@@ -70,9 +70,10 @@ module Main =
     //             | Hello _ -> "Who to say hello to"
 
     let rec sum x acc =
-        if x = 0
-        then acc
-        else sum (x - 1) (acc + x)
+        if x = 0 then
+            acc
+        else
+            sum (x - 1) (acc + x)
 
     [<EntryPoint>]
     let main (argv: string array) =
