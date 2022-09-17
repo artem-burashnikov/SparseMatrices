@@ -8,11 +8,11 @@ module SayTests =
     let tests =
         testList
             "samples"
-            [ testCase "Say nothing"
+            [ testCase "Test for sum"
               <| fun _ ->
-                  let subject = Say.nothing ()
-                  Expect.equal subject () "Not an absolute unit"
-              testCase "Say hello all"
-              <| fun _ ->
-                  let subject = Say.hello "all"
-                  Expect.equal subject "Hello all" "You didn't say hello" ]
+                  let actualResult = spbu_fsharp.Main.sum 10 0
+                  Expect.equal actualResult 60 "Not an absolute unit"]
+              // testCase "Say hello all"
+              // <| fun _ ->
+              //     let subject = Say.hello "all"
+              //     Expect.equal subject "Hello all" "You didn't say hello" ]

@@ -40,51 +40,56 @@ module AssemblyInfo =
         let githash = getGitHash assembly
         printfn "%s - %A - %s - %s" name.Name version releaseDate githash
 
-module Say =
-    open System
-
-    let nothing name = name |> ignore
-
-    let hello name = sprintf "Hello %s" name
-
-    let colorizeIn (color: string) str =
-        let oldColor = Console.ForegroundColor
-        Console.ForegroundColor <- (Enum.Parse(typedefof<ConsoleColor>, color) :?> ConsoleColor)
-        printfn "%s" str
-        Console.ForegroundColor <- oldColor
+// module Say =
+//     open System
+//
+//     let nothing name = name |> ignore
+//
+//     let hello name = sprintf "Hello %s" name
+//
+//     let colorizeIn (color: string) str =
+//         let oldColor = Console.ForegroundColor
+//         Console.ForegroundColor <- (Enum.Parse(typedefof<ConsoleColor>, color) :?> ConsoleColor)
+//         printfn "%s" str
+//         Console.ForegroundColor <- oldColor
 
 module Main =
-    open Argu
+    // open Argu
+    //
+    // type CLIArguments =
+    //     | Info
+    //     | Version
+    //     | Favorite_Color of string // Look in App.config
+    //     | [<MainCommand>] Hello of string
+    //     interface IArgParserTemplate with
+    //         member s.Usage =
+    //             match s with
+    //             | Info -> "More detailed information"
+    //             | Version -> "Version of application"
+    //             | Favorite_Color _ -> "Favorite color"
+    //             | Hello _ -> "Who to say hello to"
 
-    type CLIArguments =
-        | Info
-        | Version
-        | Favorite_Color of string // Look in App.config
-        | [<MainCommand>] Hello of string
-        interface IArgParserTemplate with
-            member s.Usage =
-                match s with
-                | Info -> "More detailed information"
-                | Version -> "Version of application"
-                | Favorite_Color _ -> "Favorite color"
-                | Hello _ -> "Who to say hello to"
+    let rec sum x acc =
+        if x = 0
+        then acc
+        else sum (x - 1) (acc + x)
 
     [<EntryPoint>]
     let main (argv: string array) =
-        let parser = ArgumentParser.Create<CLIArguments>(programName = "spbu_fsharp")
-        let results = parser.Parse(argv)
-
-        if results.Contains Version then
-            AssemblyInfo.printVersion ()
-        elif results.Contains Info then
-            AssemblyInfo.printInfo ()
-        elif results.Contains Hello then
-            match results.TryGetResult Hello with
-            | Some v ->
-                let color = results.GetResult Favorite_Color
-                Say.hello v |> Say.colorizeIn color
-            | None -> parser.PrintUsage() |> printfn "%s"
-        else
-            parser.PrintUsage() |> printfn "%s"
-
+        // let parser = ArgumentParser.Create<CLIArguments>(programName = "spbu_fsharp")
+        // let results = parser.Parse(argv)
+        //
+        // if results.Contains Version then
+        //     AssemblyInfo.printVersion ()
+        // elif results.Contains Info then
+        //     AssemblyInfo.printInfo ()
+        // elif results.Contains Hello then
+        //     match results.TryGetResult Hello with
+        //     | Some v ->
+        //         let color = results.GetResult Favorite_Color
+        //         Say.hello v |> Say.colorizeIn color
+        //     | None -> parser.PrintUsage() |> printfn "%s"
+        // else
+        //     parser.PrintUsage() |> printfn "%s"
+        printfn $"res: %A{sum 10 0}"
         0
