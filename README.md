@@ -1,4 +1,4 @@
-# spbu-fsharp
+# F# Programming Technologies course project
 
 This project will be aiding its author in finishing the SPBU's F# course
 
@@ -31,26 +31,26 @@ This project will be aiding its author in finishing the SPBU's F# course
 [//]: # ()
 [//]: # (---)
 
-[//]: # ()
-[//]: # (### Developing)
 
-[//]: # ()
-[//]: # (Make sure the following **requirements** are installed on your system:)
+### Developing
 
-[//]: # ()
-[//]: # (- [dotnet SDK]&#40;https://www.microsoft.com/net/download/core&#41; 3.0 or higher)
 
-[//]: # (- [Mono]&#40;http://www.mono-project.com/&#41; if you're on Linux or macOS.)
+Make sure the following **requirements** are installed on your system:
 
-[//]: # ()
-[//]: # (or)
 
-[//]: # ()
-[//]: # (- [VSCode Dev Container]&#40;https://code.visualstudio.com/docs/remote/containers&#41;)
+- [dotnet SDK](https://www.microsoft.com/net/download/core) 3.0 or higher
 
-[//]: # ()
-[//]: # ()
-[//]: # (---)
+- [Mono](http://www.mono-project.com/) if you're on Linux or macOS.
+
+
+or
+
+
+- [VSCode Dev Container](https://code.visualstudio.com/docs/remote/containers)
+
+
+
+---
 
 [//]: # ()
 [//]: # (### Environment Variables)
@@ -72,21 +72,21 @@ This project will be aiding its author in finishing the SPBU's F# course
 [//]: # ()
 [//]: # (---)
 
-[//]: # ()
-[//]: # (### Building)
 
-[//]: # ()
-[//]: # ()
-[//]: # (```sh)
+### Building
 
-[//]: # (> build.cmd <optional buildtarget> // on windows)
 
-[//]: # ($ ./build.sh  <optional buildtarget>// on unix)
 
-[//]: # (```)
+```sh
 
-[//]: # ()
-[//]: # (---)
+> build.cmd <optional buildtarget> // on windows
+
+$ ./build.sh  <optional buildtarget>// on unix
+
+```
+
+
+---
 
 [//]: # ()
 [//]: # (### Build Targets)
