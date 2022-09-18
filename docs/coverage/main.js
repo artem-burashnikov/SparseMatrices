@@ -224,16 +224,26 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 4, "ucl": 8, "cal": 12, "tl": 42, "ct": "LineCoverage", "mc": "-", "cb": 3, "tb": 8, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 4, "ucl": 10, "cal": 14, "tl": 44, "ct": "LineCoverage", "mc": "-", "cb": 3, "tb": 10, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
 var historicCoverageExecutionTimes = [];
 
 var riskHotspotMetrics = [
+      { "name": "Cyclomatic complexity", "explanationUrl": "https://en.wikipedia.org/wiki/Cyclomatic_complexity" },
+      { "name": "NPath complexity", "explanationUrl": "https://modess.io/npath-complexity-cyclomatic-complexity-explained" },
+      { "name": "Crap Score", "explanationUrl": "https://googletesting.blogspot.de/2011/02/this-code-is-crap.html" },
 ];
 
 var riskHotspots = [
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 24,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 8, "exceeded": false },
+      { "value": 20, "exceeded": true },
+    ]},
 ];
 
 var branchCoverageAvailable = true;
