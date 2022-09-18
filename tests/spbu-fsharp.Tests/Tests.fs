@@ -10,8 +10,8 @@ module SayTests =
             "samples"
             [ testCase "Test for sum"
               <| fun _ ->
-                  let actualResult = spbu_fsharp.Main.sum 10 0
-                  Expect.equal actualResult 55 "Not an absolute unit" ]
+                  let actualResult = spbu_fsharp.Main.pow 2 10
+                  Expect.equal actualResult 1024 "Not an absolute unit" ]
 // testCase "Say hello all"
 // <| fun _ ->
 //     let subject = Say.hello "all"
