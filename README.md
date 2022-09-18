@@ -2,7 +2,7 @@
 
 This project will be aiding its author in finishing the SPBU's F# course
 
-[//]: # (---)
+---
 
 [//]: # ()
 [//]: # (## Builds)
