@@ -1,44 +1,63 @@
 namespace spbu_fsharp
 
+// open System
 open Microsoft.FSharp.Core
 
 module Main =
+    exception InvalidInput of string
 
-    // TODO exponent for negative values
+    // TODO power helper function against unexpected input
 
-    // Homework 1 - Task 1
-    // This function takes two numbers and
-    // iteratively rises the first to the power of the second.
+
+
+
+    // Homework 1 - Task 1 - Power function - O(n) time complexity
+    // This function takes two numbers (base and exponent)
+    // and iteratively calculates a power function.
     let pow (arg: float) (exp: int) : float =
         let mutable result = 1.0
 
-        for i = 1 to exp do
+        for i = 1 to abs exp do
             result <- result * arg
 
-        result
-
-    // Homework 1 - Task 2
-    // This function takes two numbers and uses a more sophisticated
-    // approach of rising the first to the power of the second.
-    let rec q_pow (arg: float) (exp: int) : float =
-        if exp = 0 then
-            1
-        elif exp = 1 then // Recursion base case
-            arg
+        // For positive exponents return the result.
+        // For negative exponents return the inverse.
+        if exp > 0 then
+            result
         else
-            // Divide the exponent by half (floor is taken for an odd argument).
-            let halve = q_pow arg (exp / 2)
+            float 1 / result
 
-            if exp % 2 = 0 then // To get an even exponent
-                halve * halve // multiply its square roots.
+
+
+    // Homework 1 - Task 2 - Quick power function - O(log n) time complexity
+    // This function takes two numbers (base and exponent)
+    // and recursively calculates a power function.
+    let rec q_pow (arg: float) (exp: int) : float =
+
+        let result: float = // The return value
+
+            if exp = 0 then // Recursion base case
+                1
             else
-                halve * halve * arg // For an odd power additionally multiply by the arg.
+                // Divide the exponent by half (floor is taken for an odd argument).
+                let halve = q_pow arg (abs exp / 2)
 
+                if exp % 2 = 0 then // To get an even exponent
+                    halve * halve // multiply its square roots.
+                else
+                    halve * halve * arg // For an odd exp additionally multiply by the arg.
+
+        // For positive exponents return the result.
+        // For negative exponents return the inverse.
+        if exp > 0 then
+            result
+        else
+            float 1 / result
 
 
     [<EntryPoint>]
     let main (argv: string array) =
 
-        printfn $"{q_pow 2 11}, {pow 2 11}, {pow 2 -10}, {q_pow 2 -10}"
+        printfn $"result: {pow 2 5}, quick result: {q_pow 2 5}"
 
         0
