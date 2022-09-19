@@ -4,8 +4,12 @@ This project will be aiding its author in finishing the SPBU's F# course
 
 ---
 
-[//]: # ()
-[//]: # (## Builds)
+
+## How to use
+- After building a project on your system, open file explorer and navigate to
+`2022-Programming-Technologies-F-sharp-course/src/spbu-fsharp`
+- Open the terminal from inside the folder and execute the following code:
+`dotnet run <function_name> <variable1> <variable2>`
 
 [//]: # ()
 [//]: # ()
@@ -32,21 +36,26 @@ This project will be aiding its author in finishing the SPBU's F# course
 [//]: # (---)
 
 
-### Developing
+[//]: # (### Developing)
 
+[//]: # ()
+[//]: # ()
+[//]: # (Make sure the following **requirements** are installed on your system:)
 
-Make sure the following **requirements** are installed on your system:
+[//]: # ()
+[//]: # ()
+[//]: # (- [dotnet SDK]&#40;https://www.microsoft.com/net/download/core&#41; 3.0 or higher)
 
+[//]: # ()
+[//]: # (- [Mono]&#40;http://www.mono-project.com/&#41; if you're on Linux or macOS.)
 
-- [dotnet SDK](https://www.microsoft.com/net/download/core) 3.0 or higher
+[//]: # ()
+[//]: # ()
+[//]: # (or)
 
-- [Mono](http://www.mono-project.com/) if you're on Linux or macOS.
-
-
-or
-
-
-- [VSCode Dev Container](https://code.visualstudio.com/docs/remote/containers)
+[//]: # ()
+[//]: # ()
+[//]: # (- [VSCode Dev Container]&#40;https://code.visualstudio.com/docs/remote/containers&#41;)
 
 
 
@@ -72,27 +81,33 @@ or
 [//]: # ()
 [//]: # (---)
 
-
-### Building
-
-
-
-```sh
-
-> build.cmd <optional buildtarget> // on windows
-
-$ ./build.sh  <optional buildtarget>// on unix
-
-```
-
-
----
-
 [//]: # ()
-[//]: # (### Build Targets)
+[//]: # (### Building)
 
 [//]: # ()
 [//]: # ()
+[//]: # ()
+[//]: # (```sh)
+
+[//]: # ()
+[//]: # (> build.cmd <optional buildtarget> // on windows)
+
+[//]: # ()
+[//]: # ($ ./build.sh  <optional buildtarget>// on unix)
+
+[//]: # ()
+[//]: # (```)
+
+[//]: # ()
+[//]: # ()
+[//]: # (---)
+
+
+### List of available functions
+
+- `pow [<base-number>] [<exponent-number>]`
+- `q_pow [<base-number>] [<exponent-number>]`
+
 [//]: # (- `Clean` - Cleans artifact and temp directories.)
 
 [//]: # (- `DotnetRestore` - Runs [dotnet restore]&#40;https://docs.microsoft.com/en-us/dotnet/core/tools/dotnet-restore?tabs=netcore2x&#41; on the [solution file]&#40;https://docs.microsoft.com/en-us/visualstudio/extensibility/internals/solution-dot-sln-file?view=vs-2019&#41;.)
