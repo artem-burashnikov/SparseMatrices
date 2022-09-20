@@ -28,7 +28,7 @@ module Main =
 
 
 
-
+    // TODO remake this
     // Homework 1 - Task 2.
     // Quick power function.
     // Ths function takes two numbers (base and exponent)
@@ -59,10 +59,13 @@ module Main =
     // Difference between the min and the max value in an array.
     // The function takes a list of real numbers and calculates the value
     // using built-in libraries.
-    let diff (arr: float list): float =
+    let diff (arr: float list) : float =
         let result =
-            if List.length arr > 0 then List.max arr - List.min arr
-            else failwith "Bad input!"
+            if List.length arr > 0 then
+                List.max arr - List.min arr
+            else
+                failwith "Bad input!"
+
         result
 
 

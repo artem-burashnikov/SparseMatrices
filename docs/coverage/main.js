@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 6, "ucl": 12, "cal": 18, "tl": 72, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 14, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 5, "ucl": 15, "cal": 20, "tl": 82, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 24, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -238,7 +238,14 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 48,
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::diff(Microsoft.FSharp.Collections.FSharpList`1<System.Double>)", "methodShortName": "diff(...)", "fileIndex": 0, "line": 64,
+    "metrics": [
+      { "value": 8, "exceeded": false },
+      { "value": 32, "exceeded": false },
+      { "value": 72, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 40,
     "metrics": [
       { "value": 4, "exceeded": false },
       { "value": 8, "exceeded": false },
