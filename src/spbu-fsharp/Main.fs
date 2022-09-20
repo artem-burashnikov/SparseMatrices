@@ -1,36 +1,28 @@
 namespace spbu_fsharp
 
-// open System
 open Microsoft.FSharp.Core
 
 module Main =
-
-    exception InputError of string
 
     // Homework 1 - Task 1.
     // Power function.
     // This function takes two numbers (base and exponent)
     // and iteratively calculates a power function.
-    let pow (arg: float) (exp: int) : float =
+    let rec pow (arg: float) (exp: int) : float =
 
-        if arg = 0 && exp = 0 then // This operation is not defined.
-            failwith "Incorrect input"
-        elif arg = 0 then // Special case: base = 0, exp <> 0.
-            0.0
-        elif arg = 1 then // Special case: base = 1, exp <> 0.
-            1.0
-        elif exp = 0 then // Special case: base > 0, exp = 0.
-            1.0
-        else
-            // Accumulates the product using a loop.
-            let mutable acc: float = 1.0
+        // This operation is not defined
+        if arg = 0 && exp = 0 then
+            failwith "Undefined"
 
-            for i = 1 to abs exp do
-                acc <- acc * arg
+        // Accumulate the product through a loop.
+        let mutable result: float = 1.0
 
-            // For a positive exponent return the value as is.
-            // For a negative exponent inverse the number.
-            if exp > 0 then acc else float 1 / acc
+        for i = 1 to abs exp do
+            result <- result * arg
+
+        // For a positive exponent return the value as is.
+        // For a negative exponent inverse the number.
+        if exp > 0 then result else 1.0 / result
 
 
 
@@ -40,34 +32,28 @@ module Main =
     // and recursively calculates a power function.
     let rec q_pow (arg: float) (exp: int) : float =
 
+        // This operation is not defined
         if arg = 0 && exp = 0 then
-            failwith "Incorrect input" // This operation is not defined.
-        elif arg = 0 then // Special case: base = 0, exp <> 0.
-            0.0
-        elif arg = 1 then // Special case: base = 1, exp <> 0.
-            1.0
-        else
-            let result: float = // This will be returned from the function.
+            failwith "Undefined"
 
-                if exp = 0 then // Recursion base case.
-                    1.0
-                else
-                    // Divide the exponent by half (floor is taken for an odd argument).
-                    let halve: float = q_pow arg (abs exp / 2)
+        let result: float =
 
-                    if exp % 2 = 0 then // To get an even exponent
-                        halve * halve // multiply its square roots.
-                    else
-                        halve * halve * arg // For an odd exp additionally multiply by the arg.
-
-            // For positive exponents return the result.
-            // For negative exponents return the inverse.
-            // This part somehow executes at the end, even though this func is recursive???
-            if exp > 0 then
-                result
+            // Recursion base case.
+            if exp = 0 then
+                1.0
             else
-                float 1 / result
+                // Divide the exponent by half (floor is taken for an odd argument).
+                let halve: float = q_pow arg (abs exp / 2)
+                // To get an even exponent multiply its halves.
+                if exp % 2 = 0 then
+                    halve * halve
+                else
+                    // For an odd exponent additionally multiply by the arg.
+                    halve * halve * arg
 
+        // For a positive exponent return the value as is.
+        // For a negative exponent inverse the number.
+        if exp > 0 then result else 1.0 / result
 
 
     // Homework 1 - Task 3.
@@ -92,17 +78,8 @@ module Main =
 
     [<EntryPoint>]
     let main (argv: string array) =
-        printfn $"Naive power function result: {pow 2 2}"
-        printfn $"Fast power function result: {q_pow 0 0}"
-
-        printfn
-            $"Naive power function result: {diff [ 5
-                                                   4
-                                                   10
-                                                   3
-                                                   0
-                                                   -11
-                                                   5.5
-                                                   -10.25 ]}"
-
+        printfn $"Naive power function result: "
+        printfn $"Fast power function result: "
+        printfn $"Difference between min and max element in a list: "
+        printfn $"All odd numbers in between two integers: "
         0
