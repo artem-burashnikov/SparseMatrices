@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 5, "ucl": 15, "cal": 20, "tl": 82, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 24, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 8, "ucl": 36, "cal": 44, "tl": 108, "ct": "LineCoverage", "mc": "-", "cb": 8, "tb": 40, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -238,17 +238,24 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::diff(Microsoft.FSharp.Collections.FSharpList`1<System.Double>)", "methodShortName": "diff(...)", "fileIndex": 0, "line": 64,
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 43,
     "metrics": [
       { "value": 8, "exceeded": false },
-      { "value": 32, "exceeded": false },
+      { "value": 64, "exceeded": false },
       { "value": 72, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 40,
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Boolean spbu_fsharp.Main/InputError::Equals(System.Object,System.Collections.IEqualityComparer)", "methodShortName": "Equals(...)", "fileIndex": 0, "line": 8,
     "metrics": [
       { "value": 4, "exceeded": false },
-      { "value": 8, "exceeded": false },
+      { "value": 4, "exceeded": false },
+      { "value": 20, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Boolean spbu_fsharp.Main/InputError::Equals(System.Exception)", "methodShortName": "Equals(...)", "fileIndex": 0, "line": 8,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 6, "exceeded": false },
       { "value": 20, "exceeded": true },
     ]},
 ];
