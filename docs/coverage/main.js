@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 5, "ucl": 19, "cal": 24, "tl": 85, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 20, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 5, "ucl": 28, "cal": 33, "tl": 115, "ct": "LineCoverage", "mc": "-", "cb": 5, "tb": 32, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -240,9 +240,23 @@ var riskHotspots = [
   {
     "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 36,
     "metrics": [
+      { "value": 7, "exceeded": false },
+      { "value": 32, "exceeded": false },
+      { "value": 56, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Int32[] spbu_fsharp.Main::all_odds(System.Int32,System.Int32)", "methodShortName": "all_odds(...)", "fileIndex": 0, "line": 97,
+    "metrics": [
       { "value": 6, "exceeded": false },
       { "value": 16, "exceeded": false },
       { "value": 42, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::diff(System.Double[])", "methodShortName": "diff(...)", "fileIndex": 0, "line": 68,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 8, "exceeded": false },
+      { "value": 20, "exceeded": true },
     ]},
 ];
 
