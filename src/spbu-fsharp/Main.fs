@@ -7,7 +7,7 @@ module Main =
     // Homework 1 - Task 1.
     // Power function.
     // This function takes two numbers (base and exponent)
-    // and iteratively calculates a power function.
+    // and iteratively calculates a power of base to the exponent.
     let pow (arg: float) (exp: int) : float =
 
         // This operation is not defined
@@ -29,7 +29,7 @@ module Main =
     // Homework 1 - Task 2.
     // Quick power function.
     // Ths function takes two numbers (base and exponent)
-    // and recursively calculates a power function.
+    // and recursively calculates a power of base to the exponent.
     let rec q_pow (arg: float) (exp: int) : float =
 
         // This operation is not defined
@@ -61,7 +61,7 @@ module Main =
 
     // Homework 1 - Task 3.
     // Difference between the min and the max value in an array.
-    // The function takes a list of real numbers and calculates the difference
+    // The function takes an array of real numbers and returns the difference
     // between the maximum and the minimum values.
     let diff (arr: float array) : float =
 
@@ -109,7 +109,6 @@ module Main =
 
     [<EntryPoint>]
     printfn $"Power function {pow 2 5}"
-
     printfn $"Quick power function {q_pow -2 9}"
     printfn $"Difference between max and min: %A{diff [| 1; 2; 7; 8; 9; -10 |]}"
     printf $"Array of odds: %A{all_odds 1 10}"
