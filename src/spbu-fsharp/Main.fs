@@ -8,7 +8,7 @@ module Main =
     // Power function.
     // This function takes two numbers (base and exponent)
     // and iteratively calculates a power function.
-    let rec pow (arg: float) (exp: int) : float =
+    let pow (arg: float) (exp: int) : float =
 
         // This operation is not defined
         if arg = 0 && exp = 0 then
