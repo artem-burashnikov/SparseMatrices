@@ -34,7 +34,7 @@ module Main =
 
         // This operation is not defined
         if arg = 0 && exp = 0 then
-            failwith "Undefined"
+            failwith "undefined"
 
         let result: float =
 
@@ -65,26 +65,28 @@ module Main =
     // between the maximum and the minimum values.
     let diff (arr: float array) : float =
 
-        let mutable mx = arr[0]
-        let mutable mn = arr[0]
+        let result = // This will be returned.
 
-        // Look at each element in an array from left to right
-        // and iteratively find min and max values.
-        for i = 1 to arr.Length - 1 do
-
-            // Max on the current iteration.
-            if arr[i] > mx then
-                mx <- arr[i]
+            if arr = [||] then
+                failwith "undefined"
             else
-                mx <- mx
 
-            // Min on the current iteration.
-            if arr[i] < mn then
-                mn <- arr[i]
-            else
-                mn <- mn
+                let mutable mx = arr[0]
+                let mutable mn = arr[0]
 
-        mx - mn // Return the value.
+                // Look at each element in an array from left to right
+                // and iteratively find min and max values.
+                for i = 1 to arr.Length - 1 do
+
+                    // Max on the current iteration.
+                    if arr[i] > mx then mx <- arr[i] else ()
+
+                    // Min on the current iteration.
+                    if arr[i] < mn then mn <- arr[i] else ()
+
+                mx - mn // The desired value
+
+        result
 
 
 
@@ -109,6 +111,7 @@ module Main =
 
     [<EntryPoint>]
     printfn $"Power function {pow 2 5}"
-    printfn $"Quick power function {q_pow -2 9}"
+
+    printfn $"Quick power function {q_pow 2 -2}"
     printfn $"Difference between max and min: %A{diff [| 1; 2; 7; 8; 9; -10 |]}"
     printf $"Array of odds: %A{all_odds 1 10}"
