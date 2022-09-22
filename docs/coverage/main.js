@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 19, "ucl": 18, "cal": 37, "tl": 120, "ct": "LineCoverage", "mc": "-", "cb": 19, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 23, "ucl": 14, "cal": 37, "tl": 120, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 34, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -242,7 +242,7 @@ var riskHotspots = [
     "metrics": [
       { "value": 7, "exceeded": false },
       { "value": 32, "exceeded": false },
-      { "value": 56, "exceeded": true },
+      { "value": 36.69, "exceeded": true },
     ]},
 ];
 

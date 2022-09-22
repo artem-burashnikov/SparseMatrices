@@ -39,8 +39,11 @@ module EqualityTests =
                   let actualResult = pow -2 -1
                   Expect.equal actualResult -0.5 "Results don't match"
 
-              // testCase "1.6: pow. 0 to the 0th power is not defined"
-              // TODO
+              // I have no idea why it works.
+              testCase "1.6: pow. 0 to the 0th power is not defined"
+              <| fun _ ->
+                  let actualResult = Expect.throws (fun _ -> pow 0 0 |> ignore) "undefined"
+                  actualResult
 
               // Fast power function.
               testCase "2.0: q_pow. Positive integer to the power of negative exponent"
@@ -68,8 +71,10 @@ module EqualityTests =
                   let actualResult = pow -2 -1
                   Expect.equal actualResult -0.5 "Results don't match"
 
-              // testCase "2.5: pow. 0 to the 0th power is not defined"
-              // TODO
+              testCase "2.5: pow. 0 to the 0th power is not defined"
+              <| fun _ ->
+                  let actualResult = Expect.throws (fun _ -> q_pow 0 0 |> ignore) "undefined"
+                  actualResult
 
               // Min-Max diff.
               testCase "3.1: diff. All numbers are the same"
@@ -99,8 +104,10 @@ module EqualityTests =
                   let actualResult = diff [| 5 |]
                   Expect.equal actualResult 0 "Results don't match"
 
-              // testCase "3.6: diff. An empty array is given"
-              // TODO
+              testCase "3.6: diff. An empty array is given"
+              <| fun _ ->
+                  let actualResult = Expect.throws (fun _ -> diff [||] |> ignore) "undefined"
+                  actualResult
 
               // An array of all odds.
               testCase "4.1: all_ods. In between two positive integers"
