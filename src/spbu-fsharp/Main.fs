@@ -110,8 +110,11 @@ module Main =
 
 
     [<EntryPoint>]
-    printfn $"Power function {pow 2 5}"
+    let main (argv: string array) =
 
-    printfn $"Quick power function {q_pow 2 -2}"
-    printfn $"Difference between max and min: %A{diff [| 1; 2; 7; 8; 9; -10 |]}"
-    printf $"Array of odds: %A{all_odds 1 10}"
+        printfn $"Power function: {pow 2 5}"
+        printfn $"Quick power function: {q_pow 2 -2}"
+        printfn $"Difference between max and min: %A{diff [| 1; 2; 7; 8; 9; -10 |]}"
+        printfn $"Array of odds: %A{all_odds 1 10}"
+
+        0
