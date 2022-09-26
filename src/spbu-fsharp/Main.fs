@@ -126,7 +126,13 @@ module Main =
         | Cons (head, tail) -> Cons(head, Concat tail lst2) // Traverse the list until Empty.
         | Empty -> lst2 // Place the second list at Empty.
 
-
+    //
+    // // Homework 2 - Task 1.
+    // // Bubble sort list of type MyList.
+    // let BubbleSort (lst:MyList<'value>): MyList<'value> =
+    //     match lst with
+    //     | Empty -> Empty
+    //     |
 
 
 

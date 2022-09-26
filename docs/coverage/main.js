@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 23, "ucl": 17, "cal": 40, "tl": 137, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 38, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 23, "ucl": 17, "cal": 40, "tl": 143, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 38, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
