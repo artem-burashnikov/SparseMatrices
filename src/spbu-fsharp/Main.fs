@@ -79,15 +79,14 @@ module Main =
                 for i = 1 to arr.Length - 1 do
 
                     // Max on the current iteration.
-                    if arr[i] > mx then mx <- arr[i] else ()
+                    if arr[i] > mx then mx <- arr[i]
 
                     // Min on the current iteration.
-                    if arr[i] < mn then mn <- arr[i] else ()
+                    if arr[i] < mn then mn <- arr[i]
 
                 mx - mn // The desired value
 
         result
-
 
 
     // Homework 1 - Task 4.
@@ -111,10 +110,5 @@ module Main =
 
     [<EntryPoint>]
     let main (argv: string array) =
-
-        printfn $"Power function: {pow 2 5}"
-        printfn $"Quick power function: {q_pow 2 -2}"
-        printfn $"Difference between max and min: %A{diff [| 1; 2; 7; 8; 9; -10 |]}"
-        printfn $"Array of odds: %A{all_odds 1 10}"
 
         0
