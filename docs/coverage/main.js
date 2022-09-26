@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 23, "ucl": 14, "cal": 37, "tl": 120, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 23, "ucl": 17, "cal": 40, "tl": 137, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 38, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -238,7 +238,7 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 36,
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::q_pow(System.Double,System.Int32)", "methodShortName": "q_pow(...)", "fileIndex": 0, "line": 47,
     "metrics": [
       { "value": 7, "exceeded": false },
       { "value": 32, "exceeded": false },

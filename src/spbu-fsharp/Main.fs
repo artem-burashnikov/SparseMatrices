@@ -5,13 +5,13 @@ open Microsoft.FSharp.Core
 module Main =
     // Algebraic types F# way
     type MyList<'value> =
-    | Cons of head: 'value * tail: MyList<'value>
-    | Empty
+        | Cons of head: 'value * tail: MyList<'value>
+        | Empty
 
     let rec map f lst =
         match lst with
         | Empty -> Empty
-        | Cons (hd, tl) -> Cons (f hd, map f tl)
+        | Cons (hd, tl) -> Cons(f hd, map f tl)
 
 
 
@@ -121,9 +121,9 @@ module Main =
 
     // Homework 2 - Task 3.
     // Concatenate two lists of type MyList.
-    let rec Concat (lst1: MyList<'value>) (lst2: MyList<'value>): MyList<'value> =
+    let rec Concat (lst1: MyList<'value>) (lst2: MyList<'value>) : MyList<'value> =
         match lst1 with
-        | Cons (head, tail) -> Cons (head, Concat tail lst2) // Traverse the list until Empty.
+        | Cons (head, tail) -> Cons(head, Concat tail lst2) // Traverse the list until Empty.
         | Empty -> lst2 // Place the second list at Empty.
 
 
@@ -133,5 +133,5 @@ module Main =
 
     [<EntryPoint>]
     let main (argv: string array) =
-        printfn $"res: {Concat (Empty) (Empty)}"
+        printfn $"res: {Concat(Empty) (Empty)}"
         0
