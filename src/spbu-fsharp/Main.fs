@@ -3,6 +3,17 @@ namespace spbu_fsharp
 open Microsoft.FSharp.Core
 
 module Main =
+    // Algebraic types F# way
+    type MyList<'value> =
+    | Cons of head: 'value * tail: MyList<'value>
+    | Empty
+
+    let rec map f lst =
+        match lst with
+        | Empty -> Empty
+        | Cons (hd, tl) -> Cons (f hd, map f tl)
+
+
 
     // Homework 1 - Task 1.
     // Power function.
@@ -108,7 +119,19 @@ module Main =
 
 
 
+    // Homework 2 - Task 3.
+    // Concatenate two lists of type MyList.
+    let rec Concat (lst1: MyList<'value>) (lst2: MyList<'value>): MyList<'value> =
+        match lst1 with
+        | Cons (head, tail) -> Cons (head, Concat tail lst2) // Traverse the list until Empty.
+        | Empty -> lst2 // Place the second list at Empty.
+
+
+
+
+
+
     [<EntryPoint>]
     let main (argv: string array) =
-
+        printfn $"res: {Concat (Empty) (Empty)}"
         0
