@@ -41,7 +41,7 @@ module Main =
     // Quick power function.
     // Ths function takes two numbers (base and exponent)
     // and recursively calculates a power of base to the exponent.
-    let rec q_pow (arg: float) (exp: int) : float =
+    let rec qPow (arg: float) (exp: int) : float =
 
         // This operation is not defined
         if arg = 0 && exp = 0 then
@@ -56,7 +56,7 @@ module Main =
                 arg
             else
                 // Divide the exponent by half (floor is taken for an odd argument).
-                let halve: float = q_pow arg (abs exp / 2)
+                let halve: float = qPow arg (abs exp / 2)
                 // To get an even exponent multiply its halves.
                 if exp % 2 = 0 then
                     halve * halve
@@ -103,16 +103,16 @@ module Main =
     // Homework 1 - Task 4.
     // This function returns the array of all odd integers
     // strictly in between two given integers.
-    let all_odds (num1: int) (num2: int) : int array =
+    let allOdds (num1: int) (num2: int) : int array =
 
         // Determine the range
-        let smaller_num: int = if num1 <= num2 then num1 else num2
+        let smallerNum: int = if num1 <= num2 then num1 else num2
 
-        let bigger_num: int = if num1 <= num2 then num2 else num1
+        let biggerNum: int = if num1 <= num2 then num2 else num1
 
         // Make an array of all odd integers in the specified range
         let result: int array =
-            [| for i in (smaller_num + 1) .. (bigger_num - 1) do
+            [| for i in (smallerNum + 1) .. (biggerNum - 1) do
                    if abs i % 2 = 1 then yield i |]
 
         result // Return the array.
@@ -121,9 +121,9 @@ module Main =
 
     // Homework 2 - Task 3.
     // Concatenate two lists of type MyList.
-    let rec Concat (lst1: MyList<'value>) (lst2: MyList<'value>) : MyList<'value> =
+    let rec concat (lst1: MyList<'value>) (lst2: MyList<'value>) : MyList<'value> =
         match lst1 with
-        | Cons (head, tail) -> Cons(head, Concat tail lst2) // Traverse the list until Empty.
+        | Cons (head, tail) -> Cons(head, concat tail lst2) // Traverse the list until Empty.
         | Empty -> lst2 // Place the second list at Empty.
 
     //
@@ -139,5 +139,5 @@ module Main =
 
     [<EntryPoint>]
     let main (argv: string array) =
-        printfn $"res: {Concat(Empty) (Empty)}"
+        printfn $"res: {concat Empty Empty}"
         0

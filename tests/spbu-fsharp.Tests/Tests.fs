@@ -46,34 +46,34 @@ module EqualityTests =
                   actualResult
 
               // Fast power function.
-              testCase "2.0: q_pow. Positive integer to the power of negative exponent"
+              testCase "2.0: qPow. Positive integer to the power of negative exponent"
               <| fun _ ->
                   let actualResult = pow 2 -2
                   Expect.equal actualResult 0.25 "Results don't match"
 
-              testCase "2.1: q_pow. Negative integer to the power of even positive exponent"
+              testCase "2.1: qPow. Negative integer to the power of even positive exponent"
               <| fun _ ->
                   let actualResult = pow -2 10
                   Expect.equal actualResult 1024 "Results don't match"
 
-              testCase "2.2: q_pow. Negative integer to the power of odd positive exponent"
+              testCase "2.2: qPow. Negative integer to the power of odd positive exponent"
               <| fun _ ->
                   let actualResult = pow -2 9
                   Expect.equal actualResult -512 "Results don't match"
 
-              testCase "2.3: q_pow. Negative integer to the power of even negative exponent"
+              testCase "2.3: qPow. Negative integer to the power of even negative exponent"
               <| fun _ ->
                   let actualResult = pow -2 -2
                   Expect.equal actualResult 0.25 "Results don't match"
 
-              testCase "2.4: q_pow. Negative integer to the power of odd negative exponent"
+              testCase "2.4: qPow. Negative integer to the power of odd negative exponent"
               <| fun _ ->
                   let actualResult = pow -2 -1
                   Expect.equal actualResult -0.5 "Results don't match"
 
               testCase "2.5: pow. 0 to the 0th power is not defined"
               <| fun _ ->
-                  let actualResult = Expect.throws (fun _ -> q_pow 0 0 |> ignore) "undefined"
+                  let actualResult = Expect.throws (fun _ -> qPow 0 0 |> ignore) "undefined"
                   actualResult
 
               // Min-Max diff.
@@ -112,20 +112,20 @@ module EqualityTests =
               // An array of all odds.
               testCase "4.1: all_ods. In between two positive integers"
               <| fun _ ->
-                  let actualResult = all_odds 1 10
+                  let actualResult = allOdds 1 10
                   Expect.equal actualResult [| 3; 5; 7; 9 |] "Results don't match"
 
               testCase "4.2: all_ods. In between two negative integers"
               <| fun _ ->
-                  let actualResult = all_odds -10 -1
+                  let actualResult = allOdds -10 -1
                   Expect.equal actualResult [| -9; -7; -5; -3 |] "Results don't match"
 
               testCase "4.3: all_ods. In between a positive and a negative integer"
               <| fun _ ->
-                  let actualResult = all_odds -5 5
+                  let actualResult = allOdds -5 5
                   Expect.equal actualResult [| -3; -1; 1; 3 |] "Results don't match"
 
               testCase "4.4: all_ods. The same number is given twice"
               <| fun _ ->
-                  let actualResult = all_odds 5 5
+                  let actualResult = allOdds 5 5
                   Expect.equal actualResult [||] "Results don't match" ]
