@@ -3,15 +3,17 @@ namespace spbu_fsharp
 open Microsoft.FSharp.Core
 
 module Main =
-    // Algebraic types F# way
+
+    // Custom List type
     type MyList<'value> =
         | Cons of head: 'value * tail: MyList<'value>
         | Empty
 
-    let rec map f lst =
+    // Custom map function for a MyList type.
+    let rec map func lst =
         match lst with
         | Empty -> Empty
-        | Cons (hd, tl) -> Cons(f hd, map f tl)
+        | Cons (head, tail) -> Cons(func head, map func tail)
 
 
 
@@ -43,7 +45,7 @@ module Main =
     // and recursively calculates a power of base to the exponent.
     let rec qPow (arg: float) (exp: int) : float =
 
-        // This operation is not defined
+        // This operation is not defined.
         if arg = 0 && exp = 0 then
             failwith "undefined"
 
@@ -126,18 +128,49 @@ module Main =
         | Cons (head, tail) -> Cons(head, concat tail lst2) // Traverse the list until Empty.
         | Empty -> lst2 // Place the second list at Empty.
 
-    //
-    // // Homework 2 - Task 1.
-    // // Bubble sort list of type MyList.
-    // let BubbleSort (lst:MyList<'value>): MyList<'value> =
-    //     match lst with
-    //     | Empty -> Empty
-    //     |
 
+
+    let bubbleSort (lst: MyList<'value>) : MyList<'value> =
+
+        // Count number of elements in MyList.
+        let rec getLength (lst: MyList<'value>) : int =
+            match lst with
+            | Empty -> 0
+            | Cons (_, tail) -> 1 + getLength tail
+
+        // Compare two consecutive elements in MyList and swap them if required.
+        // After traversing the whole MyList from head to the end this function
+        // places the biggest element at the end.
+        let rec sort (lst: MyList<'value>) : MyList<'value> =
+            match lst with
+            | Empty -> Empty // Do nothing.
+            | Cons (head, Empty) -> Cons(head, Empty) // A single element is already compared.
+            // Swap two consecutive elements accordingly.
+            | Cons (head1, Cons (head2, tail)) ->
+                if head1 >= head2 then
+                    Cons(head2, sort (Cons(head1, tail)))
+                else
+                    Cons(head1, sort (Cons(head2, tail)))
+
+        // This function sorts MyList (counter = n) times, where n is the length of MyList.
+        // This way all n elements end up on their spots in a sorted MyList.
+        let rec looper (lst: MyList<'value>) (counter: int) : MyList<'value> =
+            match counter with
+            | 0 -> lst
+            | counter -> looper (sort lst) (counter - 1)
+
+        // At last returns a sorted MyList.
+        looper lst (getLength lst)
 
 
 
     [<EntryPoint>]
     let main (argv: string array) =
-        printfn $"res: {concat Empty Empty}"
+
+        let myListExample1 =
+            Cons(10, Cons(9, Cons(8, Cons(7, Cons(6, Cons(5, Cons(4, Cons(3, Cons(2, Cons(1, Empty))))))))))
+
+        let myListExample2 = Cons(5, Cons(5, Cons(5, Cons(1, Empty))))
+
+        printfn $"res: {bubbleSort myListExample1}"
         0
