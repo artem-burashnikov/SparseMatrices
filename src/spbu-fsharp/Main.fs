@@ -6,8 +6,11 @@ type MyList<'value> =
     | Cons of head: 'value * tail: MyList<'value>
     | Empty
 
-type IList<'value> = interface end
-type MyOOPNonEmptyList<'value> (head: 'value, tail: IList<'value>) =
+type IList<'value> =
+    interface
+    end
+
+type MyOOPNonEmptyList<'value>(head: 'value, tail: IList<'value>) =
     interface IList<'value>
     member this.Head = head
     member this.Tail = tail
@@ -255,9 +258,9 @@ module Main =
                 sort lst
 
 
-        //
-        // let OOPConcat (lst1: IList<'value>) (lst2: IList<'value>): IList<'value> =
-        //     interface IList<'value>
+    //
+    // let OOPConcat (lst1: IList<'value>) (lst2: IList<'value>): IList<'value> =
+    //     interface IList<'value>
 
 
 

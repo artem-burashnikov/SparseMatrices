@@ -9,5 +9,8 @@
   <ItemGroup>
     <Compile Include="build.fs" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FsCheck" Version="2.16.5" />
+  </ItemGroup>
   <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>

@@ -13,5 +13,8 @@
     <ItemGroup>
         <ProjectReference Include="../../src/spbu-fsharp/spbu-fsharp.fsproj" />
     </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="FsCheck" Version="2.16.5" />
+    </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

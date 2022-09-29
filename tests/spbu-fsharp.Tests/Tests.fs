@@ -135,3 +135,5 @@ module EqualityTests =
                     <| fun _ ->
                         let actualResult = allOdds 5 5
                         Expect.equal actualResult [||] "Results don't match" ] ]
+
+
