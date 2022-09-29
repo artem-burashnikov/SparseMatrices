@@ -224,7 +224,7 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 23, "ucl": 17, "cal": 40, "tl": 137, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 38, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 23, "ucl": 55, "cal": 78, "tl": 256, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 68, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -238,11 +238,32 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::qPow(System.Double,System.Int32)", "methodShortName": "qPow(...)", "fileIndex": 0, "line": 49,
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main/HomeWork1::qPow(System.Double,System.Int32)", "methodShortName": "qPow(...)", "fileIndex": 0, "line": 49,
     "metrics": [
       { "value": 7, "exceeded": false },
       { "value": 32, "exceeded": false },
       { "value": 36.69, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "spbu_fsharp.MyList`1<value> spbu_fsharp.Main/HomeWork2/smallerElements@197::Invoke(spbu_fsharp.MyList`1<value>,value)", "methodShortName": "Invoke(...)", "fileIndex": 0, "line": 197,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 16, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "spbu_fsharp.MyList`1<value> spbu_fsharp.Main/HomeWork2/biggerElements@215::Invoke(spbu_fsharp.MyList`1<value>,value)", "methodShortName": "Invoke(...)", "fileIndex": 0, "line": 215,
+    "metrics": [
+      { "value": 5, "exceeded": false },
+      { "value": 16, "exceeded": false },
+      { "value": 30, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "spbu_fsharp.MyList`1<value> spbu_fsharp.Main/HomeWork2/sort@154::Invoke(spbu_fsharp.MyList`1<value>)", "methodShortName": "Invoke(...)", "fileIndex": 0, "line": 154,
+    "metrics": [
+      { "value": 4, "exceeded": false },
+      { "value": 8, "exceeded": false },
+      { "value": 20, "exceeded": true },
     ]},
 ];
 
