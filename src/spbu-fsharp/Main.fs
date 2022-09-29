@@ -1,11 +1,22 @@
 namespace spbu_fsharp
 
 
-// Custom linked list.
-// Functional way.
+
 type MyList<'value> =
     | Cons of head: 'value * tail: MyList<'value>
     | Empty
+
+type IList<'value> = interface end
+type MyOOPNonEmptyList<'value> (head: 'value, tail: IList<'value>) =
+    interface IList<'value>
+    member this.Head = head
+    member this.Tail = tail
+
+type MyOOPEmptyList<'value>() =
+    interface IList<'value>
+
+type IActor<'inType, 'outType> =
+    abstract Do: 'inType -> 'outType
 
 
 
@@ -138,7 +149,8 @@ module Main =
         // This function sorts a linked list.
         // First we calculate the number (n) of elements in a given list.
         // Then we recursively call the sorting function n times and
-        // on each call some element ends up moving to the end.
+        // on each call some element ends up moving to its
+        // place .
         let bubbleSort (lst: MyList<'value>) : MyList<'value> =
 
             // Count the number of elements.
@@ -195,7 +207,7 @@ module Main =
                 // which elements are less than or equal to the pivot.
                 let rec smallerElements (lst: MyList<'value>) (pivot: 'value) : MyList<'value> =
                     match lst with
-                    // If an element is bigger than the pivot, then accumulate it.
+                    // If an element is less than or equal to the pivot, then accumulate it.
                     // Otherwise ignore.
                     | Empty -> Empty
                     | Cons (head, Empty) ->
@@ -241,6 +253,13 @@ module Main =
 
                 // Returns a sorted list.
                 sort lst
+
+
+        //
+        // let OOPConcat (lst1: IList<'value>) (lst2: IList<'value>): IList<'value> =
+        //     interface IList<'value>
+
+
 
 
     [<EntryPoint>]
