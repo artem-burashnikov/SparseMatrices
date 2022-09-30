@@ -1,46 +1,38 @@
 namespace spbu_fsharp.Tests
 
 open Expecto
+open ExpectoFsCheck
+open FsCheck
+open Microsoft.FSharp.Core
+open spbu_fsharp
 open spbu_fsharp.Main.HomeWork1
 open spbu_fsharp.Main.HomeWork2
 
-module EqualityTests =
+module FsCheckTests =
+
+    // Is this being used?
+    let config = { Config.Default with MaxTest = 10000 }
+
     [<Tests>]
     let tests =
 
         testList
-            "samples"
+            "FsCheck tests"
             [ testList
                   "Naive power function"
-                  [ testCase "1.0 pow. Positive integer to the power of positive exponent"
-                    <| fun _ ->
-                        let actualResult = pow 2 10
-                        Expect.equal actualResult 1024 "Results don't match"
+                  [ testProperty "All power functions should return equal results"
+                    <| fun (x: int) (y: int) ->
+                        if x <> 0 && y <> 0 then
+                            qPow x y = pown x y
+                        else
+                            skiptest "incorrect arguments"
 
-                    testCase "1.1: pow. Positive integer to the power of negative exponent"
-                    <| fun _ ->
-                        let actualResult = pow 2 -2
-                        Expect.equal actualResult 0.25 "Results don't match"
-
-                    testCase "1.2: pow. Negative integer to the power of even positive exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 10
-                        Expect.equal actualResult 1024 "Results don't match"
-
-                    testCase "1.3: pow. Negative integer to the power of odd positive exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 9
-                        Expect.equal actualResult -512 "Results don't match"
-
-                    testCase "1.4: pow. Negative integer to the power of even negative exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 -2
-                        Expect.equal actualResult 0.25 "Results don't match"
-
-                    testCase "1.5: pow. Negative integer to the power of odd negative exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 -1
-                        Expect.equal actualResult -0.5 "Results don't match"
+                    testProperty "Bigger exponent should result in a greater result"
+                    <| fun arg exp1 exp2 ->
+                        if exp1 > exp2 && arg > 1 && exp1 > 1 && exp2 > 1 then
+                            qPow arg exp1 > qPow arg exp2
+                        else
+                            skiptest "incorrect arguments"
 
                     // I have slight idea why it works.
                     testCase "1.6: pow. 0 to the 0th power is not defined"
@@ -50,30 +42,19 @@ module EqualityTests =
                         actualResult ]
               testList
                   "Fast power function"
-                  [ testCase "2.0: qPow. Positive integer to the power of negative exponent"
-                    <| fun _ ->
-                        let actualResult = pow 2 -2
-                        Expect.equal actualResult 0.25 "Results don't match"
+                  [ testProperty "All power functions should return equal results"
+                    <| fun (x: int) (y: int) ->
+                        if x <> 0 && y <> 0 then
+                            qPow x y = pown x y
+                        else
+                            skiptest "incorrect arguments"
 
-                    testCase "2.1: qPow. Negative integer to the power of even positive exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 10
-                        Expect.equal actualResult 1024 "Results don't match"
-
-                    testCase "2.2: qPow. Negative integer to the power of odd positive exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 9
-                        Expect.equal actualResult -512 "Results don't match"
-
-                    testCase "2.3: qPow. Negative integer to the power of even negative exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 -2
-                        Expect.equal actualResult 0.25 "Results don't match"
-
-                    testCase "2.4: qPow. Negative integer to the power of odd negative exponent"
-                    <| fun _ ->
-                        let actualResult = pow -2 -1
-                        Expect.equal actualResult -0.5 "Results don't match"
+                    testProperty "Bigger exponent should result in a greater result"
+                    <| fun arg exp1 exp2 ->
+                        if exp1 > exp2 && arg > 1 && exp1 > 1 && exp2 > 1 then
+                            qPow arg exp1 > qPow arg exp2
+                        else
+                            skiptest "incorrect arguments"
 
                     testCase "2.5: pow. 0 to the 0th power is not defined"
                     <| fun _ ->
@@ -134,6 +115,8 @@ module EqualityTests =
                     testCase "4.4: all_ods. The same number is given twice"
                     <| fun _ ->
                         let actualResult = allOdds 5 5
-                        Expect.equal actualResult [||] "Results don't match" ] ]
+                        Expect.equal actualResult [||] "Results don't match"
 
 
+
+                    ] ]

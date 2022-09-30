@@ -1,10 +1,15 @@
 namespace spbu_fsharp
 
+open Expecto
+open FsCheck
+open Microsoft.FSharp.Core
 
 
 type MyList<'value> =
     | Cons of head: 'value * tail: MyList<'value>
     | Empty
+
+
 
 type IList<'value> =
     interface
@@ -23,10 +28,6 @@ type IActor<'inType, 'outType> =
 
 
 
-open Microsoft.FSharp.Core
-
-
-
 module Main =
 
     module public HomeWork1 =
@@ -35,21 +36,21 @@ module Main =
         // Power function.
         // This function takes two numbers (base and exponent)
         // and iteratively calculates a power of base to the exponent.
-        let pow (arg: float) (exp: int) : float =
+        let pow (arg: int) (exp: int) : int =
 
             // This operation is not defined
             if arg = 0 && exp = 0 then
                 failwith "Undefined"
 
             // Accumulate the product through a loop.
-            let mutable result: float = 1.0
+            let mutable result = 1
 
             for i = 1 to abs exp do
                 result <- result * arg
 
             // For a positive exponent return the value as is.
             // For a negative exponent inverse the number.
-            if exp > 0 then result else 1.0 / result
+            if exp > 0 then result else 1 / result
 
 
 
@@ -57,22 +58,22 @@ module Main =
         // Quick power function.
         // Ths function takes two numbers (base and exponent)
         // and recursively calculates a power of base to the exponent.
-        let rec qPow (arg: float) (exp: int) : float =
+        let rec qPow (arg: int) (exp: int) : int =
 
             // This operation is not defined.
             if arg = 0 && exp = 0 then
                 failwith "undefined"
 
-            let result: float =
+            let result =
 
                 // Recursion base case.
                 if exp = 0 then
-                    1.0
+                    1
                 elif exp = 1 then
                     arg
                 else
                     // Divide the exponent by half (floor is taken for an odd argument).
-                    let halve: float = qPow arg (abs exp / 2)
+                    let halve = qPow arg (abs exp / 2)
                     // To get an even exponent multiply its halves.
                     if exp % 2 = 0 then
                         halve * halve
@@ -82,7 +83,7 @@ module Main =
 
             // For a positive exponent return the value as is.
             // For a negative exponent inverse the number.
-            if exp > 0 then result else 1.0 / result
+            if exp > 0 then result else 1 / result
 
 
 
@@ -137,6 +138,7 @@ module Main =
 
     module public HomeWork2 =
 
+
         // Homework 2 - Task 3 - Concat (MyList)
         // This function concatenates two lists.
         // Traverse the first list until Empty.
@@ -146,7 +148,10 @@ module Main =
             | Cons (head, tail) -> Cons(head, concat tail lst2)
             | Empty -> lst2
 
-
+        let rec length (lst: MyList<'value>) : int =
+            match lst with
+            | Empty -> 0
+            | Cons (_, tail) -> 1 + length tail
 
         // Homework 2 - Task 1 - Bubble sort (MyList).
         // This function sorts a linked list.
@@ -156,7 +161,7 @@ module Main =
         // place .
         let bubbleSort (lst: MyList<'value>) : MyList<'value> =
 
-            // Count the number of elements.
+            // This function counts the number of elements.
             let rec getLength (lst: MyList<'value>) : int =
                 match lst with
                 | Empty -> 0
@@ -268,11 +273,8 @@ module Main =
     [<EntryPoint>]
     let main (argv: string array) =
 
-        let myListExample1 =
-            Cons(10, Cons(9, Cons(8, Cons(7, Cons(6, Cons(5, Cons(4, Cons(3, Cons(2, Cons(1, Empty))))))))))
+        let myListGen = Arb.generate<MyList<int>>
+        let samples = Gen.sample 100 20 myListGen
 
-        // let myListExample2 =
-        //     Cons(4, Cons(3, Cons(2, Cons(1, Empty))))
-
-        printfn $"res: {HomeWork2.qSort myListExample1}"
+        // printfn $"res: {HomeWork2.qSort myListExample1}"
         0
