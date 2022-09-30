@@ -1,6 +1,5 @@
 namespace spbu_fsharp
 
-open Expecto
 open FsCheck
 open Microsoft.FSharp.Core
 
@@ -29,6 +28,19 @@ type IActor<'inType, 'outType> =
 
 
 module Main =
+
+    // This function takes two linked lists
+    // and compares them node by node.
+    // Returns true if there is a difference.
+    // False otherwise.
+    let rec cmp (lst1: MyList<int>) (lst2: MyList<int>) : bool =
+        match lst1, lst2 with
+        | Empty, Empty -> false
+        | Cons (head1, Empty), Cons (head2, Empty) when head1 = head2 -> false
+        | Cons (head1, tail1), Cons (head2, tail2) when head1 = head2 -> cmp tail1 tail2
+        | _ -> true
+
+
 
     module public HomeWork1 =
 
@@ -138,7 +150,6 @@ module Main =
 
     module public HomeWork2 =
 
-
         // Homework 2 - Task 3 - Concat (MyList)
         // This function concatenates two lists.
         // Traverse the first list until Empty.
@@ -148,26 +159,22 @@ module Main =
             | Cons (head, tail) -> Cons(head, concat tail lst2)
             | Empty -> lst2
 
-        let rec length (lst: MyList<'value>) : int =
-            match lst with
-            | Empty -> 0
-            | Cons (_, tail) -> 1 + length tail
+
 
         // Homework 2 - Task 1 - Bubble sort (MyList).
         // This function sorts a linked list.
         // First we calculate the number (n) of elements in a given list.
         // Then we recursively call the sorting function n times and
-        // on each call some element ends up moving to its
-        // place .
+        // on each call some element ends up moving to its place .
         let bubbleSort (lst: MyList<'value>) : MyList<'value> =
 
-            // This function counts the number of elements.
+            // This function counts the number of elements in a list.
             let rec getLength (lst: MyList<'value>) : int =
                 match lst with
                 | Empty -> 0
                 | Cons (_, tail) -> 1 + getLength tail
 
-            // Compare two consecutive elements and swap them if required.
+            // Compare two consecutive values and swap them if required.
             // On each call this function puts a single element
             // on its spot in a sorted list.
             let rec sort (lst: MyList<'value>) : MyList<'value> =
@@ -175,7 +182,7 @@ module Main =
                 | Empty -> Empty
                 // A single element is already sorted.
                 | Cons (head, Empty) -> Cons(head, Empty)
-                // Swap two consecutive elements accordingly.
+                // Swap two consecutive values accordingly.
                 | Cons (head1, Cons (head2, tail)) ->
                     if head1 >= head2 then
                         Cons(head2, sort (Cons(head1, tail)))
@@ -184,13 +191,13 @@ module Main =
 
             // This function calls a sorting function n times,
             // where n is the length of a given linked list.
-            // This way all elements end up on their spots in a sorted list.
+            // This way all elements end up on their spots in a final sorted list.
             let rec looper (lst: MyList<'value>) (counter: int) : MyList<'value> =
                 match counter with
                 | 0 -> lst
                 | counter -> looper (sort lst) (counter - 1)
 
-            // Returns a sorted list.
+            // Return a sorted list.
             looper lst (getLength lst)
 
 
@@ -259,13 +266,9 @@ module Main =
                             (sort (smallerElements tail head))
                             (concat (Cons(head, Empty)) (sort (biggerElements tail head)))
 
-                // Returns a sorted list.
+                // Return a sorted list.
                 sort lst
 
-
-    //
-    // let OOPConcat (lst1: IList<'value>) (lst2: IList<'value>): IList<'value> =
-    //     interface IList<'value>
 
 
 
@@ -276,5 +279,5 @@ module Main =
         let myListGen = Arb.generate<MyList<int>>
         let samples = Gen.sample 100 20 myListGen
 
-        // printfn $"res: {HomeWork2.qSort myListExample1}"
+        printfn $"res: {HomeWork2.concat Empty Empty}"
         0
