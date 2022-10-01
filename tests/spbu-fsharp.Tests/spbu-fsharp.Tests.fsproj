@@ -8,10 +8,16 @@
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Tests.fs" />
+        <Compile Include="Task1Tests.fs" />
+        <Compile Include="Task2Tests.fs" />
         <Compile Include="Main.fs" />
+        <Content Include=".fantomasignore" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../../src/spbu-fsharp/spbu-fsharp.fsproj" />
+    </ItemGroup>
+    <ItemGroup>
+      <PackageReference Include="Expecto.FsCheck" Version="9.0.4" />
     </ItemGroup>
     <Import Project="..\..\.paket\Paket.Restore.targets" />
 </Project>

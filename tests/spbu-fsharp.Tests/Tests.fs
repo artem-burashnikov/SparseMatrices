@@ -1,4 +1,5 @@
 namespace spbu_fsharp.Tests
+<<<<<<< HEAD
 
 open Expecto
 open spbu_fsharp.Main
@@ -129,3 +130,5 @@ module EqualityTests =
               <| fun _ ->
                   let actualResult = allOdds 5 5
                   Expect.equal actualResult [||] "Results don't match" ]
+=======
+>>>>>>> hw2
