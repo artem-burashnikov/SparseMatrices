@@ -3,7 +3,6 @@ namespace spbu_fsharp
 open Microsoft.FSharp.Core
 module Main =
 
-<<<<<<< HEAD
     // Homework 1 - Task 1.
     // Power function.
     // This function takes two numbers (base and exponent)
@@ -108,8 +107,6 @@ module Main =
 
 
 
-=======
->>>>>>> hw2
     [<EntryPoint>]
     let main (argv: string array) =
         0
