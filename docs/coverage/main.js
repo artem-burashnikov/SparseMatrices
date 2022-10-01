@@ -224,9 +224,11 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 62, "ucl": 21, "cal": 83, "tl": 283, "ct": "LineCoverage", "mc": "-", "cb": 58, "tb": 86, "lch": [], "bch": [], "hc": [] },
-      { "name": "spbu_fsharp.MyOOPEmptyList<T>", "rp": "spbu_fsharp_MyOOPEmptyList_1.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 283, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "spbu_fsharp.MyOOPNonEmptyList<T>", "rp": "spbu_fsharp_MyOOPNonEmptyList_1.html", "cl": 0, "ucl": 3, "cal": 3, "tl": 283, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork1", "rp": "spbu_fsharp_HomeWork1.html", "cl": 28, "ucl": 4, "cal": 32, "tl": 104, "ct": "LineCoverage", "mc": "-", "cb": 27, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork2", "rp": "spbu_fsharp_HomeWork2.html", "cl": 39, "ucl": 3, "cal": 42, "tl": 124, "ct": "LineCoverage", "mc": "-", "cb": 31, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "Lists", "rp": "spbu_fsharp_Lists.html", "cl": 3, "ucl": 30, "cal": 33, "tl": 78, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 14, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 8, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "Tree", "rp": "spbu_fsharp_Tree.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 25, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 10, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -240,21 +242,14 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Boolean spbu_fsharp.Main::cmp(spbu_fsharp.MyList`1<System.Int32>,spbu_fsharp.MyList`1<System.Int32>)", "methodShortName": "cmp(...)", "fileIndex": 0, "line": 37,
+    "assembly": "spbu-fsharp", "class": "Tree", "reportPath": "spbu_fsharp_Tree.html", "methodName": "a Tree::minInTree(Tree/BinTree`1<a>)", "methodShortName": "minInTree(...)", "fileIndex": 0, "line": 12,
     "metrics": [
-      { "value": 10, "exceeded": false },
-      { "value": 256, "exceeded": true },
-      { "value": 10.29, "exceeded": false },
-    ]},
-  {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Int32 spbu_fsharp.Main/HomeWork1::qPow(System.Int32,System.Int32)", "methodShortName": "qPow(...)", "fileIndex": 0, "line": 76,
-    "metrics": [
-      { "value": 7, "exceeded": false },
+      { "value": 8, "exceeded": false },
       { "value": 32, "exceeded": false },
-      { "value": 36.69, "exceeded": true },
+      { "value": 72, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Int32 spbu_fsharp.Main/HomeWork1::pow(System.Int32,System.Int32)", "methodShortName": "pow(...)", "fileIndex": 0, "line": 54,
+    "assembly": "spbu-fsharp", "class": "HomeWork1", "reportPath": "spbu_fsharp_HomeWork1.html", "methodName": "System.Double HomeWork1::pow(System.Double,System.Int32)", "methodShortName": "pow(...)", "fileIndex": 0, "line": 10,
     "metrics": [
       { "value": 6, "exceeded": false },
       { "value": 16, "exceeded": false },
