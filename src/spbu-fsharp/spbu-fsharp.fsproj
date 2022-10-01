@@ -20,6 +20,7 @@
         <Compile Include="Lists.fs" />
         <Compile Include="Trees.fs" />
         <Compile Include="Task1.fs" />
+        <Compile Include="Task2.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
