@@ -10,7 +10,6 @@
         <Compile Include="Tests.fs" />
         <Compile Include="Task1Tests.fs" />
         <Compile Include="Main.fs" />
-        <Content Include=".fantomasignore" />
     </ItemGroup>
     <ItemGroup>
         <ProjectReference Include="../../src/spbu-fsharp/spbu-fsharp.fsproj" />
