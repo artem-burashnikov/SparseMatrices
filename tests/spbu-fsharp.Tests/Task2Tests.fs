@@ -6,6 +6,12 @@ open Expecto
 open FsCheck
 open Microsoft.FSharp.Core
 
+// This type is used for testing sorting functions
+// which require list's values to be numeric.
+type MyComparableNumType =
+    | Ints of int
+    | Floats of float
+
 module TestCases =
 
     let config = { Config.Default with MaxTest = 10000 }
@@ -16,7 +22,7 @@ module TestCases =
         testList "samples" [
 
             testProperty "Sorting algorithms should produce the same result"
-                <| fun (myList: MyList<int>) ->
+                <| fun (myList: MyList<MyComparableNumType>) ->
                     let sort1 = bubbleSort myList
                     let sort2 = qSort myList
                     Expect.equal (checkEqual sort1 sort2) true
