@@ -6,8 +6,7 @@ open Expecto
 open FsCheck
 open Microsoft.FSharp.Core
 
-// This type is used for testing sorting functions
-// which require list's values to be numeric.
+
 
 module TestCases =
 
