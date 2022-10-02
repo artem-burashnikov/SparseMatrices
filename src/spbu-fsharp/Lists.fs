@@ -76,3 +76,11 @@ let rec checkEqual lst1 lst2 : bool =
         else
             true
     | _ -> false
+
+
+
+/// Count the number of elements in a list.
+let rec getLength (lst: MyList<'value>) : int =
+    match lst with
+    | Empty -> 0
+    | Cons (_, tail) -> 1 + getLength tail
