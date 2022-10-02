@@ -8,9 +8,6 @@ open Microsoft.FSharp.Core
 
 // This type is used for testing sorting functions
 // which require list's values to be numeric.
-type MyComparableNumType =
-    | Ints of int
-    | Floats of float
 
 module TestCases =
 
@@ -21,8 +18,10 @@ module TestCases =
 
         testList "samples" [
 
+            // TODO
+            // I fill have to somehow make the next test work for a custom type.
             testProperty "Sorting algorithms should produce the same result"
-                <| fun (myList: MyList<MyComparableNumType>) ->
+                <| fun (myList: MyList<int>) ->
                     let sort1 = bubbleSort myList
                     let sort2 = qSort myList
                     Expect.equal (checkEqual sort1 sort2) true
