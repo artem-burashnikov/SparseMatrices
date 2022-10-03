@@ -12,15 +12,21 @@ module TestCases =
 
     let config = { Config.Default with MaxTest = 10000 }
 
+    type MyComparableValues =
+        | Ints of int
+        | Floats of float
+        | Strings of string
+        | Chars of char
+
     [<Tests>]
     let tests =
 
         testList "samples" [
 
-            // TODO
-            // I fill have to somehow make the next test work for a custom type.
+            // I will have to make a FsCheck generator for this custom type.
+            // Some of the comparable types
             testProperty "Sorting algorithms should produce the same result"
-                <| fun (myList: MyList<int>) ->
+                <| fun (myList:MyList<MyComparableValues>) ->
                     let sort1 = bubbleSort myList
                     let sort2 = qSort myList
                     Expect.equal (checkEqual sort1 sort2) true
@@ -31,7 +37,7 @@ module TestCases =
                     Expect.equal actualResult Empty "Should be empty"
 
             testProperty "Resulting length should be the sum of initial lengths"
-                <| fun myList1 myList2 ->
+                <| fun (myList1:MyList<_>) (myList2:MyList<_>) ->
                     let lengthOfCat = getLength (concat myList1 myList2)
                     let sumOfLengths = (getLength myList1) + (getLength myList2)
                     Expect.equal lengthOfCat sumOfLengths "Lengths must match"

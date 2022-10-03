@@ -3,11 +3,7 @@ module HomeWork2
 
 open Lists
 
-/// Count the number of elements in a list.
-let rec getLength (lst: MyList<'value>) : int =
-    match lst with
-    | Empty -> 0
-    | Cons (_, tail) -> 1 + getLength tail
+
 
 // Homework 2 - Task 3 - Concat (MyList)
 /// Concatenates two lists.
