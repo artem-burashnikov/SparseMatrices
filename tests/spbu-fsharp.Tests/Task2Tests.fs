@@ -47,8 +47,8 @@ module TestCases =
 
             testCase "If both Empty, result should be Empty (MyOOPList)"
                 <| fun _ ->
-                    let actualResult = concatOOP (MyOOPEmptyList()) (MyOOPEmptyList())
-                    Expect.equal actualResult (MyOOPEmptyList()) "Should be empty"
+                    let actualResult = concatOOP (MyOOPEmptyList()) (MyOOPEmptyList()) |> toMyList
+                    Expect.equal actualResult (MyOOPEmptyList() |> toMyList) "Should be empty"
 
             testProperty "Resulting length should be the sum of initial lengths (MyList)"
                 <| fun (myList1:MyList<_>) (myList2:MyList<_>) ->
@@ -56,10 +56,11 @@ module TestCases =
                     let sumOfLengths = (getLength myList1) + (getLength myList2)
                     Expect.equal lengthOfCat sumOfLengths "Lengths must match"
 
-            testProperty "Resulting length should be the sum of initial lengths (MyOOPList)"
-                <| fun myOOPList1 myOOPList2 ->
-                    let lengthOfCat = getLengthOOP (concatOOP myOOPList1 myOOPList2)
-                    let sumOfLengths = (getLengthOOP myOOPList1) + (getLengthOOP myOOPList2)
+            testCase "Resulting length should be the sum of initial lengths (MyOOPList)"
+                <| fun _ ->
+                    let lst = MyOOPNonEmptyList(4, MyOOPNonEmptyList(3, MyOOPNonEmptyList(2, MyOOPNonEmptyList(2, MyOOPEmptyList()))))
+                    let lengthOfCat = getLengthOOP (concatOOP lst lst)
+                    let sumOfLengths = (getLengthOOP lst) + (getLengthOOP lst)
                     Expect.equal lengthOfCat sumOfLengths "Lengths must match"
 
             testCase "Empty + something should be something (MyList)"

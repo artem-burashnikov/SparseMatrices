@@ -130,7 +130,7 @@ let qSort (lst: MyList<'value>) : MyList<'value> =
 // Return a joined IList.
 // lst1 is the list that is being traversed.
 // lst2 is attached at the end of lst1.
-let rec concatOOP (lst1:IList<'value>) (lst2:IList<'value>) : IList<'value> =
+let rec concatOOP (lst1: IList<'value>) (lst2: IList<'value>) : IList<'value> =
     match lst1 with
     | :? MyOOPNonEmptyList<'value> as lst ->
         MyOOPNonEmptyList(lst.Head, concatOOP lst.Tail lst2)
