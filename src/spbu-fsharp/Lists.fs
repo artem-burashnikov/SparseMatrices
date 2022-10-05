@@ -62,13 +62,14 @@ let go2() =
     let lst = MyOOPNonEmptyList(1,MyOOPNonEmptyList(3,MyOOPEmptyList()))
     oopMap (MinusOneActor()) lst
 
-// let fromMyListToMyOOPList lst =
+
+
 // This function takes two linked lists
 // and checks if their corresponding nodes are equal.
 // Returns true if lists are identical.
 // False otherwise.
-let rec checkEqual lst1 lst2 : bool =
-    match lst1, lst2 with
+let rec checkEqual (myList1: MyList<'value>) (myList2: MyList<'value>) : bool =
+    match myList1, myList2 with
     | Empty, Empty -> true
     | Cons (head1, tail1), Cons (head2, tail2) ->
         if head1 = head2 then
@@ -79,8 +80,47 @@ let rec checkEqual lst1 lst2 : bool =
 
 
 
-/// Count the number of elements in a list.
-let rec getLength (lst: MyList<'value>) : int =
-    match lst with
+/// Count the number of elements in a list (MyList).
+let rec getLength myList: int =
+    match myList with
     | Empty -> 0
     | Cons (_, tail) -> 1 + getLength tail
+
+
+
+/// Count the number of elements in a list (IList)
+let rec getLengthOOP (myOOPList:IList<'value>) : int =
+    match myOOPList with
+    | :? MyOOPEmptyList<'value> -> 0
+    | :? MyOOPNonEmptyList<'value> as myOOPList -> 1 + getLengthOOP myOOPList.Tail
+    | _ -> failwith "Task2.getLengthOOP: Function only accepts IList types. \
+                    Incorrect variable type was given."
+
+
+/// Convert MyOOPList type to MyList type.
+let rec toMyList (myOOPList: IList<'value>) =
+    match myOOPList with
+    | :? MyOOPEmptyList<'value> -> Empty
+    | :? MyOOPNonEmptyList<'value> as myOOPList ->
+        Cons(myOOPList.Head, toMyList myOOPList.Tail)
+    | _ -> failwith "Error"
+
+
+/// Convert MyList type to MyOOPList type.
+let rec toMyOOPList myList =
+    match myList with
+    | Empty -> MyOOPEmptyList() :> IList<'value>
+    | Cons(head, tail) -> MyOOPNonEmptyList(head, toMyOOPList tail)
+
+/// Takes a linked list cell and return the its value.
+let headSeparator (lst: IList<'value>) : 'value =
+    match lst with
+    | :? MyOOPNonEmptyList<'value> as lst -> lst.Head
+    | _ -> failwith "Task2.headSeparator: Function only accepts MyOOPNonEmptyList type."
+
+// Takes a linked list cell and return the next cell linked to it.
+let tailSeparator (lst: IList<'value>) : IList<'value> =
+    match lst with
+    | :? MyOOPEmptyList<'value> -> MyOOPEmptyList() :> IList<'value>
+    | :? MyOOPNonEmptyList<'value> as lst -> lst.Tail
+    | _ -> failwith "Task2.tailSeparator: Function only accepts IList type."

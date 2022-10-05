@@ -92,9 +92,17 @@ let diff (arr: float array) : float =
 let allOdds (num1: int) (num2: int) : int array =
 
     // Determine the range
-    let smallerNum: int = if num1 <= num2 then num1 else num2
+    let smallerNum =
+        if num1 <= num2 then
+            num1
+        else
+            num2
 
-    let biggerNum: int = if num1 <= num2 then num2 else num1
+    let biggerNum =
+        if num1 <= num2 then
+            num2
+        else
+            num1
 
     // Make an array of all odd integers in the specified range
     let result: int array =

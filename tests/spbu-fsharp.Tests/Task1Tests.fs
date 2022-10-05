@@ -3,9 +3,6 @@ module Task1Tests
 open Expecto.Flip
 open HomeWork1
 open Expecto
-open FsCheck
-open ExpectoFsCheck
-open ExpectoConfig
 open Microsoft.FSharp.Core
 
 module TestCases =
@@ -23,7 +20,6 @@ module TestCases =
                         qPow x y = pown x y
                     else
                         skiptest "incorrect arguments"
-
 
             testProperty "pow: Bigger exponent should result in a greater result"
                 <| fun arg exp1 exp2 ->
@@ -87,10 +83,10 @@ module TestCases =
                     let smallerNum = min a b
                     let actualResult = allOdds a b
                     if Array.length <| actualResult <> 0 then
-                        if abs a % 2 = 1 then
-                            Expect.equal (smallerNum + 2) actualResult[0]
-                        else
+                        if a % 2 = 0 then
                             Expect.equal (smallerNum + 1) actualResult[0]
+                        else
+                            Expect.equal (smallerNum + 2) actualResult[0]
                     else
                         skiptest "incorrect array"
 
