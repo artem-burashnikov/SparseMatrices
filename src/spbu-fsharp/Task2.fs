@@ -73,11 +73,6 @@ module MyLists =
             let rec partition (lst: MyList<'value>) (pivot: 'value) : MyList<'value> * MyList<'value> =
                 match lst with
                 | Empty -> Empty, Empty
-                | Cons(head, Empty) ->
-                    if head <= pivot then
-                        Cons(head, Empty), Empty
-                    else
-                        Empty, Cons(head, Empty)
                 | Cons(head, tail) ->
                     if head <= pivot then
                         Cons(head, fst (partition tail pivot)), snd (partition tail pivot)
