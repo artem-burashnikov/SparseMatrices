@@ -65,6 +65,7 @@ module MyLists =
         | Empty -> Empty
         | Cons (head, Empty) -> Cons(head, Empty)
         | _ ->
+
             // This sub-function takes a linked list and returns a tuple.
             // First part of the tuple (fst) consists of all elements of a given list,
             // that are less than or equal to the pivot.
@@ -115,7 +116,7 @@ module MyOOPLists =
 
 
 
-    // Homework 2 - Task 1 - Bubble sort (MyOOPList).
+    // Homework 2 - Task 1 - Bubble sort.
     /// Function sorts a linked list using a bubble sorting algorithm.
     let bubbleSort (lst: IList<'value>) : IList<'value> =
 
@@ -154,7 +155,7 @@ module MyOOPLists =
 
 
 
-    // Homework 2 - Task 2 - Quicksort (MyList).
+    // Homework 2 - Task 2 - Quicksort.
     /// Sort a linked list using a quicksort algorithm.
     // The first element in a list is chosen as a pivot.
     // First we partition a list into two.
@@ -171,11 +172,12 @@ module MyOOPLists =
             if lst.Tail :? MyOOPEmptyList<'value> then
                 lst
             else
+
                 // This sub-function takes a linked list and returns a tuple.
                 // First part of the tuple (fst) consists of all elements of a given list,
                 // that are less than or equal to the pivot.
                 // Second part of the tuple (snd)
-                // consists of all elements that greater than the pivot.
+                // consists of all elements that are greater than the pivot.
                 let rec partition (lst :IList<'value>) (pivot: 'value) =
                     match lst with
                     | :? MyOOPEmptyList<'value> ->
@@ -188,6 +190,7 @@ module MyOOPLists =
                             fst <| partition lst.Tail pivot,
                             MyOOPNonEmptyList(lst.Head, snd <| partition lst.Tail pivot)
                     | _ -> failwith "Task2.HomeWork2.qSort.partition caused an exception in matching"
+
                 // This is the main sorting sub-function.
                 // It sorts two partitions and concatenates them with the pivot.
                 let rec sort (lst: IList<'value>) : IList<'value> =
@@ -202,8 +205,10 @@ module MyOOPLists =
                             concat
                                 (sort <| fst (partition lst.Tail lst.Head))
                                 (MyOOPNonEmptyList(lst.Head, sort <| snd (partition lst.Tail lst.Head)))
-                    | _ -> failwith "Task2.qSortOOP.sort caused an exception in matching"
+                    | _ -> failwith "TTask2.HomeWork2.sort caused an exception in matching"
+
                 // Return a sorted list.
                 sort lst
+
         // Unhandled exception
-        | _ -> failwith "Task2.qSortOOP caused an exception in matching."
+        | _ -> failwith "Task2.HomeWork2.qSort caused an exception in matching."
