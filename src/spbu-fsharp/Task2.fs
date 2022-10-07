@@ -75,10 +75,11 @@ module MyLists =
                 match lst with
                 | Empty -> Empty, Empty
                 | Cons(head, tail) ->
+                    let parts = partition tail pivot
                     if head <= pivot then
-                        Cons(head, fst (partition tail pivot)), snd (partition tail pivot)
+                        Cons(head, fst parts), snd parts
                     else
-                        fst (partition tail pivot), Cons(head, snd (partition tail pivot))
+                        fst parts, Cons(head, snd parts)
 
             // This is the main sorting sub-function.
             // It sorts two partitions and concatenates them with the pivot.
@@ -89,9 +90,10 @@ module MyLists =
                 | Empty -> Empty
                 | Cons (head, Empty) -> Cons(head, Empty)
                 | Cons (head, tail) ->
+                    let parts = partition tail head
                     concat
-                        (sort (fst <| partition tail head))
-                        (Cons(head, sort (snd <| partition tail head)))
+                        (sort <| fst parts)
+                        (Cons(head, sort <| snd parts))
 
             // Return a sorted list.
             sort lst
@@ -183,12 +185,11 @@ module MyOOPLists =
                     | :? MyOOPEmptyList<'value> ->
                         MyOOPEmptyList() :> IList<'value>, MyOOPEmptyList() :> IList<'value>
                     | :? MyOOPNonEmptyList<'value> as lst ->
+                        let parts = partition lst.Tail pivot
                         if lst.Head <= pivot then
-                            MyOOPNonEmptyList(lst.Head, fst <| partition lst.Tail pivot),
-                            snd <| partition lst.Tail pivot
+                            MyOOPNonEmptyList(lst.Head, fst parts),snd parts
                         else
-                            fst <| partition lst.Tail pivot,
-                            MyOOPNonEmptyList(lst.Head, snd <| partition lst.Tail pivot)
+                            fst parts,MyOOPNonEmptyList(lst.Head, snd parts)
                     | _ -> failwith "Task2.HomeWork2.qSort.partition caused an exception in matching"
 
                 // This is the main sorting sub-function.
@@ -202,9 +203,10 @@ module MyOOPLists =
                         if lst.Tail :? MyOOPEmptyList<'value> then
                             lst
                         else
+                            let parts = partition lst.Tail lst.Head
                             concat
-                                (sort <| fst (partition lst.Tail lst.Head))
-                                (MyOOPNonEmptyList(lst.Head, sort <| snd (partition lst.Tail lst.Head)))
+                                (sort <| fst parts)
+                                (MyOOPNonEmptyList(lst.Head, sort <| snd parts))
                     | _ -> failwith "TTask2.HomeWork2.sort caused an exception in matching"
 
                 // Return a sorted list.
