@@ -3,9 +3,6 @@ module Task1Tests
 open Expecto.Flip
 open HomeWork1
 open Expecto
-open FsCheck
-open ExpectoFsCheck
-open ExpectoConfig
 open Microsoft.FSharp.Core
 
 module TestCases =
@@ -81,18 +78,6 @@ module TestCases =
                 <| fun _ ->
                 let actualResult = allOdds 1 10
                 Expect.equal actualResult [| 3; 5; 7; 9 |] "Results don't match"
-
-            testProperty "allOdds: assuming ascending order of the resulting array, the first element is determined by input"
-                <| fun a b ->
-                    let smallerNum = min a b
-                    let actualResult = allOdds a b
-                    if Array.length <| actualResult <> 0 then
-                        if abs a % 2 = 1 then
-                            Expect.equal (smallerNum + 2) actualResult[0]
-                        else
-                            Expect.equal (smallerNum + 1) actualResult[0]
-                    else
-                        skiptest "incorrect array"
 
             testCase "allOdds: The same number is given twice"
                 <| fun _ ->
