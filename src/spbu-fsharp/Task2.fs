@@ -40,13 +40,13 @@ module MyLists =
         // Call a sorting function n times,
         // where n = counter is the length of a given linked list.
         // This way all elements end up on their spots in the final sorted list.
-        let rec looper counter lst =
+        let rec looper lst counter  =
             match counter with
             | 0 -> lst
-            | _ -> looper (counter - 1) <| sort lst
+            | _ -> looper (sort lst) (counter - 1)
 
         // Return a sorted list.
-        looper <| getLength lst <| lst
+        looper lst <| getLength lst
 
 
 
@@ -91,9 +91,7 @@ module MyLists =
                 | Cons (head, Empty) -> Cons(head, Empty)
                 | Cons (head, tail) ->
                     let parts = partition tail head
-                    concat
-                        (sort <| fst parts)
-                        (Cons(head, sort <| snd parts))
+                    concat (sort <| fst parts) (Cons(head, sort <| snd parts))
 
             // Return a sorted list.
             sort lst
