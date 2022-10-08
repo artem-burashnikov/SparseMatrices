@@ -84,3 +84,60 @@ let rec getLength (lst: MyList<'value>) : int =
     match lst with
     | Empty -> 0
     | Cons (_, tail) -> 1 + getLength tail
+
+/// Count the number of elements in a list (IList)
+let rec getLengthOOP (myOOPList:IList<'value>) : int =
+    match myOOPList with
+    | :? MyOOPEmptyList<'value> -> 0
+    | :? MyOOPNonEmptyList<'value> as myOOPList -> 1 + getLengthOOP myOOPList.Tail
+    | _ -> failwith "Task2.getLengthOOP: Function only accepts IList types. \
+                    Incorrect variable type was given."
+
+/// Convert MyOOPList type to MyList type.
+let rec myOOPListToMyList (myOOPList: IList<'value>) =
+    match myOOPList with
+    | :? MyOOPEmptyList<'value> -> Empty
+    | :? MyOOPNonEmptyList<'value> as myOOPList ->
+        Cons(myOOPList.Head, myOOPListToMyList myOOPList.Tail)
+    | _ -> failwith "Error"
+
+/// Convert MyList type to MyOOPList type.
+let rec myListToMyOOPList myList =
+    match myList with
+    | Empty -> MyOOPEmptyList() :> IList<'value>
+    | Cons(head, tail) -> MyOOPNonEmptyList(head, myListToMyOOPList tail)
+
+/// Takes a linked list cell and return its value.
+let headSeparator (lst: IList<'value>) : 'value =
+    match lst with
+    | :? MyOOPNonEmptyList<'value> as lst -> lst.Head
+    | _ -> failwith "Task2.headSeparator: Function only accepts MyOOPNonEmptyList type."
+
+// Takes a linked list cell and return the next cell linked to it.
+let tailSeparator (lst: IList<'value>) : IList<'value> =
+    match lst with
+    | :? MyOOPEmptyList<'value> -> MyOOPEmptyList() :> IList<'value>
+    | :? MyOOPNonEmptyList<'value> as lst -> lst.Tail
+    | _ -> failwith "Task2.tailSeparator: Function only accepts IList type."
+
+let rec listToMyList lst =
+    match lst with
+    | [] -> Empty
+    | head :: tail -> Cons(head, listToMyList tail)
+
+let rec myListToList lst =
+    match lst with
+    | Empty -> []
+    | Cons(head, tail) ->  head :: myListToList tail
+
+let rec listToMyOOPList lst =
+    match lst with
+    | [] -> MyOOPEmptyList() :> IList<'value>
+    | head :: tail -> MyOOPNonEmptyList(head, listToMyOOPList tail)
+
+let rec myOOPListToList (lst: IList<'value>) =
+    match lst with
+    | :? MyOOPEmptyList<'value> -> []
+    | :? MyOOPNonEmptyList<'value> as lst -> lst.Head :: myOOPListToList lst.Tail
+    | _ -> failwith $"Lists.myOOPListToList caused an exception in matching. \
+                        The input was given %A{lst}"
