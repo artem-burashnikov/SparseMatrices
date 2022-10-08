@@ -40,7 +40,7 @@ module MyLists =
         // Call a sorting function n times,
         // where n = counter is the length of a given linked list.
         // This way all elements end up on their spots in the final sorted list.
-        let rec looper lst counter  =
+        let rec looper lst counter =
             match counter with
             | 0 -> lst
             | _ -> looper (sort lst) (counter - 1)
@@ -74,8 +74,9 @@ module MyLists =
             let rec partition (lst: MyList<'value>) (pivot: 'value) : MyList<'value> * MyList<'value> =
                 match lst with
                 | Empty -> Empty, Empty
-                | Cons(head, tail) ->
+                | Cons (head, tail) ->
                     let parts = partition tail pivot
+
                     if head <= pivot then
                         Cons(head, fst parts), snd parts
                     else
@@ -107,10 +108,11 @@ module MyOOPLists =
     // Return a joined IList.
     let rec concat (lst1: IList<'value>) (lst2: IList<'value>) : IList<'value> =
         match lst1 with
-        | :? MyOOPNonEmptyList<'value> as lst ->
-            MyOOPNonEmptyList(lst.Head, concat lst.Tail lst2)
+        | :? MyOOPNonEmptyList<'value> as lst -> MyOOPNonEmptyList(lst.Head, concat lst.Tail lst2)
         | :? MyOOPEmptyList<'value> -> lst2
-        | _ -> failwith $"Task2.HomeWork2.MyOOPLists.concat: \
+        | _ ->
+            failwith
+                $"Task2.HomeWork2.MyOOPLists.concat: \
                         IList type was expected in matching, but given \
                         lst1: %A{lst1.GetType()}, lst2: %A{lst2.GetType()}"
 
@@ -140,7 +142,9 @@ module MyOOPLists =
                         MyOOPNonEmptyList(head2, sort (MyOOPNonEmptyList(head1, tail2)))
                     else
                         MyOOPNonEmptyList(head1, sort lst.Tail)
-            | _ -> failwith $"Task2.HomeWork2.MyOOPLists.bubbleSort.sort: \
+            | _ ->
+                failwith
+                    $"Task2.HomeWork2.MyOOPLists.bubbleSort.sort: \
                                 IList type was expected in matching, but given %A{lst.GetType()}"
 
         // This sub-function calls the sorting function n times.
@@ -178,16 +182,16 @@ module MyOOPLists =
                 // that are less than or equal to the pivot.
                 // Second part of the tuple (snd)
                 // consists of all elements that are greater than the pivot.
-                let rec partition (lst :IList<'value>) (pivot: 'value) =
+                let rec partition (lst: IList<'value>) (pivot: 'value) =
                     match lst with
-                    | :? MyOOPEmptyList<'value> ->
-                        MyOOPEmptyList() :> IList<'value>, MyOOPEmptyList() :> IList<'value>
+                    | :? MyOOPEmptyList<'value> -> MyOOPEmptyList() :> IList<'value>, MyOOPEmptyList() :> IList<'value>
                     | :? MyOOPNonEmptyList<'value> as lst ->
                         let parts = partition lst.Tail pivot
+
                         if lst.Head <= pivot then
-                            MyOOPNonEmptyList(lst.Head, fst parts),snd parts
+                            MyOOPNonEmptyList(lst.Head, fst parts), snd parts
                         else
-                            fst parts,MyOOPNonEmptyList(lst.Head, snd parts)
+                            fst parts, MyOOPNonEmptyList(lst.Head, snd parts)
                     | _ -> failwith "Task2.HomeWork2.qSort.partition caused an exception in matching"
 
                 // This is the main sorting sub-function.
@@ -202,9 +206,7 @@ module MyOOPLists =
                             lst
                         else
                             let parts = partition lst.Tail lst.Head
-                            concat
-                                (sort <| fst parts)
-                                (MyOOPNonEmptyList(lst.Head, sort <| snd parts))
+                            concat (sort <| fst parts) (MyOOPNonEmptyList(lst.Head, sort <| snd parts))
                     | _ -> failwith "TTask2.HomeWork2.sort caused an exception in matching"
 
                 // Return a sorted list.
