@@ -1,9 +1,6 @@
 # Ignore script files
 Task1Tests.fs
 Task2Tests.fs
-Tests.fs
 Task1.fs
-Main.fs
 Trees.fs
 Task2.fs
-Lists.fs

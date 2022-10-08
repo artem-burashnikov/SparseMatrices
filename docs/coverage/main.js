@@ -224,9 +224,11 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "HomeWork1", "rp": "spbu_fsharp_HomeWork1.html", "cl": 19, "ucl": 13, "cal": 32, "tl": 104, "ct": "LineCoverage", "mc": "-", "cb": 18, "tb": 34, "lch": [], "bch": [], "hc": [] },
-      { "name": "Lists", "rp": "spbu_fsharp_Lists.html", "cl": 0, "ucl": 33, "cal": 33, "tl": 78, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 14, "lch": [], "bch": [], "hc": [] },
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 0, "ucl": 33, "cal": 33, "tl": 113, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "CLists", "rp": "spbu_fsharp_CLists.html", "cl": 0, "ucl": 13, "cal": 13, "tl": 34, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 8, "lch": [], "bch": [], "hc": [] },
+      { "name": "Helpers.ListConverters", "rp": "spbu_fsharp_ListConverters.html", "cl": 0, "ucl": 24, "cal": 24, "tl": 52, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 16, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork1", "rp": "spbu_fsharp_HomeWork1.html", "cl": 27, "ucl": 5, "cal": 32, "tl": 104, "ct": "LineCoverage", "mc": "-", "cb": 26, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "OOPLists", "rp": "spbu_fsharp_OOPLists.html", "cl": 0, "ucl": 35, "cal": 35, "tl": 70, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 18, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 8, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "Tree", "rp": "spbu_fsharp_Tree.html", "cl": 0, "ucl": 9, "cal": 9, "tl": 25, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 10, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
@@ -248,41 +250,6 @@ var riskHotspots = [
       { "value": 72, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::qPow(System.Double,System.Int32)", "methodShortName": "qPow(...)", "fileIndex": 0, "line": 35,
-    "metrics": [
-      { "value": 7, "exceeded": false },
-      { "value": 32, "exceeded": false },
-      { "value": 56, "exceeded": true },
-    ]},
-  {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::pow(System.Double,System.Int32)", "methodShortName": "pow(...)", "fileIndex": 0, "line": 13,
-    "metrics": [
-      { "value": 6, "exceeded": false },
-      { "value": 16, "exceeded": false },
-      { "value": 42, "exceeded": true },
-    ]},
-  {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Int32[] spbu_fsharp.Main::allOdds(System.Int32,System.Int32)", "methodShortName": "allOdds(...)", "fileIndex": 0, "line": 97,
-    "metrics": [
-      { "value": 6, "exceeded": false },
-      { "value": 16, "exceeded": false },
-      { "value": 42, "exceeded": true },
-    ]},
-  {
-    "assembly": "spbu-fsharp", "class": "HomeWork1", "reportPath": "spbu_fsharp_HomeWork1.html", "methodName": "System.Double HomeWork1::qPow(System.Double,System.Int32)", "methodShortName": "qPow(...)", "fileIndex": 0, "line": 32,
-    "metrics": [
-      { "value": 7, "exceeded": false },
-      { "value": 32, "exceeded": false },
-      { "value": 36.69, "exceeded": true },
-    ]},
-  {
-    "assembly": "spbu-fsharp", "class": "spbu_fsharp.Main", "reportPath": "spbu_fsharp_Main.html", "methodName": "System.Double spbu_fsharp.Main::diff(System.Double[])", "methodShortName": "diff(...)", "fileIndex": 0, "line": 69,
-    "metrics": [
-      { "value": 5, "exceeded": false },
-      { "value": 16, "exceeded": false },
-      { "value": 30, "exceeded": true },
-    ]},
-  {
     "assembly": "spbu-fsharp", "class": "HomeWork1", "reportPath": "spbu_fsharp_HomeWork1.html", "methodName": "System.Double HomeWork1::pow(System.Double,System.Int32)", "methodShortName": "pow(...)", "fileIndex": 0, "line": 10,
     "metrics": [
       { "value": 6, "exceeded": false },
@@ -290,7 +257,7 @@ var riskHotspots = [
       { "value": 22.94, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "Lists", "reportPath": "spbu_fsharp_Lists.html", "methodName": "System.Boolean Lists::checkEqual(Lists/MyList`1<a>,Lists/MyList`1<a>)", "methodShortName": "checkEqual(...)", "fileIndex": 0, "line": 71,
+    "assembly": "spbu-fsharp", "class": "CLists", "reportPath": "spbu_fsharp_CLists.html", "methodName": "System.Boolean CLists::checkEqual(CLists/CList`1<a>,CLists/CList`1<a>)", "methodShortName": "checkEqual(...)", "fileIndex": 0, "line": 21,
     "metrics": [
       { "value": 4, "exceeded": false },
       { "value": 4, "exceeded": false },

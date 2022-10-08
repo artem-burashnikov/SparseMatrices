@@ -16,9 +16,10 @@
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
         <None Include="App.config" />
-        <Compile Include="Helper.fs" />
-        <Compile Include="Lists.fs" />
+        <Compile Include="CLists.fs" />
         <Compile Include="Trees.fs" />
+        <Compile Include="OOPLists.fs" />
+        <Compile Include="Helper.fs" />
         <Compile Include="Task1.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
