@@ -19,7 +19,7 @@ module TestCases =
                 <| fun _ ->
                     let input = Node("abba", Empty)
                     let expectedResult = Cons("abba", Empty), 1
-                    let actualResult = makeCList input
+                    let actualResult = traverse input
                     Expect.equal actualResult expectedResult "Failed to produce a correct list \
                         on a single source node."
 
@@ -27,7 +27,7 @@ module TestCases =
                 <| fun _ ->
                     let input = Node(true, Empty)
                     let expectedResult = Cons(true, Empty), 1
-                    let actualResult = makeCList input
+                    let actualResult = traverse input
                     Expect.equal actualResult expectedResult "Failed to produce a correct list \
                         on a single source node."
 
@@ -35,23 +35,23 @@ module TestCases =
                 <| fun _ ->
                     let input = Node("abba", Cons(Leaf("abba"), Empty))
                     let expectedResult = Cons("abba", Cons("abba", Empty)), 1
-                    let actualResult = makeCList input
+                    let actualResult = traverse input
                     Expect.equal actualResult expectedResult "Failed to produce a correct list \
                         on a source node with a single child (values of both match)."
 
             testCase "A source Node which has a single child (values of both differ)"
                 <| fun _ ->
                     let input = Node(1, Cons(Leaf(2), Empty))
-                    let expectedResult = Cons(1, Cons(2, Empty)), 2
-                    let actualResult = makeCList input
+                    let expectedResult = Cons(2, Cons(1, Empty)), 2
+                    let actualResult = traverse input
                     Expect.equal actualResult expectedResult "Failed to produce a correct list \
                         on a source node with a single child (values of both differ)."
 
             testCase "A source node with two children and a child's child (all values differ)"
                 <| fun _ ->
                     let input = Node(1, Cons(Node(2, Cons(Leaf(3), Empty)), Cons(Leaf(4), Empty)))
-                    let expectedResult = Cons(1, Cons(2, Cons(3, Cons(4, Empty)))), 4
-                    let actualResult = makeCList input
+                    let expectedResult = Cons(4, Cons(3, Cons(2, Cons(1, Empty)))), 4
+                    let actualResult = traverse input
                     Expect.equal actualResult expectedResult "Failed to produce a correct list \
                         on a source node with two children (all values differ)"
 
@@ -59,7 +59,7 @@ module TestCases =
                 <| fun _ ->
                     let input = Node("abba", Cons(Node("abba", Cons(Leaf("abba"), Empty)), Cons(Leaf("abba"), Empty)))
                     let expectedResult = Cons("abba", Cons("abba", Cons("abba", Cons("abba", Empty)))), 1
-                    let actualResult = makeCList input
+                    let actualResult = traverse input
                     Expect.equal actualResult expectedResult "Failed to produce a correct list \
                         on a source node with two children and a child's child (all values match)"
 
@@ -68,19 +68,19 @@ module TestCases =
                     let input1 = Node(Empty, Empty)
                     let input2 = Leaf(Empty)
                     let expectedResult = Cons(Empty, Empty), 1
-                    let actualResult1 = makeCList input1
-                    let actualResult2 = makeCList input2
+                    let actualResult1 = traverse input1
+                    let actualResult2 = traverse input2
                     Expect.equal (actualResult1 = expectedResult && actualResult2 = expectedResult) true "Failed to produce \
                         a correct list that has an empty list as an element."
 
             testProperty "Number of unique elements in a tree must be no more than number of all elements."
                <| fun tree ->
-                    let lst = makeCList tree
+                    let lst = traverse tree
                     let length = getLength (fst lst)
                     snd lst <= length
 
             testProperty "A constructed list cannot be empty"
                 <| fun tree ->
-                    let lst = makeCList tree
+                    let lst = traverse tree
                     getLength (fst lst) > 0 && snd lst >= 0
 ]

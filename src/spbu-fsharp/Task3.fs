@@ -14,50 +14,39 @@ module NTrees =
         | Leaf of value: 'value
         | Node of parent: 'value * children: CList<NTree<'value>>
 
+    let traverse tree =
+        let rec fold fAdd fMerge acc item =
+            let recurse = fold fAdd fMerge
 
+            match item with
+            | Leaf value -> fAdd acc value
+            | Node (value, children) ->
+                match children with
+                | Empty -> fAdd acc value
+                | Cons (node, Empty) -> recurse <| fAdd acc value <| node
+                // I have a very little idea why the following line works.
+                // I pass "recurse" as a function to CLists.fold.
+                // But what is "recurse" exactly then?
+                // The purpose was very straightforward - a function that would fold a list of trees was needed.
+                // Which recurse just happened to be.
+                // But why is "recurse" a valid function to be passed?
+                | Cons (node, children) -> CLists.fold recurse (recurse <| fAdd acc value <| node) children
 
-    // HomeWork 3.
-    /// This function traverses an NTree and collects values in its nodes
-    /// while constructing a CList in a process.
-    /// Returns the tuple of constructed CList and the count of the tree's unique elements.
-    let makeCList (tree: NTree<'value>) =
-        match tree with
-        // If a given tree has only a single Leaf, return the result.
-        // Otherwise traverse the tree.
-        | Leaf value -> Cons(value, Empty), 1
-        | Node (value, children) ->
+        let uniqueValues tree =
+            let hSetAdd (hSet: HashSet<'value>) value =
+                hSet.Add value |> ignore
+                hSet
 
-            // Initialize a HashSet of values.
-            // Each value from a visited node will be added to this HashSet.
-            let hSet = new HashSet<'value>()
+            let hSetUnite (hSet1: HashSet<'value>) (hSet2: HashSet<'value>) =
+                hSet1.UnionWith hSet2
+                hSet1
 
-            /// This sub-function visits nodes and children of an N-ary tree.
-            let rec visit family =
-                match family with
-                // If the node is empty, return nothing.
-                | Empty -> Empty
-                // If a child is a Leaf, then grab its value
-                // and continue visiting children of the parent node.
-                | Cons (Leaf value, children) ->
-                    hSet.Add(value) |> ignore
-                    Cons(value, visit children)
-                // If a child is a Node, then grab its value, visit its children,
-                // visit parent node's children and concatenate both sub-lists.
-                | Cons (Node (value, depthChildren), widthChildren) ->
-                    hSet.Add(value) |> ignore
+            let hSet = HashSet<'value>()
+            fold hSetAdd hSetUnite hSet tree
 
-                    concat
-                    <| Cons(value, visit depthChildren)
-                    <| visit widthChildren
+        let cListConstruct tree =
+            let lstAdd cList elem = Cons(elem, cList)
+            let lstUnite lst lst1 = concat lst lst1
+            fold lstAdd lstUnite Empty tree
 
-            // Add value at the source to the head of the list.
-            // Start traversing the tree by visiting the source node's children.
-            let construct parent children = Cons(parent, visit children)
-
-            // Return the required result which is a constructed CList
-            // with a counter of unique values found in a given tree.
-            let result =
-                hSet.Add(value) |> ignore
-                construct value children, hSet.Count
-
-            result
+        cListConstruct tree, (uniqueValues tree).Count
