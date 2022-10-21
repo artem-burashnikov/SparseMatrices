@@ -15,6 +15,10 @@ module NTrees =
         | Node of parent: 'value * children: CList<NTree<'value>>
 
     let traverse tree =
+        /// General n-ary tree folding function.
+        // It requires two operations to be defined:
+        // fAdd - which would add item in each visited node to the accumulator.
+        // fMerge - which would combine resulting accumulators from different sub-trees.
         let rec fold fAdd fMerge acc item =
             let recurse = fold fAdd fMerge
 
@@ -23,15 +27,17 @@ module NTrees =
             | Node (value, children) ->
                 match children with
                 | Empty -> fAdd acc value
-                | Cons (node, Empty) -> recurse <| fAdd acc value <| node
-                // I have a very little idea why the following line works.
+                // I have some idea why the following line works.
                 // I pass "recurse" as a function to CLists.fold.
                 // But what is "recurse" exactly then?
-                // The purpose was very straightforward - a function that would fold a list of trees was needed.
-                // Which recurse just happened to be.
+                // I need a function that would work as a folder on a list of trees.
+                // Which is what recurse just happened to be.
                 // But why is "recurse" a valid function to be passed?
                 | Cons (node, children) -> CLists.fold recurse (recurse <| fAdd acc value <| node) children
 
+        /// Function counts unique values in the nodes of an n-ary tree.
+        // We pass hSetAdd and hSetUnite as folder functions to the general tree folding function.
+        // Returns an integer - number of unique elements.
         let uniqueValues tree =
             let hSetAdd (hSet: HashSet<'value>) value =
                 hSet.Add value |> ignore
@@ -42,11 +48,17 @@ module NTrees =
                 hSet1
 
             let hSet = HashSet<'value>()
-            fold hSetAdd hSetUnite hSet tree
+            let result = fold hSetAdd hSetUnite hSet tree
+            result.Count
 
+        /// Function constructs a linked list of type CList from the values in the nodes of n-ary tree.
+        // lstAdd and lstUnite are passed as folder functions to the general tree folding function.
+        // Returns a CList that has all values.
         let cListConstruct tree =
+            // The defined order of arguments (1st: elem; 2nd: cList) is important.
+            // When this gets passed as a folder function, the accumulator will be the first argument.
             let lstAdd cList elem = Cons(elem, cList)
-            let lstUnite lst lst1 = concat lst lst1
+            let lstUnite lst1 lst2 = concat lst1 lst2
             fold lstAdd lstUnite Empty tree
 
-        cListConstruct tree, (uniqueValues tree).Count
+        cListConstruct tree, uniqueValues tree
