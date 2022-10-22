@@ -61,4 +61,5 @@ module NTrees =
             let lstUnite lst1 lst2 = concat lst1 lst2
             fold lstAdd lstUnite Empty tree
 
+        // Final result.
         cListConstruct tree, uniqueValues tree
