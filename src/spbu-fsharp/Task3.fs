@@ -28,7 +28,7 @@ module NTrees =
 
 
 
-    /// Function counts unique values in the nodes of an n-ary tree.
+    /// Function makes a set of values in the nodes of an n-ary tree.
     // We pass hSetAdd as folder function to the general tree folding function.
     // Returns a set of elements.
     let setFromValues tree =
