@@ -21,11 +21,7 @@ module NTrees =
 
         match item with
         | Leaf value -> folder acc value
-        | Node (value, children) ->
-            match children with
-            | Empty -> folder acc value
-            | Cons (node, children) -> CLists.fold recurse (recurse <| folder acc value <| node) children
-
+        | Node (value, children) -> CLists.fold recurse (folder acc value) children
 
 
     /// Function makes a set of values in the nodes of an n-ary tree.
