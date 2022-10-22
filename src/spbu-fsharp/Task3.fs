@@ -2,7 +2,6 @@ namespace HomeWork3
 
 open System.Collections.Generic
 open CLists
-open Homework2.AlgList
 open Microsoft.FSharp.Core
 
 module NTrees =
@@ -14,10 +13,9 @@ module NTrees =
         | Leaf of value: 'value
         | Node of parent: 'value * children: CList<NTree<'value>>
 
+
+
     /// General n-ary tree folding function.
-    // It requires two operations to be defined:
-    // fAdd - which would add item in each visited node to the accumulator.
-    // fMerge - which would combine resulting accumulators from different sub-trees.
     let rec fold folder acc item =
         let recurse = fold folder
 
@@ -26,28 +24,25 @@ module NTrees =
         | Node (value, children) ->
             match children with
             | Empty -> folder acc value
-            // I have some idea why the following line works.
-            // I pass "recurse" as a function to CLists.fold.
-            // But what is "recurse" exactly then?
-            // I need a function that would work as a folder on a list of trees.
-            // Which is what recurse just happened to be.
-            // But why is "recurse" a valid function to be passed?
             | Cons (node, children) -> CLists.fold recurse (recurse <| folder acc value <| node) children
 
+
+
     /// Function counts unique values in the nodes of an n-ary tree.
-    // We pass hSetAdd and hSetUnite as folder functions to the general tree folding function.
-    // Returns an integer - number of unique elements.
+    // We pass hSetAdd as folder function to the general tree folding function.
+    // Returns a set of elements.
     let setFromValues tree =
         let hSetAdd (hSet: HashSet<'value>) value =
             hSet.Add value |> ignore
             hSet
 
         let hSet = HashSet<'value>()
-        let result = fold hSetAdd hSet tree
-        result
+        fold hSetAdd hSet tree
+
+
 
     /// Function constructs a linked list of type CList from the values in the nodes of n-ary tree.
-    // lstAdd and lstUnite are passed as folder functions to the general tree folding function.
+    // lstAdd is passed as folder function to the general tree folding function.
     // Returns a CList that has all values.
     let cListConstruct tree =
         // The defined order of arguments (1st: elem; 2nd: cList) is important.
