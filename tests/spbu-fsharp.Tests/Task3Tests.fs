@@ -91,9 +91,9 @@ module TestCases =
 
                     // Defines a folder function for CList.fold
                     let lstUniques lst =
-                        let hSet = HashSet<'value>()
+                        let hSet = HashSet<'Value>()
 
-                        let hSetAdd (hSet: HashSet<'value>) item =
+                        let hSetAdd (hSet: HashSet<'Value>) item =
                             hSet.Add item |> ignore
                             hSet
 

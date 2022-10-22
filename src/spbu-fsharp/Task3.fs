@@ -9,9 +9,9 @@ module NTrees =
     /// This type represents an N-ary tree.
     // Each node in such tree may have any number of children.
     // Every node consists of its value and a list of the node's children which may be empty.
-    type NTree<'value> =
-        | Leaf of value: 'value
-        | Node of parent: 'value * children: CList<NTree<'value>>
+    type NTree<'Value> =
+        | Leaf of value: 'Value
+        | Node of parent: 'Value * children: CList<NTree<'Value>>
 
 
 
@@ -32,11 +32,11 @@ module NTrees =
     // We pass hSetAdd as folder function to the general tree folding function.
     // Returns a set of elements.
     let setFromValues tree =
-        let hSetAdd (hSet: HashSet<'value>) value =
+        let hSetAdd (hSet: HashSet<'Value>) value =
             hSet.Add value |> ignore
             hSet
 
-        let hSet = HashSet<'value>()
+        let hSet = HashSet<'Value>()
         fold hSetAdd hSet tree
 
 
