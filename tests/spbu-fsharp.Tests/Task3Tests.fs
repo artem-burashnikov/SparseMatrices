@@ -1,5 +1,6 @@
 module Task3Tests
 
+open System.Collections.Generic
 open CLists
 open HomeWork3.NTrees
 open Expecto
@@ -25,8 +26,8 @@ module TestCases =
 
             testCase "A single source Leaf with no children"
                 <| fun _ ->
-                    let input = Node(true, Empty)
-                    let expectedResult = Cons(true, Empty), 1
+                    let input = Leaf("abba")
+                    let expectedResult = Cons("abba", Empty), 1
                     let actualResult = traverse input
                     Expect.equal actualResult expectedResult "Failed to produce a correct list \
                         on a single source node."
@@ -81,6 +82,30 @@ module TestCases =
 
             testProperty "A constructed list cannot be empty"
                 <| fun tree ->
-                    let lst = traverse tree
-                    getLength (fst lst) > 0 && snd lst >= 0
+                    let result = traverse tree
+                    getLength (fst result) > 0 && snd result >= 0
+
+            testProperty "Constructing a list from a given tree then making a set of values \
+                          should produce the same output as making a set of values from a tree straight away."
+                <| fun tree ->
+
+                    // Defines a folder function for CList.fold
+                    let lstUniques lst =
+                        let hSet = HashSet<'value>()
+
+                        let hSetAdd (hSet: HashSet<'value>) item =
+                            hSet.Add item |> ignore
+                            hSet
+
+                        CLists.fold hSetAdd hSet lst
+
+                    // We fold a given tree into a set of its elements (set1) and a CList.
+                    // After which we fold a CList into the set of its elements (set2).
+                    // Both sets (set1 and set2) should be subsets of each other.
+                    let resultFromTree = cListConstruct tree, setFromValues tree
+                    let setFromTree = snd resultFromTree
+                    let setFromCList = lstUniques <| fst resultFromTree
+
+                    Expect.equal (setFromTree.IsSubsetOf setFromCList && setFromCList.IsSubsetOf setFromTree) true "Did not produce equal sets."
 ]
+
