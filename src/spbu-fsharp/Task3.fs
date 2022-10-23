@@ -24,6 +24,7 @@ module NTrees =
         | Node (value, children) -> CLists.fold recurse (folder acc value) children
 
 
+
     /// Function makes a set of values in the nodes of an n-ary tree.
     // We pass hSetAdd as folder function to the general tree folding function.
     // Returns a set of elements.
@@ -46,5 +47,7 @@ module NTrees =
         let lstAdd cList elem = Cons(elem, cList)
         fold lstAdd Empty tree
 
+
+    // HomeWork 3 result.
     let traverse tree =
         cListConstruct tree, (setFromValues tree).Count
