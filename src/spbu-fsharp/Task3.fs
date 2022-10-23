@@ -48,6 +48,6 @@ module NTrees =
         fold lstAdd Empty tree
 
 
-    // HomeWork 3 result.
+    // HomeWork 3 result..
     let traverse tree =
         cListConstruct tree, (setFromValues tree).Count
