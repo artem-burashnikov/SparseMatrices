@@ -26,7 +26,7 @@ let pow (arg: float) (exp: int) : float =
 // Quick power function.
 // Ths function takes two numbers (base and exponent)
 // and recursively calculates a power of base to the exponent.
-let rec qPow (arg:float) (exp:int) =
+let rec qPow (arg: float) (exp: int) =
 
     // This operation is not defined.
     if arg = 0.0 && exp = 0 then
