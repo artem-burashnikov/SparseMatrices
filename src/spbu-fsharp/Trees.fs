@@ -22,8 +22,18 @@ module BinTrees =
     type BinTree<'Value> =
         | None
         | Leaf of 'Value
-        | Node of BinTree<'Value> * BinTree<'Value>
+        | Node of left: BinTree<'Value> * right: BinTree<'Value>
 
+    /// Fold for BinTree types (skips None).
+    let rec fold folder acc tree =
+        let recurse = fold folder
+
+        match tree with
+        | BinTree.None -> acc
+        | Leaf value -> folder acc value
+        | Node (left, right) ->
+            let leftAcc = recurse acc left
+            recurse leftAcc right
 
 module QuadTrees =
 
@@ -31,3 +41,16 @@ module QuadTrees =
         | None
         | Leaf of 'Value
         | Node of NW: QuadTree<'Value> * NE: QuadTree<'Value> * SW: QuadTree<'Value> * SE: QuadTree<'Value>
+
+    /// Fold for BinTree types (skips None).
+    let rec fold folder acc tree =
+        let recurse = fold folder
+
+        match tree with
+        | QuadTree.None -> acc
+        | Leaf value -> folder acc value
+        | Node (NW, NE, SW, SE) ->
+            let nwAcc = recurse acc NW
+            let neAcc = recurse nwAcc NE
+            let swAcc = recurse neAcc SW
+            recurse swAcc SE
