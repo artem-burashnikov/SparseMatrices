@@ -1,6 +1,7 @@
 module Task4Tests
 
 open System
+open Helpers.Numbers
 open HomeWork4
 open Expecto
 open FsCheck
@@ -39,14 +40,23 @@ module TestCases =
                 let actualResult = ceilPowTwo x
                 actualResult >= x
 
-            testProperty "ceilPowTwo: Different function should produce the same result."
+            testProperty "ceilPowTwo: Different function that does the same should produce the same result."
             <| fun x ->
                 let result1 = ceilPowTwo x
                 let result2 =
                     if x <= 0 then
                         1
+                    elif x = 1 then
+                        2
                     else
                         pown 2 (int << ceil <| Math.Log2(double x))
                 result1 = result2
+
+            testProperty "Vector partitioning: built-in function should produce the same result."
+            <| fun (arr: array<int>) ->
+                let expectedLeft, expectedRight = Array.splitAt ((ceilPowTwo arr.Length)/2) arr
+                let actualLeft, actualRight = vecPartition (Vector(arr, 0, (ceilPowTwo arr.Length) - 1))
+                Expect.sequenceEqual actualLeft.Data[actualLeft.Left..actualLeft.Right] expectedLeft ""
+                Expect.sequenceEqual actualRight.Data[actualRight.Left..actualRight.Right] expectedRight ""
 ]
 

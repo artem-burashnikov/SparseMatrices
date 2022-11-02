@@ -24,7 +24,7 @@ module BinTrees =
         | Leaf of 'Value
         | Node of left: BinTree<'Value> * right: BinTree<'Value>
 
-    /// Fold for BinTree types (skips None).
+    /// Fold for BinTree types.
     let rec fold folder acc tree =
         let recurse = fold folder
 
@@ -42,7 +42,7 @@ module QuadTrees =
         | Leaf of 'Value
         | Node of NW: QuadTree<'Value> * NE: QuadTree<'Value> * SW: QuadTree<'Value> * SE: QuadTree<'Value>
 
-    /// Fold for BinTree types (skips None).
+    /// Fold for BinTree types.
     let rec fold folder acc tree =
         let recurse = fold folder
 

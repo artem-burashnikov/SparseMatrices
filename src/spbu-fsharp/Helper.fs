@@ -50,3 +50,24 @@ module ListConverters =
         match lst with
         | Empty -> []
         | Cons (head, tail) -> head :: listToLst tail
+
+module Numbers =
+
+    /// Function calculates the nearest power of two which is greater than or equal to the given integer.
+    let ceilPowTwo x =
+        let rec looper x acc =
+            if x = 1 then 2
+            elif acc >= x then acc
+            else looper x (acc * 2)
+
+        // Identity element for multiplication is 1, hence accumulator starts at 1.
+        looper x 1
+
+    /// Function checks if a given integer equals 2 to some power.
+    let isTwo x = x > 1 && x = ceilPowTwo x
+
+module Tuples =
+
+    let first (item, _, _) = item
+    let second (_, item, _) = item
+    let third (_, _, item) = item
