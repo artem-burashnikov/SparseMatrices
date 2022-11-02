@@ -53,7 +53,7 @@ module TestCases =
                 result1 = result2
 
             testProperty "Vector partitioning: built-in function should produce the same result."
-            <| fun (arr: array<int>) ->
+            <| fun (arr: array<int option>) ->
                 let expectedLeft, expectedRight = Array.splitAt ((ceilPowTwo arr.Length)/2) arr
                 let actualLeft, actualRight = vecPartition (Vector(arr, 0, (ceilPowTwo arr.Length) - 1))
                 Expect.sequenceEqual actualLeft.Data[actualLeft.Left..actualLeft.Right] expectedLeft ""
