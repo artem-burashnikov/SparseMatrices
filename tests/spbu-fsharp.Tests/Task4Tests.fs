@@ -82,5 +82,23 @@ module TestCases =
                     let actualResult = BinTrees.fold folder (HashSet()) tree
                     let expectedResult = Array.fold folder (HashSet()) arr
                     Expect.equal (expectedResult.IsSubsetOf actualResult && actualResult.IsSubsetOf expectedResult) true "Did not produce equal sets."
+
+            testCase "vecToTree: empty array should produce an empty tree"
+            <| fun _ ->
+                let actualResult = vecToTree [||]
+                let expectedResult = BinTrees.None
+                Expect.equal actualResult expectedResult ""
+
+            testCase "vecToTree: Simplest 2-elements array (different values)"
+            <| fun _ ->
+                let actualResult = vecToTree [|Some 1; Some 2|]
+                let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.Leaf 2)
+                Expect.equal actualResult expectedResult ""
+
+            testCase "vecToTree: Simplest 2-elements array (identical values)"
+            <| fun _ ->
+                let actualResult = vecToTree [|Some 1; Some 1|]
+                let expectedResult = BinTrees.Leaf(1)
+                Expect.equal actualResult expectedResult ""
     ]
 
