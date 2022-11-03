@@ -1,11 +1,13 @@
 module Task4Tests
 
 open System
+open System.Collections.Generic
 open Helpers.Numbers
 open HomeWork4
 open Expecto
 open FsCheck
 open Microsoft.FSharp.Core
+open Trees
 
 module TestCases =
 
@@ -53,10 +55,32 @@ module TestCases =
                 result1 = result2
 
             testProperty "Vector partitioning: built-in function should produce the same result."
-            <| fun (arr: array<int option>) ->
+            <| fun (arr: array<_>) ->
                 let expectedLeft, expectedRight = Array.splitAt ((ceilPowTwo arr.Length)/2) arr
                 let actualLeft, actualRight = vecPartition (Vector(arr, 0, (ceilPowTwo arr.Length) - 1))
                 Expect.sequenceEqual actualLeft.Data[actualLeft.Left..actualLeft.Right] expectedLeft ""
                 Expect.sequenceEqual actualRight.Data[actualRight.Left..actualRight.Right] expectedRight ""
-]
+
+            testProperty "Partitioning then concatenating should output the initial array"
+            <| fun (arr: array<_>) ->
+                let leftPart, rightPart = vecPartition (Vector(arr, 0, (ceilPowTwo arr.Length) - 1))
+                let actualResult = Array.concat [leftPart.Data[leftPart.Left..leftPart.Right]; rightPart.Data[rightPart.Left..rightPart.Right]]
+                Expect.sequenceEqual actualResult arr ""
+
+            testProperty "Array to Binary Tree converter: The set of original data must not change"
+            <| fun (arr: array<_>) ->
+
+                let folder (acc: HashSet<'value>) x =
+                        acc.Add(x) |> ignore
+                        acc
+
+                // Skipping this test because BinaryTrees.fold produces different result by design.
+                if arr.Length = 0 then
+                    skiptest ""
+                else
+                    let tree = vecToTree arr
+                    let actualResult = BinTrees.fold folder (HashSet()) tree
+                    let expectedResult = Array.fold folder (HashSet()) arr
+                    Expect.equal (expectedResult.IsSubsetOf actualResult && actualResult.IsSubsetOf expectedResult) true "Did not produce equal sets."
+    ]
 

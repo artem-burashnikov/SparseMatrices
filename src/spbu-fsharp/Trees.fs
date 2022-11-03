@@ -29,8 +29,8 @@ module BinTrees =
         let recurse = fold folder
 
         match tree with
-        | BinTree.None -> acc
-        | Leaf value -> folder acc value
+        | BinTree.None -> folder acc Option.None
+        | Leaf value -> folder acc (Option.Some value)
         | Node (left, right) ->
             let leftAcc = recurse acc left
             recurse leftAcc right
@@ -42,12 +42,12 @@ module QuadTrees =
         | Leaf of 'Value
         | Node of NW: QuadTree<'Value> * NE: QuadTree<'Value> * SW: QuadTree<'Value> * SE: QuadTree<'Value>
 
-    /// Fold for BinTree types.
+    /// Fold for QuadTree types.
     let rec fold folder acc tree =
         let recurse = fold folder
 
         match tree with
-        | QuadTree.None -> acc
+        | QuadTree.None -> folder acc QuadTree.None
         | Leaf value -> folder acc value
         | Node (NW, NE, SW, SE) ->
             let nwAcc = recurse acc NW
