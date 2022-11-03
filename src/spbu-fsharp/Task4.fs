@@ -22,8 +22,7 @@ type Vector<'value> =
           Left = left
           Right = right }
 
-    member this.CurrentLength =
-        this.Right - this.Left + 1
+    member this.CurrentLength = this.Right - this.Left + 1
 
     /// Maximum real available index.
     member this.DataMaxIndex = this.Data.Length - 1
@@ -59,8 +58,7 @@ let vecToTree (arr: array<'value option>) =
 
             // To get rid of the unnecessary data or to store adjacent identical data more efficiently
             // we merge a node into a single one based on the node's children.
-            let result =
-                Node(maker leftPart, maker rightPart)
+            let result = Node(maker leftPart, maker rightPart)
 
             match result with
             | Node (BinTree.None, BinTree.None) -> BinTree.None
@@ -69,8 +67,7 @@ let vecToTree (arr: array<'value option>) =
 
     // Construct a Vector type from a given array and pad it with the
     // maximum index that this array would have if its length were equal to a power of two.
-    let paddedIndex =
-        (Numbers.ceilPowTwo arr.Length) - 1
+    let paddedIndex = (Numbers.ceilPowTwo arr.Length) - 1
 
     let vec = Vector(arr, 0, paddedIndex)
 
