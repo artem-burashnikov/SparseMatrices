@@ -1,8 +1,8 @@
 module Task4Tests
 
 open System
-open System.Collections.Generic
 open Helpers.Numbers
+open HomeWork4.SparseVector
 open HomeWork4.VectorData
 open Expecto
 open FsCheck
@@ -67,38 +67,41 @@ module TestCases =
                 let actualResult = Array.concat [leftPart.Data[leftPart.Left..leftPart.Right]; rightPart.Data[rightPart.Left..rightPart.Right]]
                 Expect.sequenceEqual actualResult arr ""
 
-            testProperty "Array to Binary Tree converter: The set of original data must not change"
-            <| fun (arr: array<_>) ->
-
-                let folder (acc: HashSet<'value>) x =
-                        acc.Add(x) |> ignore
-                        acc
-
-                // Skipping this test because BinaryTrees.fold produces different result by design.
-                if arr.Length = 0 then
-                    skiptest ""
-                else
-                    let tree = vecToTree arr
-                    let actualResult = BinTrees.fold folder (HashSet()) tree
-                    let expectedResult = Array.fold folder (HashSet()) arr
-                    Expect.equal (expectedResult.IsSubsetOf actualResult && actualResult.IsSubsetOf expectedResult) true "Did not produce equal sets."
-
             testCase "vecToTree: empty array should produce an empty tree"
             <| fun _ ->
                 let actualResult = vecToTree [||]
                 let expectedResult = BinTrees.None
                 Expect.equal actualResult expectedResult ""
 
-            testCase "vecToTree: Simplest 2-elements array (different values)"
+            testCase "vecToTree: 1-element array"
+            <| fun _ ->
+                let actualResult = vecToTree [|Some 1|]
+                let expectedResult = BinTrees.Leaf 1
+                Expect.equal actualResult expectedResult ""
+
+            testCase "vecToTree: 2-elements array (different values)"
             <| fun _ ->
                 let actualResult = vecToTree [|Some 1; Some 2|]
                 let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.Leaf 2)
                 Expect.equal actualResult expectedResult ""
 
-            testCase "vecToTree: Simplest 2-elements array (identical values)"
+            testCase "vecToTree: 2-elements array (identical values)"
             <| fun _ ->
                 let actualResult = vecToTree [|Some 1; Some 1|]
                 let expectedResult = BinTrees.Leaf(1)
                 Expect.equal actualResult expectedResult ""
-    ]
 
+            testCase "vecToTree: 3-elements array (different values)"
+            <| fun _ ->
+                let actualResult = vecToTree [|Some 1; None; Some 2|]
+                let expectedResult = BinTrees.Node(BinTrees.Node (BinTrees.Leaf 1, BinTrees.None), BinTrees.Node(BinTrees.Leaf 2, BinTrees.None))
+                Expect.equal actualResult expectedResult ""
+
+            testProperty "SparseVector.GetValue loop through each index collecting values. Resulting sequence should be equal to the original."
+            <| fun (arr: array<_>) ->
+                let sparseVec = toSparse arr
+                let mutable actualResult = []
+                for i = 1 to arr.Length do
+                    actualResult <- sparseVec.GetValue i :: actualResult
+                Expect.sequenceEqual (actualResult |> List.rev) arr ""
+]

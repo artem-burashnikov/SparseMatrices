@@ -23,7 +23,7 @@ module VectorData =
                   Left = left
                   Right = right }
 
-            member this.CurrentLength = this.Right - this.Left + 1
+            member this.Length = this.Right - this.Left + 1
 
             /// Maximum real available index.
             member this.DataMaxIndex = this.Data.Length - 1
@@ -36,21 +36,25 @@ module VectorData =
         Vector(vec.Data, vec.Left, newRight), Vector(vec.Data, newRight + 1, vec.Right)
 
 
+    let getData =
+        function
+        | Some value -> Leaf value
+        | Option.None -> BinTree.None
+
+
     let vecToTree (arr: array<'value option>) =
         let rec maker (vec: Vector<'value>) =
-            // If we look at a vector which starting index is out of bounds,
-            // then there is no real data in it, no need to store anything.
-            if vec.Left > vec.DataMaxIndex then
-                BinTree.None
             // If we find a cell that is within the bounds of the initial array,
             // then we look at the data in that cell and store it accordingly.
-            elif (vec.CurrentLength = 1)
-                 && (vec.Left <= vec.DataMaxIndex) then
-                let data = vec.Data[vec.Left]
-
-                match data with
-                | Some value -> Leaf value
-                | Option.None -> BinTree.None
+            // Special case for an array of a single element is needed,
+            // since the resulting tree would contain unnecessary branch otherwise.
+            if vec.Data.Length = 1
+               || ((vec.Length = 1) && (vec.Left <= vec.DataMaxIndex)) then
+                vec.Data[vec.Left] |> getData
+            // If we look at a vector which starting index is out of bounds,
+            // then there is no real data in it, no need to store anything.
+            elif vec.Left > vec.DataMaxIndex then
+                BinTree.None
             else
                 // Otherwise we split the array (padded with indices to the power of 2) in two halves
                 // and repeat the process.
@@ -98,7 +102,7 @@ module SparseVector =
 
 
             /// Search function traverses a binary tree and looks for a value at a given index.
-            // Index lookup happens as if the tree was an array by using two pointers (left, right).
+            // Index lookup happens as if the tree was an array by using two pointers.
             let rec search ix left right tree =
                 let middle = (left + right) / 2
 
@@ -123,7 +127,7 @@ module SparseVector =
                 if ix < 0 || ix > this.Length - 1 then
                     failwith "Index out of bounds."
                 else
-                    search ix 0 (this.Length - 1) this.Data
+                    search ix 0 (Numbers.ceilPowTwo this.Length - 1) this.Data
 
             getValue i
 

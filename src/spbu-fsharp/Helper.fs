@@ -53,7 +53,7 @@ module ListConverters =
 
 module Numbers =
 
-    /// Function calculates the nearest power of two which is greater than or equal to the given integer.
+    /// Function calculates the smallest power of two which is greater than or equal to the given integer.
     let ceilPowTwo x =
         let rec looper x acc =
             if x <= 0 then 1
@@ -63,6 +63,3 @@ module Numbers =
 
         // Identity element for multiplication is 1, hence accumulator starts at 1.
         looper x 1
-
-    /// Function checks if a given integer equals 2 to some power.
-    let isTwo x = x > 1 && x = ceilPowTwo x
