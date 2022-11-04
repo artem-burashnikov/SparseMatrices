@@ -102,6 +102,6 @@ module TestCases =
                 let sparseVec = toSparse arr
                 let mutable actualResult = []
                 for i = 1 to arr.Length do
-                    actualResult <- sparseVec.GetValue i :: actualResult
+                    actualResult <- sparseVec[i] :: actualResult
                 Expect.sequenceEqual (actualResult |> List.rev) arr ""
 ]
