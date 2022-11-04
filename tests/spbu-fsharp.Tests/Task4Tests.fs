@@ -3,7 +3,7 @@ module Task4Tests
 open System
 open System.Collections.Generic
 open Helpers.Numbers
-open HomeWork4
+open HomeWork4.VectorData
 open Expecto
 open FsCheck
 open Microsoft.FSharp.Core
