@@ -49,8 +49,7 @@ module VectorData =
             // then we look at the data in that cell and store it accordingly.
             // Special case for an array of a single element is needed,
             // since the resulting tree would contain unnecessary branch otherwise.
-            if vec.Data.Length = 1
-               || ((vec.Length = 1) && (vec.Left <= vec.DataMaxIndex)) then
+            if vec.Data.Length = 1 || ((vec.Length = 1) && (vec.Left <= vec.DataMaxIndex)) then
                 vec.Data[vec.Left] |> getData
             // If we look at a vector which starting index is out of bounds,
             // then there is no real data in it, no need to store anything.
@@ -66,8 +65,8 @@ module VectorData =
                 let result = BinTree.Node(maker leftPart, maker rightPart)
 
                 match result with
-                | BinTree.Node (BinTree.None, BinTree.None) -> BinTree.None
-                | BinTree.Node (BinTree.Leaf value1, BinTree.Leaf value2) when value1 = value2 -> BinTree.Leaf value1
+                | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
+                | BinTree.Node(BinTree.Leaf value1, BinTree.Leaf value2) when value1 = value2 -> BinTree.Leaf value1
                 | _ -> result
 
         // Construct a Vector type from a given array and pad it with the
@@ -97,8 +96,8 @@ module SparseVector =
 
                 let rec look (direction: Direction) (tree: BinTree<'value>) =
                     match direction, tree with
-                    | Left, BinTree.Node (leftChild, _) -> leftChild
-                    | Right, BinTree.Node (_, rightChild) -> rightChild
+                    | Left, BinTree.Node(leftChild, _) -> leftChild
+                    | Right, BinTree.Node(_, rightChild) -> rightChild
                     | _, BinTree.Leaf value -> BinTree.Leaf value
                     | _, BinTree.None -> BinTree.None
 
@@ -183,9 +182,9 @@ module MatrixData =
         //   |          |           |
         //   |    SW    |    SE  Jxy|
         //
-        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, mtx.Iy, newX, newY),  // NW
-        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, newY + 1, newX, mtx.Jy),  // NE
-        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, mtx.Iy, mtx.Jx, newY),  // SW
+        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, mtx.Iy, newX, newY), // NW
+        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, newY + 1, newX, mtx.Jy), // NE
+        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, mtx.Iy, mtx.Jx, newY), // SW
         Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, newY + 1, mtx.Jx, mtx.Jy) // SE
 
 
@@ -201,10 +200,12 @@ module MatrixData =
         let rec maker (mtx: Matrix<'value>) =
 
             // If we find a cell within bounds of the original data, then store the cell's value accordingly.
-            if mtx.LengthX = 1
-               && mtx.LengthY = 1
-               && mtx.Jx <= (mtx.DataRows - 1)
-               && mtx.Jy <= (mtx.DataCols - 1) then
+            if
+                mtx.LengthX = 1
+                && mtx.LengthY = 1
+                && mtx.Jx <= (mtx.DataRows - 1)
+                && mtx.Jy <= (mtx.DataCols - 1)
+            then
 
                 mtx.Data[mtx.Ix][mtx.Iy] |> getData
 
@@ -219,8 +220,8 @@ module MatrixData =
                 let result = QuadTree.Node(maker nw, maker ne, maker sw, maker se)
 
                 match result with
-                | QuadTree.Node (QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
-                | QuadTree.Node (QuadTree.Leaf value1, QuadTree.Leaf value2, QuadTree.Leaf value3, QuadTree.Leaf value4) when
+                | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
+                | QuadTree.Node(QuadTree.Leaf value1, QuadTree.Leaf value2, QuadTree.Leaf value3, QuadTree.Leaf value4) when
                     identical value1 value2 value3 value4
                     ->
                     QuadTree.Leaf value1
@@ -234,8 +235,7 @@ module MatrixData =
             table[0][0] |> getData
         // Matrix m by n.
         elif table.Length > 0 && table[0].Length > 0 then
-            let paddedIndex =
-                Numbers.ceilPowTwo (max table.Length table[0].Length) - 1
+            let paddedIndex = Numbers.ceilPowTwo (max table.Length table[0].Length) - 1
 
             let mtx =
                 Matrix(table, table.Length, table[0].Length, 0, 0, paddedIndex, paddedIndex)
