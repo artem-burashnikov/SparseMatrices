@@ -95,6 +95,7 @@ module SparseVector =
         member this.Item
             with get i =
 
+                /// Navigates search function through a binary tree.
                 let look (direction: Direction) (tree: BinTree<'Value>) =
                     match direction, tree with
                     | Left, BinTree.Node(leftChild, _) -> leftChild
@@ -124,7 +125,7 @@ module SparseVector =
                         | _ -> search ix (middle + 1) right node
 
                 let getValue (i: int) =
-                    let ix = i - 1 // Vector indices (i) start at 1, so we offset by one.
+                    let ix = i - 1 // Vector's index (i) starts at 1, so we offset by one.
 
                     if ix < 0 || ix > this.Length - 1 then
                         failwith "Index out of range."
@@ -134,12 +135,15 @@ module SparseVector =
                 getValue i
 
 
+    // Construct a SparseVector from a given array.
     let toSparse (arr: 'Value option array) =
         let length = arr.Length
         let data = VectorData.vecToTree arr
         SparseVector(length, data)
 
 
+
+open SparseVector
 
 module MatrixData =
 
@@ -205,6 +209,7 @@ module MatrixData =
         List.forall (fun x -> x = a) [ b; c; d ]
 
 
+    /// This function coverts a given table into a QudTree by splitting data into 4 quadrants.
     let mtxToTree (table: array<array<'Value option>>) =
         let rec maker (mtx: Matrix<'Value>) =
 
@@ -246,9 +251,11 @@ module MatrixData =
         elif table.Length > 0 && table[0].Length > 0 then
             let paddedIndex = Numbers.ceilPowTwo (max table.Length table[0].Length) - 1
 
+            // Construct a matrix 2^n by 2^n (n > 1) from a given table.
             let mtx =
                 Matrix(table, table.Length, table[0].Length, 0, 0, paddedIndex, paddedIndex)
 
+            // Make a SparseMatrix from the constructed matrix.
             maker mtx
         else
             failwith "Incorrect table data."
@@ -257,7 +264,7 @@ module MatrixData =
 
 module SparseMatrix =
 
-    // 4 quadrants.
+    // 4 quadrants in a QuadTree's node.
     type Direction =
         | NW
         | NE
@@ -278,6 +285,7 @@ module SparseMatrix =
         member this.Item
             with get (i, j) =
 
+                /// Navigates search function through a QuadTree.
                 let look (direction: Direction) (tree: QuadTree<'Value>) =
                     match direction, tree with
                     | NW, QuadTree.Node(nw, _, _, _) -> nw
@@ -287,21 +295,18 @@ module SparseMatrix =
                     | _, QuadTree.Leaf _ -> tree
                     | _, QuadTree.None -> tree
 
-                // i, j - indices we are looking for
-                // ix, iy - coordinates of the top-left cell in a quadrant
-                // jx, jy - coordinates of the bottom-right cell in a quadrant
+                // i, j - indices we are looking for.
+                // ix, iy - coordinates of the top-left cell in a quadrant.
+                // jx, jy - coordinates of the bottom-right cell in a quadrant.
                 let rec search i j ix iy jx jy tree =
 
                     let middleI = (ix + jx) / 2
                     let middleJ = (iy + jy) / 2
-                    // printfn $"middleI: %A{middleI}, middleJ: %A{middleJ}, ix: %A{ix}, iy: %A{iy}, jx: %A{jx}, jy: %A{jy}"
-                    // System.Console.ReadKey() |> ignore
 
                     // Data is located in the NW quadrant.
                     if i <= middleI && j <= middleJ then
                         let node = look NW tree
-                        // printfn $"%A{node}"
-                        // System.Console.ReadKey() |> ignore
+
                         match node with
                         | QuadTree.Leaf value -> Some value
                         | QuadTree.None -> Option.None
@@ -310,8 +315,7 @@ module SparseMatrix =
                     // Data is located in the NE quadrant.
                     elif i <= middleI && j > middleJ then
                         let node = look NE tree
-                        // printfn $"%A{node}"
-                        // System.Console.ReadKey() |> ignore
+
                         match node with
                         | QuadTree.Leaf value -> Some value
                         | QuadTree.None -> Option.None
@@ -320,8 +324,7 @@ module SparseMatrix =
                     // Data is located in the SW quadrant.
                     elif i > middleI && j <= middleJ then
                         let node = look SW tree
-                        // printfn $"%A{node}"
-                        // System.Console.ReadKey() |> ignore
+
                         match node with
                         | QuadTree.Leaf value -> Some value
                         | QuadTree.None -> Option.None
@@ -330,8 +333,7 @@ module SparseMatrix =
                     // Data is located in the SE quadrant.
                     else
                         let node = look SE tree
-                        // printfn $"%A{node}"
-                        // System.Console.ReadKey() |> ignore
+
                         match node with
                         | QuadTree.Leaf value -> Some value
                         | QuadTree.None -> Option.None
@@ -357,7 +359,7 @@ module SparseMatrix =
                 getValue i j
 
 
-
+    /// Convert a table to SparseMatrix.
     let toSparse (table: array<array<'value option>>) =
         let rows, columns =
             if table.Length = 0 then 0, 0
@@ -366,3 +368,71 @@ module SparseMatrix =
 
         let data = MatrixData.mtxToTree table
         SparseMatrix(rows, columns, data)
+
+
+
+module Algebra =
+
+    /// Sum of two binary trees.
+    /// This does not cover the case when trees have different depth
+    /// since it's assumed the incorrect data will be filtered in the higher function call.
+    let rec sum operator binTree1 binTree2 =
+        let recurse = sum operator
+
+        match binTree1, binTree2 with
+        // Neutral + Value = Value
+        | BinTree.None, tree -> tree
+        | tree, BinTree.None -> tree
+        // This, in fact, is the following case: BinTree.Node(a, a), BinTree.Node(b1, b2) and vice versa.
+        // Since it's assumed that trees have matching depths, summation continues as if the node had two children.
+        | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(recurse binTree1 b1, recurse binTree1 b2)
+        | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(recurse a1 binTree2, recurse a2 binTree2)
+        | BinTree.Leaf a, BinTree.Leaf b -> BinTree.Leaf(operator a b)
+        | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(recurse a1 b1, recurse a2 b2)
+
+
+    /// Multiplication of two elements.
+    let mult operator a b = operator a b
+
+    /// Vector by Matrix multiplication.
+    let vecByMtx fAdd fMult (vec: SparseVector.SparseVector<'value>) (mtx: SparseMatrix.SparseMatrix<'value>) =
+
+        if vec.Length <> mtx.Rows then
+
+            failwith "Dimensions of objects don't match."
+
+        else
+
+            let rec inner fAdd fMult binTree quadTree =
+                let recurse = inner fAdd fMult
+
+                match binTree, quadTree with
+                // Neutral * Value = Neutral.
+                | BinTree.None, _
+                | _, QuadTree.None -> BinTree.None
+
+                | BinTree.Leaf a, QuadTree.Leaf b -> BinTree.Leaf(fMult a b)
+
+                // Left argument is in fact BinTree.Node(Leaf a, Leaf a)
+                | BinTree.Leaf _, QuadTree.Node(b1, b2, b3, b4) ->
+
+
+                    let s1 = fAdd (recurse binTree b1) (recurse binTree b3)
+                    let s2 = fAdd (recurse binTree b2) (recurse binTree b4)
+                    BinTree.Node(s1, s2)
+
+                // Right argument is in fact Quadtree.Node(Leaf a, Leaf a, Leaf a, Leaf a)
+                | BinTree.Node(a1, a2), QuadTree.Leaf _ ->
+
+                    let s = fAdd (recurse a1 quadTree) (recurse a2 quadTree)
+                    BinTree.Node(s, s)
+
+                | BinTree.Node(a1, a2), QuadTree.Node(b1, b2, b3, b4) ->
+
+
+                    let s1 = fAdd (recurse a1 b1) (recurse a2 b3)
+                    let s2 = fAdd (recurse a1 b2) (recurse a2 b4)
+                    BinTree.Node(s1, s2)
+
+            let data = inner fAdd fMult vec.Data mtx.Data
+            SparseVector(vec.Length, data)
