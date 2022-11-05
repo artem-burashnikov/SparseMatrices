@@ -205,8 +205,7 @@ module MatrixData =
         | Option.None -> QuadTree.None
 
 
-    let identical a b c d =
-        a = b && a = c && a = d
+    let identical a b c d = a = b && a = c && a = d
 
 
     /// This function coverts a given table into a QudTree by splitting data into 4 quadrants.
