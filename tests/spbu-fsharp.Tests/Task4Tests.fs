@@ -2,6 +2,7 @@ module Task4Tests
 
 open System
 open Helpers.Numbers
+open HomeWork4
 open HomeWork4.MatrixData
 open HomeWork4.SparseVector
 open HomeWork4.VectorData
@@ -253,4 +254,52 @@ module TestCases =
                           QuadTree.Node(QuadTree.Leaf 5, QuadTree.None, QuadTree.None, QuadTree.None)
                       )
 
-                  Expect.equal actualResult expectedResult "" ]
+                  Expect.equal actualResult expectedResult ""
+
+              testCase "Getting values from 1x1 array"
+              <| fun _ ->
+
+                  let table = [| [| Some 3 |] |]
+
+                  let mtx = SparseMatrix.toSparse table
+
+                  for i = 1 to 1 do
+                      for j = 1 to 1 do
+                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) ""
+
+              testCase "Getting values from 1x2 array"
+              <| fun _ ->
+
+                  let table = [| [| Some 3; Some 1 |] |]
+
+                  let mtx = SparseMatrix.toSparse table
+
+                  for i = 1 to 1 do
+                      for j = 1 to 2 do
+                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) ""
+
+              testCase "Getting values from 2x1 array"
+              <| fun _ ->
+
+                  let table = [| [| Some 3 |]; [| Some 1 |] |]
+
+                  let mtx = SparseMatrix.toSparse table
+
+                  for i = 1 to 2 do
+                      for j = 1 to 1 do
+                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) ""
+
+
+              testCase "Getting values from 2d-array and getting values from SparseMatrix should be the same"
+              <| fun _ ->
+
+                  let table =
+                      [| [| Some 3; Some 3; Some 3 |]
+                         [| Some 1; Option.None; Option.None |]
+                         [| Some 3; Some 4; Option.None |] |]
+
+                  let mtx = SparseMatrix.toSparse table
+
+                  for i = 1 to 3 do
+                      for j = 1 to 3 do
+                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) "" ]

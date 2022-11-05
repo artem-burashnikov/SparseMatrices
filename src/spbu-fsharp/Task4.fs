@@ -95,12 +95,12 @@ module SparseVector =
         member this.Item
             with get i =
 
-                let rec look (direction: Direction) (tree: BinTree<'Value>) =
+                let look (direction: Direction) (tree: BinTree<'Value>) =
                     match direction, tree with
                     | Left, BinTree.Node(leftChild, _) -> leftChild
                     | Right, BinTree.Node(_, rightChild) -> rightChild
-                    | _, BinTree.Leaf value -> BinTree.Leaf value
-                    | _, BinTree.None -> BinTree.None
+                    | _, BinTree.Leaf _ -> tree
+                    | _, BinTree.None -> tree
 
 
                 /// Search function traverses a binary tree and looks for a value at a given index.
@@ -257,6 +257,7 @@ module MatrixData =
 
 module SparseMatrix =
 
+    // 4 quadrants.
     type Direction =
         | NW
         | NE
@@ -273,6 +274,88 @@ module SparseMatrix =
             { Rows = rows
               Columns = columns
               Data = data }
+
+        member this.Item
+            with get (i, j) =
+
+                let look (direction: Direction) (tree: QuadTree<'Value>) =
+                    match direction, tree with
+                    | NW, QuadTree.Node(nw, _, _, _) -> nw
+                    | NE, QuadTree.Node(_, ne, _, _) -> ne
+                    | SW, QuadTree.Node(_, _, sw, _) -> sw
+                    | SE, QuadTree.Node(_, _, _, se) -> se
+                    | _, QuadTree.Leaf _ -> tree
+                    | _, QuadTree.None -> tree
+
+                // i, j - indices we are looking for
+                // ix, iy - coordinates of the top-left cell in a quadrant
+                // jx, jy - coordinates of the bottom-right cell in a quadrant
+                let rec search i j ix iy jx jy tree =
+
+                    let middleI = (ix + jx) / 2
+                    let middleJ = (iy + jy) / 2
+                    // printfn $"middleI: %A{middleI}, middleJ: %A{middleJ}, ix: %A{ix}, iy: %A{iy}, jx: %A{jx}, jy: %A{jy}"
+                    // System.Console.ReadKey() |> ignore
+
+                    // Data is located in the NW quadrant.
+                    if i <= middleI && j <= middleJ then
+                        let node = look NW tree
+                        // printfn $"%A{node}"
+                        // System.Console.ReadKey() |> ignore
+                        match node with
+                        | QuadTree.Leaf value -> Some value
+                        | QuadTree.None -> Option.None
+                        | _ -> search i j ix iy middleI middleJ node
+
+                    // Data is located in the NE quadrant.
+                    elif i <= middleI && j > middleJ then
+                        let node = look NE tree
+                        // printfn $"%A{node}"
+                        // System.Console.ReadKey() |> ignore
+                        match node with
+                        | QuadTree.Leaf value -> Some value
+                        | QuadTree.None -> Option.None
+                        | _ -> search i j ix (middleJ + 1) middleI jy node
+
+                    // Data is located in the SW quadrant.
+                    elif i > middleI && j <= middleJ then
+                        let node = look SW tree
+                        // printfn $"%A{node}"
+                        // System.Console.ReadKey() |> ignore
+                        match node with
+                        | QuadTree.Leaf value -> Some value
+                        | QuadTree.None -> Option.None
+                        | _ -> search i j (middleI + 1) iy jx middleJ node
+
+                    // Data is located in the SE quadrant.
+                    else
+                        let node = look SE tree
+                        // printfn $"%A{node}"
+                        // System.Console.ReadKey() |> ignore
+                        match node with
+                        | QuadTree.Leaf value -> Some value
+                        | QuadTree.None -> Option.None
+                        | _ -> search i j (middleI + 1) (middleJ + 1) jx jy node
+
+
+                let getValue (i: int) (j: int) =
+                    // Matrix indices (i, j) start at 1, so we offset by one.
+                    let rowIndex = i - 1
+                    let colIndex = j - 1
+
+                    if
+                        rowIndex < 0
+                        || colIndex < 0
+                        || rowIndex > this.Rows - 1
+                        || colIndex > this.Columns - 1
+                    then
+                        failwith "Indices out of range."
+                    else
+                        let paddedIndex = Numbers.ceilPowTwo (max this.Rows this.Columns) - 1
+                        search rowIndex colIndex 0 0 paddedIndex paddedIndex this.Data
+
+                getValue i j
+
 
 
     let toSparse (table: array<array<'value option>>) =
