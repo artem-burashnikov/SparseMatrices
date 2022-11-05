@@ -206,7 +206,7 @@ module MatrixData =
 
 
     let identical a b c d =
-        List.forall (fun x -> x = a) [ b; c; d ]
+        a = b && a = c && a = d
 
 
     /// This function coverts a given table into a QudTree by splitting data into 4 quadrants.
