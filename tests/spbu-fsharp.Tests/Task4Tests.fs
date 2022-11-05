@@ -325,7 +325,8 @@ module TestCases =
                   let vec = SparseVector.toSparse arr
                   let mtx = SparseMatrix.toSparse table
 
-                  let actualResul = Algebra.vecByMtx (Algebra.sum (+)) (Algebra.mult (*)) vec mtx
+                  let actualResult =
+                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.mult (*)) vec mtx
 
                   let expectedResult =
                       BinTree.Node(
@@ -333,7 +334,7 @@ module TestCases =
                           BinTree.Node(BinTree.Leaf 30, BinTree.Leaf 40)
                       )
 
-                  Expect.equal actualResul.Data expectedResult ""
+                  Expect.equal actualResult.Data expectedResult ""
 
               testCase "Vector * Matrix: 1x1 times 1x1"
               <| fun _ ->
@@ -344,11 +345,12 @@ module TestCases =
                   let vec = SparseVector.toSparse arr
                   let mtx = SparseMatrix.toSparse table
 
-                  let actualResul = Algebra.vecByMtx (Algebra.sum (+)) (Algebra.mult (*)) vec mtx
+                  let actualResult =
+                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.mult (*)) vec mtx
 
                   let expectedResult = BinTree.Leaf 1
 
-                  Expect.equal actualResul.Data expectedResult ""
+                  Expect.equal actualResult.Data expectedResult ""
 
               testCase "Vector * Matrix: 1x2 times 2x1"
               <| fun _ ->
@@ -359,11 +361,12 @@ module TestCases =
                   let vec = SparseVector.toSparse arr
                   let mtx = SparseMatrix.toSparse table
 
-                  let actualResul = Algebra.vecByMtx (Algebra.sum (+)) (Algebra.mult (*)) vec mtx
+                  let actualResult =
+                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.mult (*)) vec mtx
 
                   let expectedResult = BinTree.Node(BinTree.Leaf 2, BinTree.None)
 
-                  Expect.equal actualResul.Data expectedResult ""
+                  Expect.equal actualResult.Data expectedResult ""
 
               testCase "Vector * Matrix: 1x3 times 3x2"
               <| fun _ ->
@@ -374,12 +377,13 @@ module TestCases =
                   let vec = SparseVector.toSparse arr
                   let mtx = SparseMatrix.toSparse table
 
-                  let actualResul = Algebra.vecByMtx (Algebra.sum (+)) (Algebra.mult (*)) vec mtx
+                  let actualResult =
+                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.mult (*)) vec mtx
 
                   let expectedResult =
                       BinTree.Node(BinTree.Node(BinTree.Leaf 6, BinTree.Leaf 9), BinTree.None)
 
-                  Expect.equal actualResul.Data expectedResult ""
+                  Expect.equal actualResult.Data expectedResult ""
 
               testCase "Vector * Matrix: 1x8 times 8x4"
               <| fun _ ->
@@ -398,7 +402,8 @@ module TestCases =
                   let vec = SparseVector.toSparse arr
                   let mtx = SparseMatrix.toSparse table
 
-                  let actualResult = Algebra.vecByMtx (Algebra.sum (+)) (Algebra.mult (*)) vec mtx
+                  let actualResult =
+                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.mult (*)) vec mtx
 
                   let expectedResult =
                       BinTree.Node(

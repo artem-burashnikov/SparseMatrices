@@ -128,7 +128,7 @@ module SparseVector =
                     let ix = i - 1 // Vector's index (i) starts at 1, so we offset by one.
 
                     if ix < 0 || ix > this.Length - 1 then
-                        failwith "Index out of range."
+                        failwith $"SparseVector.Item with get(i): Index %A{ix} is out of range."
                     else
                         search ix 0 (Numbers.ceilPowTwo this.Length - 1) this.Data
 
@@ -205,7 +205,7 @@ module MatrixData =
         | Option.None -> QuadTree.None
 
 
-    let identical a b c d = a = b && a = c && a = d
+    let allEqual a b c d = a = b && a = c && a = d
 
 
     /// This function coverts a given table into a QudTree by splitting data into 4 quadrants.
@@ -230,15 +230,15 @@ module MatrixData =
 
                 let nw, ne, sw, se = mtxPartition mtx
 
-                let result = QuadTree.Node(maker nw, maker ne, maker sw, maker se)
+                let node = QuadTree.Node(maker nw, maker ne, maker sw, maker se)
 
-                match result with
+                match node with
                 | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
-                | QuadTree.Node(QuadTree.Leaf value1, QuadTree.Leaf value2, QuadTree.Leaf value3, QuadTree.Leaf value4) when
-                    identical value1 value2 value3 value4
+                | QuadTree.Node(QuadTree.Leaf nw, QuadTree.Leaf ne, QuadTree.Leaf sw, QuadTree.Leaf se) when
+                    allEqual nw ne sw se
                     ->
-                    QuadTree.Leaf value1
-                | _ -> result
+                    QuadTree.Leaf nw
+                | _ -> node
 
         // Empty Matrix cases.
         if (table.Length = 0) || (table.Length = 1 && table[0].Length = 0) then
@@ -247,17 +247,18 @@ module MatrixData =
         elif table.Length = 1 && table[0].Length = 1 then
             table[0][0] |> getData
         // Matrix m by n.
+        // Construct a matrix 2^n by 2^n (n > 1) from a given table.
         elif table.Length > 0 && table[0].Length > 0 then
             let paddedIndex = Numbers.ceilPowTwo (max table.Length table[0].Length) - 1
 
-            // Construct a matrix 2^n by 2^n (n > 1) from a given table.
+
             let mtx =
                 Matrix(table, table.Length, table[0].Length, 0, 0, paddedIndex, paddedIndex)
 
             // Make a SparseMatrix from the constructed matrix.
             maker mtx
         else
-            failwith "Incorrect table data."
+            failwith $"MatrixData.mtxToTree: Incorrect table data: %A{table}"
 
 
 
@@ -271,10 +272,10 @@ module SparseMatrix =
         | SE
 
 
-    type SparseMatrix<'value> =
+    type SparseMatrix<'Value> =
         val Rows: int
         val Columns: int
-        val Data: QuadTree<'value>
+        val Data: QuadTree<'Value>
 
         new(rows, columns, data) =
             { Rows = rows
@@ -350,7 +351,7 @@ module SparseMatrix =
                         || rowIndex > this.Rows - 1
                         || colIndex > this.Columns - 1
                     then
-                        failwith "Indices out of range."
+                        failwith $"SparseMatrix.Item with get(i, j): Indices %A{(i, j)} out of range."
                     else
                         let paddedIndex = Numbers.ceilPowTwo (max this.Rows this.Columns) - 1
                         search rowIndex colIndex 0 0 paddedIndex paddedIndex this.Data
@@ -359,7 +360,7 @@ module SparseMatrix =
 
 
     /// Convert a table to SparseMatrix.
-    let toSparse (table: array<array<'value option>>) =
+    let toSparse (table: array<array<'Value option>>) =
         let rows, columns =
             if table.Length = 0 then 0, 0
             elif table.Length = 1 && table[0].Length = 0 then 0, 0
@@ -370,13 +371,13 @@ module SparseMatrix =
 
 
 
-module Algebra =
+module TreeAlgebra =
 
     /// Sum of two binary trees.
     /// This does not cover the case when trees have different depth
     /// since it's assumed the incorrect data will be filtered in the higher function call.
-    let rec sum operator binTree1 binTree2 =
-        let recurse = sum operator
+    let rec treeSum fAdd binTree1 binTree2 =
+        let recurse = treeSum fAdd
 
         match binTree1, binTree2 with
         // Neutral + Value = Value
@@ -386,19 +387,25 @@ module Algebra =
         // Since it's assumed that trees have matching depths, summation continues as if the node had two children.
         | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(recurse binTree1 b1, recurse binTree1 b2)
         | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(recurse a1 binTree2, recurse a2 binTree2)
-        | BinTree.Leaf a, BinTree.Leaf b -> BinTree.Leaf(operator a b)
+        | BinTree.Leaf a, BinTree.Leaf b -> BinTree.Leaf(fAdd a b)
         | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(recurse a1 b1, recurse a2 b2)
 
 
     /// Multiplication of two elements.
     let mult operator a b = operator a b
 
+
+    /// Summation of two elements.
+    let sum operator a b = operator a b
+
+
     /// Vector by Matrix multiplication.
-    let vecByMtx fAdd fMult (vec: SparseVector.SparseVector<'value>) (mtx: SparseMatrix.SparseMatrix<'value>) =
+    let vecByMtx fAdd fMult (vec: SparseVector.SparseVector<'Value>) (mtx: SparseMatrix.SparseMatrix<'Value>) =
 
         if vec.Length <> mtx.Rows then
 
-            failwith "Dimensions of objects don't match."
+            failwith
+                $"Algebra.vecByMtx: Dimensions of objects vector's length: %A{vec.Length} and Matrix rows %A{mtx.Rows} don't match."
 
         else
 
