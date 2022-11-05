@@ -79,6 +79,7 @@ module VectorData =
         maker vec
 
 
+
 module SparseVector =
 
     type Direction =
@@ -199,8 +200,10 @@ module MatrixData =
         | Some value -> QuadTree.Leaf value
         | Option.None -> QuadTree.None
 
+
     let identical a b c d =
         List.forall (fun x -> x = a) [ b; c; d ]
+
 
     let mtxToTree (table: array<array<'Value option>>) =
         let rec maker (mtx: Matrix<'Value>) =
@@ -249,3 +252,34 @@ module MatrixData =
             maker mtx
         else
             failwith "Incorrect table data."
+
+
+
+module SparseMatrix =
+
+    type Direction =
+        | NW
+        | NE
+        | SW
+        | SE
+
+
+    type SparseMatrix<'value> =
+        val Rows: int
+        val Columns: int
+        val Data: QuadTree<'value>
+
+        new(rows, columns, data) =
+            { Rows = rows
+              Columns = columns
+              Data = data }
+
+
+    let toSparse (table: array<array<'value option>>) =
+        let rows, columns =
+            if table.Length = 0 then 0, 0
+            elif table.Length = 1 && table[0].Length = 0 then 0, 0
+            else table.Length, table[0].Length
+
+        let data = MatrixData.mtxToTree table
+        SparseMatrix(rows, columns, data)
