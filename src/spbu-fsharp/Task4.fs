@@ -10,10 +10,10 @@ module VectorData =
 
     /// This sub-structure is used to build a Binary Tree from a given array.
     // The constructed Binary Tree will be then used as a data storage for a sparse vector.
-    type Vector<'value> =
+    type Vector<'Value> =
         struct
             /// Initial vector data.
-            val Data: array<'value option>
+            val Data: array<'Value option>
             /// Leftmost array index.
             val Left: int
             /// Rightmost array index.
@@ -32,7 +32,7 @@ module VectorData =
 
 
     /// Splits a given Vector in half.
-    let vecPartition (vec: Vector<'value>) =
+    let vecPartition (vec: Vector<'Value>) =
         let newRight = (vec.Left + vec.Right) / 2
         Vector(vec.Data, vec.Left, newRight), Vector(vec.Data, newRight + 1, vec.Right)
 
@@ -43,8 +43,8 @@ module VectorData =
         | Option.None -> BinTree.None
 
 
-    let vecToTree (arr: array<'value option>) =
-        let rec maker (vec: Vector<'value>) =
+    let vecToTree (arr: array<'Value option>) =
+        let rec maker (vec: Vector<'Value>) =
             // If we find a cell that is within the bounds of the initial array,
             // then we look at the data in that cell and store it accordingly.
             // Special case for an array of a single element is needed,
@@ -85,16 +85,16 @@ module SparseVector =
         | Left // Left child of a node in a Binary Tree.
         | Right // Right child of a node in a Binary Tree.
 
-    type SparseVector<'value> =
+    type SparseVector<'Value> =
         val Length: int
-        val Data: BinTree<'value>
+        val Data: BinTree<'Value>
 
         new(length, data) = { Data = data; Length = length }
 
         member this.Item
             with get i =
 
-                let rec look (direction: Direction) (tree: BinTree<'value>) =
+                let rec look (direction: Direction) (tree: BinTree<'Value>) =
                     match direction, tree with
                     | Left, BinTree.Node(leftChild, _) -> leftChild
                     | Right, BinTree.Node(_, rightChild) -> rightChild
@@ -133,7 +133,7 @@ module SparseVector =
                 getValue i
 
 
-    let toSparse (arr: 'value option array) =
+    let toSparse (arr: 'Value option array) =
         let length = arr.Length
         let data = VectorData.vecToTree arr
         SparseVector(length, data)
@@ -142,10 +142,10 @@ module SparseVector =
 
 module MatrixData =
 
-    type Matrix<'value> =
+    type Matrix<'Value> =
         struct
             // Initial matrix data.
-            val Data: array<array<'value option>>
+            val Data: array<array<'Value option>>
             // Real number of columns.
             val DataCols: int
             // Real number of rows.
@@ -172,20 +172,26 @@ module MatrixData =
         end
 
 
-    let mtxPartition (mtx: Matrix<'value>) =
-        let newX = (mtx.Ix + mtx.Jx) / 2
-        let newY = (mtx.Iy + mtx.Jy) / 2
-        //
-        //   |Ixy       |           |
-        //   |    NW    |    NE     |
-        //  _|__________|___________|_
-        //   |          |           |
-        //   |    SW    |    SE  Jxy|
-        //
-        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, mtx.Iy, newX, newY), // NW
-        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, newY + 1, newX, mtx.Jy), // NE
-        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, mtx.Iy, mtx.Jx, newY), // SW
-        Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, newY + 1, mtx.Jx, mtx.Jy) // SE
+    let mtxPartition (mtx: Matrix<'Value>) =
+        if (mtx.Data.Length = 0) || (mtx.Data.Length = 1 && mtx.Data[0].Length = 0) then
+            Matrix([||], 0, 0, -1, -1, -1, -1),
+            Matrix([||], 0, 0, -1, -1, -1, -1),
+            Matrix([||], 0, 0, -1, -1, -1, -1),
+            Matrix([||], 0, 0, -1, -1, -1, -1)
+        else
+            let newX = (mtx.Ix + mtx.Jx) / 2
+            let newY = (mtx.Iy + mtx.Jy) / 2
+            //
+            //   |Ixy       |           |
+            //   |    NW    |    NE     |
+            //  _|__________|___________|_
+            //   |          |           |
+            //   |    SW    |    SE  Jxy|
+            //
+            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, mtx.Iy, newX, newY), // NW
+            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, newY + 1, newX, mtx.Jy), // NE
+            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, mtx.Iy, mtx.Jx, newY), // SW
+            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, newY + 1, mtx.Jx, mtx.Jy) // SE
 
 
     let getData =
@@ -196,8 +202,8 @@ module MatrixData =
     let identical a b c d =
         List.forall (fun x -> x = a) [ b; c; d ]
 
-    let mtxToTree (table: array<array<'value option>>) =
-        let rec maker (mtx: Matrix<'value>) =
+    let mtxToTree (table: array<array<'Value option>>) =
+        let rec maker (mtx: Matrix<'Value>) =
 
             // If we find a cell within bounds of the original data, then store the cell's value accordingly.
             if
@@ -227,8 +233,8 @@ module MatrixData =
                     QuadTree.Leaf value1
                 | _ -> result
 
-        // Empty Matrix
-        if table.Length = 0 then
+        // Empty Matrix cases.
+        if (table.Length = 0) || (table.Length = 1 && table[0].Length = 0) then
             QuadTree.None
         // Matrix 1x1
         elif table.Length = 1 && table[0].Length = 1 then

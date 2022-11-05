@@ -1,6 +1,5 @@
 # Ignore script files
 Task1.fs
-Main.fs
 Trees.fs
 CLists.fs
 Helper.fs

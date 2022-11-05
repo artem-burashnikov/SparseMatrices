@@ -2,6 +2,8 @@ module Task4Tests
 
 open System
 open Helpers.Numbers
+open HomeWork4
+open HomeWork4.MatrixData
 open HomeWork4.SparseVector
 open HomeWork4.VectorData
 open Expecto
@@ -121,4 +123,49 @@ module TestCases =
 
               Expect.sequenceEqual (actualResult |> List.rev) arr ""
 
+            testCase "Table partition: empty input"
+            <| fun _ ->
+                let rows = 0
+                let cols = 0
+                let mtx = Matrix([||], rows, cols, -1, -1, -1, -1)
+                let nw, ne, sw, se = mtxPartition mtx
+                Expect.equal nw.Data [||] ""
+                Expect.equal ne.Data [||] ""
+                Expect.equal sw.Data [||] ""
+                Expect.equal se.Data [||] ""
+
+            testProperty "Table partition (by indices)"
+            <| fun (x: int) (y: int) ->
+
+                let rows = abs x
+                let cols = abs y
+
+                if rows = 0 || cols = 0 then
+                    skiptest "Table dimensions must be greater than 0"
+                else
+
+                    let paddedIndex = ceilPowTwo (max rows cols) - 1
+
+                    let middle = paddedIndex / 2
+
+                    // The data is not important, leaving empty for convenience.
+                    let mtx = Matrix([||], rows, cols, 0, 0, paddedIndex, paddedIndex)
+
+                    let nw, ne, sw, se = mtxPartition mtx
+                    Expect.equal nw.Ix 0 ""
+                    Expect.equal nw.Iy 0 ""
+                    Expect.equal nw.Jx middle ""
+                    Expect.equal nw.Jy middle ""
+                    Expect.equal ne.Ix 0 ""
+                    Expect.equal ne.Iy (middle + 1) ""
+                    Expect.equal ne.Jx middle ""
+                    Expect.equal ne.Jy paddedIndex ""
+                    Expect.equal sw.Ix (middle + 1) ""
+                    Expect.equal sw.Iy 0 ""
+                    Expect.equal sw.Jx paddedIndex ""
+                    Expect.equal sw.Jy middle ""
+                    Expect.equal se.Ix (middle + 1) ""
+                    Expect.equal se.Iy (middle + 1) ""
+                    Expect.equal se.Jx paddedIndex ""
+                    Expect.equal se.Jy paddedIndex ""
             ]
