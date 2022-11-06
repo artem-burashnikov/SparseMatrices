@@ -62,12 +62,12 @@ module VectorData =
 
                 // To get rid of the unnecessary data and store identical data more efficiently
                 // we merge a node into a single one based on the node's children.
-                let result = BinTree.Node(maker leftPart, maker rightPart)
+                let node = BinTree.Node(maker leftPart, maker rightPart)
 
-                match result with
+                match node with
                 | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
                 | BinTree.Node(BinTree.Leaf value1, BinTree.Leaf value2) when value1 = value2 -> BinTree.Leaf value1
-                | _ -> result
+                | _ -> node
 
         // Construct a Vector type from a given array and pad it with the
         // maximum index that this array would have if its length were equal to a power of two.
@@ -82,10 +82,6 @@ module VectorData =
 
 module SparseVector =
 
-    type Direction =
-        | Left // Left child of a node in a Binary Tree.
-        | Right // Right child of a node in a Binary Tree.
-
     type SparseVector<'Value> =
         val Length: int
         val Data: BinTree<'Value>
@@ -95,34 +91,19 @@ module SparseVector =
         member this.Item
             with get i =
 
-                /// Navigates search function through a binary tree.
-                let look (direction: Direction) (tree: BinTree<'Value>) =
-                    match direction, tree with
-                    | Left, BinTree.Node(leftChild, _) -> leftChild
-                    | Right, BinTree.Node(_, rightChild) -> rightChild
-                    | _, BinTree.Leaf _ -> tree
-                    | _, BinTree.None -> tree
-
-
                 /// Search function traverses a binary tree and looks for a value at a given index.
                 // Index lookup happens as if the tree was an array by using two pointers.
-                let rec search ix left right tree =
-                    let middle = (left + right) / 2
+                let rec search i (left, right) tree =
+                    match tree with
+                    | BinTree.Leaf value -> Some value
+                    | BinTree.None -> Option.None
+                    | BinTree.Node(leftChild, rightChild) ->
+                        let middle = (left + right) / 2
+                        if i <= middle then
+                            search i (left, middle) leftChild
+                        else
+                            search i (middle + 1, right) rightChild
 
-                    if ix <= middle then
-                        let node = look Left tree
-
-                        match node with
-                        | BinTree.Leaf value -> Some value
-                        | BinTree.None -> Option.None
-                        | _ -> search ix left middle node
-                    else
-                        let node = look Right tree
-
-                        match node with
-                        | BinTree.Leaf value -> Some value
-                        | BinTree.None -> Option.None
-                        | _ -> search ix (middle + 1) right node
 
                 let getValue (i: int) =
                     let ix = i - 1 // Vector's index (i) starts at 1, so we offset by one.
@@ -130,7 +111,7 @@ module SparseVector =
                     if ix < 0 || ix > this.Length - 1 then
                         failwith $"SparseVector.Item with get(i): Index %A{ix} is out of range."
                     else
-                        search ix 0 (Numbers.ceilPowTwo this.Length - 1) this.Data
+                        search ix (0, Numbers.ceilPowTwo this.Length - 1) this.Data
 
                 getValue i
 
