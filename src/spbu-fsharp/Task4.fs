@@ -99,6 +99,7 @@ module SparseVector =
                     | BinTree.None -> Option.None
                     | BinTree.Node(leftChild, rightChild) ->
                         let middle = (left + right) / 2
+
                         if i <= middle then
                             search i (left, middle) leftChild
                         else
