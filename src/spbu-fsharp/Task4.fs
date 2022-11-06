@@ -381,7 +381,7 @@ module TreeAlgebra =
 
         match binTree1, binTree2 with
         // Neutral + Value = Value
-        | BinTree.None, tree -> tree
+        | BinTree.None, tree
         | tree, BinTree.None -> tree
         // This, in fact, is the following case: BinTree.Node(a, a), BinTree.Node(b1, b2) and vice versa.
         // Since it's assumed that trees have matching depths, summation continues as if the node had two children.
@@ -391,12 +391,8 @@ module TreeAlgebra =
         | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(recurse a1 b1, recurse a2 b2)
 
 
-    /// Multiplication of two elements.
-    let mult operator a b = operator a b
-
-
-    /// Summation of two elements.
-    let sum operator a b = operator a b
+    /// Algebraic operation on elements.
+    let fDo operator a b = operator a b
 
 
     /// Vector by Matrix multiplication.
@@ -441,4 +437,4 @@ module TreeAlgebra =
                     BinTree.Node(s1, s2)
 
             let data = inner fAdd fMult vec.Data mtx.Data
-            SparseVector(vec.Length, data)
+            SparseVector(mtx.Columns, data)
