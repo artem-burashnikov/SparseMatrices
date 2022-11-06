@@ -326,7 +326,7 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
 
                   let expectedResult =
                       BinTree.Node(
@@ -347,7 +347,7 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
 
                   let expectedResult = BinTree.Leaf 2
 
@@ -364,7 +364,7 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
 
                   let expectedResult = BinTree.Node(BinTree.Leaf 1, BinTree.None)
 
@@ -381,7 +381,7 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
 
                   let expectedResult =
                       BinTree.Node(BinTree.Node(BinTree.Leaf 6, BinTree.Leaf 9), BinTree.None)
@@ -407,7 +407,7 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      TreeAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
 
                   let expectedResult =
                       BinTree.Node(

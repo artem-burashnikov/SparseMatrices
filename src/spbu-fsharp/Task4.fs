@@ -264,14 +264,6 @@ module MatrixData =
 
 module SparseMatrix =
 
-    // 4 quadrants in a QuadTree's node.
-    type Direction =
-        | NW
-        | NE
-        | SW
-        | SE
-
-
     type SparseMatrix<'Value> =
         val Rows: int
         val Columns: int
@@ -282,65 +274,34 @@ module SparseMatrix =
               Columns = columns
               Data = data }
 
-        member this.Item
-            with get (i, j) =
 
-                /// Navigates search function through a QuadTree.
-                let look (direction: Direction) (tree: QuadTree<'Value>) =
-                    match direction, tree with
-                    | NW, QuadTree.Node(nw, _, _, _) -> nw
-                    | NE, QuadTree.Node(_, ne, _, _) -> ne
-                    | SW, QuadTree.Node(_, _, sw, _) -> sw
-                    | SE, QuadTree.Node(_, _, _, se) -> se
-                    | _, QuadTree.Leaf _ -> tree
-                    | _, QuadTree.None -> tree
+        member this.Item
+            with get (i: int, j: int) =
 
                 // i, j - indices we are looking for.
                 // ix, iy - coordinates of the top-left cell in a quadrant.
                 // jx, jy - coordinates of the bottom-right cell in a quadrant.
-                let rec search i j ix iy jx jy tree =
+                let rec search (i, j) (ix, iy) (jx, jy) tree =
 
-                    let middleI = (ix + jx) / 2
-                    let middleJ = (iy + jy) / 2
+                    match tree with
+                    | QuadTree.Leaf value -> Some value
+                    | QuadTree.None -> Option.None
+                    | QuadTree.Node(nw, ne, sw, se) ->
 
-                    // Data is located in the NW quadrant.
-                    if i <= middleI && j <= middleJ then
-                        let node = look NW tree
+                        let middleI = (ix + jx) / 2
+                        let middleJ = (iy + jy) / 2
 
-                        match node with
-                        | QuadTree.Leaf value -> Some value
-                        | QuadTree.None -> Option.None
-                        | _ -> search i j ix iy middleI middleJ node
-
-                    // Data is located in the NE quadrant.
-                    elif i <= middleI && j > middleJ then
-                        let node = look NE tree
-
-                        match node with
-                        | QuadTree.Leaf value -> Some value
-                        | QuadTree.None -> Option.None
-                        | _ -> search i j ix (middleJ + 1) middleI jy node
-
-                    // Data is located in the SW quadrant.
-                    elif i > middleI && j <= middleJ then
-                        let node = look SW tree
-
-                        match node with
-                        | QuadTree.Leaf value -> Some value
-                        | QuadTree.None -> Option.None
-                        | _ -> search i j (middleI + 1) iy jx middleJ node
-
-                    // Data is located in the SE quadrant.
-                    else
-                        let node = look SE tree
-
-                        match node with
-                        | QuadTree.Leaf value -> Some value
-                        | QuadTree.None -> Option.None
-                        | _ -> search i j (middleI + 1) (middleJ + 1) jx jy node
+                        if i <= middleI && j <= middleJ then
+                            search (i, j) (ix, iy) (middleI, middleJ) nw
+                        elif i <= middleI && j > middleJ then
+                            search (i, j) (ix, middleJ + 1) (middleI, jy) ne
+                        elif i > middleI && j <= middleJ then
+                            search (i, j) (middleI + 1, iy) (jx, middleJ) sw
+                        else
+                            search (i, j) (middleI + 1, middleJ + 1) (jx, jy) se
 
 
-                let getValue (i: int) (j: int) =
+                let getValue (i, j) =
                     // Matrix indices (i, j) start at 1, so we offset by one.
                     let rowIndex = i - 1
                     let colIndex = j - 1
@@ -354,9 +315,9 @@ module SparseMatrix =
                         failwith $"SparseMatrix.Item with get(i, j): Indices %A{(i, j)} out of range."
                     else
                         let paddedIndex = Numbers.ceilPowTwo (max this.Rows this.Columns) - 1
-                        search rowIndex colIndex 0 0 paddedIndex paddedIndex this.Data
+                        search (rowIndex, colIndex) (0, 0) (paddedIndex, paddedIndex) this.Data
 
-                getValue i j
+                getValue (i, j)
 
 
     /// Convert a table to SparseMatrix.
@@ -375,7 +336,7 @@ module TreeAlgebra =
 
     /// Sum of two binary trees.
     /// This does not cover the case when trees have different depth
-    /// since it's assumed the incorrect data will be filtered in the higher function call.
+    /// since it's assumed the incorrect data will be filtered before the function call.
     let rec treeSum fAdd binTree1 binTree2 =
         let recurse = treeSum fAdd
 
@@ -394,6 +355,8 @@ module TreeAlgebra =
     /// Algebraic operation on elements.
     let fDo operator a b = operator a b
 
+
+module MatrixAlgebra =
 
     /// Vector by Matrix multiplication.
     let vecByMtx fAdd fMult (vec: SparseVector.SparseVector<'Value>) (mtx: SparseMatrix.SparseMatrix<'Value>) =
