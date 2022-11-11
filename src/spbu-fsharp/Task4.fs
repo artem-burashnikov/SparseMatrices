@@ -8,8 +8,6 @@ open Trees.QuadTrees
 
 module VectorData =
 
-    /// This sub-structure is used to build a Binary Tree from a given array.
-    // The constructed Binary Tree will be then used as a data storage for a sparse vector.
     type Vector<'Value>(arr: 'Value option array, head: int, length: int) =
         struct
             member this.Memory = arr
@@ -27,6 +25,7 @@ module VectorData =
 
 
 
+    /// Reduces identical data in a node of a binary tree to save space.
     let reduce binTreeNode =
         match binTreeNode with
         | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
@@ -41,7 +40,7 @@ module VectorData =
         | Option.None -> BinTree.None
 
 
-
+    /// Converts an array to Vector.
     let vecToTree (arr: array<'Value option>) =
         let rec maker (vec: Vector<'Value>) =
             if vec.Head > vec.DataMaxIndex then
@@ -53,7 +52,6 @@ module VectorData =
 
                 BinTree.Node(maker leftPart, maker rightPart) |> reduce
 
-        // Check a given vector's length and act accordingly.
         let vec = Vector(arr, 0, arr.Length)
 
         if vec.Length = 0 then
@@ -68,8 +66,6 @@ module VectorData =
 
 
 
-open VectorData
-
 module SparseVector =
 
     type SparseVector<'Value when 'Value: equality>(arr: 'Value option array) =
@@ -81,34 +77,29 @@ module SparseVector =
         member this.Item
             with get i =
 
-                /// Search function traverses a binary tree and looks for a value at a given index.
-                // Index lookup happens as if the tree was an array by using two local pointers.
-                let rec search i (left, right) tree =
+                let rec search i size tree =
                     match tree with
                     | BinTree.Leaf value -> Some value
                     | BinTree.None -> Option.None
                     | BinTree.Node(leftChild, rightChild) ->
-                        let middle = (left + right) / 2
+                        let middle = size / 2
 
                         if i <= middle then
-                            search i (left, middle) leftChild
+                            search i middle leftChild
                         else
-                            search i (middle + 1, right) rightChild
+                            search (i - middle) middle rightChild
 
 
                 let getValue (i: int) =
-                    let ix = i - 1 // Vector's index (i) starts at 1, so we offset by one.
-
-                    if ix < 0 || ix > this.Length - 1 then
-                        failwith $"SparseVector.Item with get(i): Index %A{ix} is out of range."
+                    if i < 1 || i > this.Length then
+                        failwith $"SparseVector.Item with get(i): Index %A{i} is out of range."
                     else
-                        search ix (0, Numbers.ceilPowTwo this.Length - 1) this.Data
+                        let powerSize = Numbers.ceilPowTwo this.Length
+                        search i powerSize this.Data
 
                 getValue i
 
 
-
-open SparseVector
 
 module MatrixData =
 
@@ -126,7 +117,7 @@ module MatrixData =
         end
 
 
-
+    /// Splits a given table in 4 quadrants.
     let mtxPartition (mtx: Matrix<'Value>) =
         if mtx.Rows = 0 || mtx.Columns = 0 then
             mtx, mtx, mtx, mtx
@@ -165,7 +156,7 @@ module MatrixData =
 
 
 
-    /// This function coverts a given table into a QudTree by splitting data into 4 quadrants.
+    /// Converts a given table into a QudTree.
     let tableToTree (table: 'Value option[,]) =
         let rec maker (mtx: Matrix<'Value>) =
             // If we find a cell within bounds of the original data, then store the cell's value accordingly.
@@ -198,14 +189,12 @@ module MatrixData =
             QuadTree.None
         elif rows = 1 && columns = 1 then
             table[0, 0] |> getData
-        // Matrix m by n.
-        // Construct a matrix 2^n by 2^n from a given table.
+
         else
             let powerSize = Numbers.ceilPowTwo (max rows columns)
 
             let mtx = Matrix(table, 0, 0, powerSize, powerSize)
 
-            // Make a SparseMatrix from the constructed matrix.
             maker mtx
 
 
@@ -252,8 +241,6 @@ module SparseMatrix =
                 getValue (i, j)
 
 
-
-open SparseMatrix
 
 // module TreeAlgebra =
 
