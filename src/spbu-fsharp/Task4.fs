@@ -10,31 +10,29 @@ module VectorData =
 
     /// This sub-structure is used to build a Binary Tree from a given array.
     // The constructed Binary Tree will be then used as a data storage for a sparse vector.
-    type Vector<'Value> =
+    type Vector<'Value>(arr: 'Value option array, head: int, length: int) =
         struct
-            /// Initial vector data.
-            val Data: array<'Value option>
-            /// Leftmost array index.
-            val Left: int
-            /// Rightmost array index.
-            val Right: int
-
-            new(data, left, right) =
-                { Data = data
-                  Left = left
-                  Right = right }
-
-            member this.Length = this.Right - this.Left + 1
-
-            /// Maximum real available index.
-            member this.DataMaxIndex = this.Data.Length - 1
+            member this.Memory = arr
+            member this.Head = head
+            member this.Length = length
+            member this.DataMaxIndex = arr.Length - 1
         end
 
 
+
     /// Splits a given Vector in half.
-    let vecPartition (vec: Vector<'Value>) =
-        let newRight = (vec.Left + vec.Right) / 2
-        Vector(vec.Data, vec.Left, newRight), Vector(vec.Data, newRight + 1, vec.Right)
+    let vecDiv2 (vec: Vector<'Value>) =
+        let newLength = vec.Length / 2
+        Vector(vec.Memory, vec.Head, newLength), Vector(vec.Memory, vec.Head + newLength, newLength)
+
+
+
+    let reduce binTreeNode =
+        match binTreeNode with
+        | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
+        | BinTree.Node(BinTree.Leaf a1, BinTree.Leaf a2) when a1 = a2 -> BinTree.Leaf a1
+        | _ -> binTreeNode
+
 
 
     let getData =
@@ -43,56 +41,48 @@ module VectorData =
         | Option.None -> BinTree.None
 
 
+
     let vecToTree (arr: array<'Value option>) =
         let rec maker (vec: Vector<'Value>) =
-            // If we find a cell that is within the bounds of the initial array,
-            // then we look at the data in that cell and store it accordingly.
-            // Special case for an array of a single element is needed,
-            // since the resulting tree would contain unnecessary branch otherwise.
-            if vec.Data.Length = 1 || ((vec.Length = 1) && (vec.Left <= vec.DataMaxIndex)) then
-                vec.Data[vec.Left] |> getData
-            // If we look at a vector which starting index is out of bounds,
-            // then there is no real data in it, no need to store anything.
-            elif vec.Left > vec.DataMaxIndex then
+            if vec.Head > vec.DataMaxIndex then
                 BinTree.None
+            else if vec.Length = 1 then
+                vec.Memory[vec.Head] |> getData
             else
-                // Otherwise we split the array (padded with indices to the power of 2) in two halves
-                // and repeat the process.
-                let leftPart, rightPart = vecPartition vec
+                let leftPart, rightPart = vecDiv2 vec
 
-                // To get rid of the unnecessary data and store identical data more efficiently
-                // we merge a node into a single one based on the node's children.
-                let node = BinTree.Node(maker leftPart, maker rightPart)
+                BinTree.Node(maker leftPart, maker rightPart) |> reduce
 
-                match node with
-                | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
-                | BinTree.Node(BinTree.Leaf value1, BinTree.Leaf value2) when value1 = value2 -> BinTree.Leaf value1
-                | _ -> node
+        // Check a given vector's length and act accordingly.
+        let vec = Vector(arr, 0, arr.Length)
 
-        // Construct a Vector type from a given array and pad it with the
-        // maximum index that this array would have if its length were equal to a power of two.
-        let paddedIndex = (Numbers.ceilPowTwo arr.Length) - 1
+        if vec.Length = 0 then
+            BinTree.None
+        elif (vec.Length = 1) then
+            vec.Memory[vec.Head] |> getData
+        else
+            let powerLength = Numbers.ceilPowTwo arr.Length
 
-        let vec = Vector(arr, 0, paddedIndex)
-
-        // Make a tree.
-        maker vec
+            let vec = Vector(arr, 0, powerLength)
+            maker vec
 
 
+
+open VectorData
 
 module SparseVector =
 
-    type SparseVector<'Value> =
-        val Length: int
-        val Data: BinTree<'Value>
+    type SparseVector<'Value when 'Value: equality>(arr: 'Value option array) =
+        let data = VectorData.vecToTree arr
+        member this.Length = arr.Length
 
-        new(length, data) = { Data = data; Length = length }
+        member this.Data = data
 
         member this.Item
             with get i =
 
                 /// Search function traverses a binary tree and looks for a value at a given index.
-                // Index lookup happens as if the tree was an array by using two pointers.
+                // Index lookup happens as if the tree was an array by using two local pointers.
                 let rec search i (left, right) tree =
                     match tree with
                     | BinTree.Leaf value -> Some value
@@ -117,68 +107,55 @@ module SparseVector =
                 getValue i
 
 
-    // Construct a SparseVector from a given array.
-    let toSparse (arr: 'Value option array) =
-        let length = arr.Length
-        let data = VectorData.vecToTree arr
-        SparseVector(length, data)
-
-
 
 open SparseVector
 
 module MatrixData =
 
-    type Matrix<'Value> =
+    type Matrix<'Value>(arr2d: 'Value option[,], x: int, y: int, rows: int, columns: int) =
         struct
-            // Initial matrix data.
-            val Data: array<array<'Value option>>
-            // Real number of columns.
-            val DataCols: int
-            // Real number of rows.
-            val DataRows: int
-            // Coordinates of the top-left cell.
-            val Ix: int
-            val Iy: int
-            // Coordinates of the bottom-right cell.
-            val Jx: int
-            val Jy: int
+            member this.Memory = arr2d
+            member this.HeadX = x
+            member this.HeadY = y
+            member this.Rows = rows
+            member this.Columns = columns
 
-            new(data, rows, cols, ix, iy, jx, jy) =
-                { Data = data
-                  DataRows = rows
-                  DataCols = cols
-                  Ix = ix
-                  Iy = iy
-                  Jx = jx
-                  Jy = jy }
+            member this.MaxRowIndex = (Array2D.length1 arr2d) - 1
 
-            member this.LengthX = this.Jy - this.Iy + 1
-
-            member this.LengthY = this.Jx - this.Ix + 1
+            member this.MaxColumnIndex = (Array2D.length2 arr2d) - 1
         end
 
 
+
     let mtxPartition (mtx: Matrix<'Value>) =
-        if (mtx.Data.Length = 0) || (mtx.Data.Length = 1 && mtx.Data[0].Length = 0) then
-            Matrix([||], 0, 0, -1, -1, -1, -1),
-            Matrix([||], 0, 0, -1, -1, -1, -1),
-            Matrix([||], 0, 0, -1, -1, -1, -1),
-            Matrix([||], 0, 0, -1, -1, -1, -1)
+        if mtx.Rows = 0 || mtx.Columns = 0 then
+            mtx, mtx, mtx, mtx
         else
-            let newX = (mtx.Ix + mtx.Jx) / 2
-            let newY = (mtx.Iy + mtx.Jy) / 2
+            let halveRows = mtx.Rows / 2
+            let halveColumns = mtx.Columns / 2
             //
-            //   |Ixy       |           |
+            //   |          |           |
             //   |    NW    |    NE     |
             //  _|__________|___________|_
             //   |          |           |
-            //   |    SW    |    SE  Jxy|
+            //   |    SW    |    SE     |
             //
-            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, mtx.Iy, newX, newY), // NW
-            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, mtx.Ix, newY + 1, newX, mtx.Jy), // NE
-            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, mtx.Iy, mtx.Jx, newY), // SW
-            Matrix(mtx.Data, mtx.DataRows, mtx.DataCols, newX + 1, newY + 1, mtx.Jx, mtx.Jy) // SE
+            Matrix(mtx.Memory, mtx.HeadX, mtx.HeadY, halveRows, halveColumns), // NW
+            Matrix(mtx.Memory, mtx.HeadX, mtx.HeadY + halveColumns, halveRows, halveColumns), // NE
+            Matrix(mtx.Memory, mtx.HeadX + halveRows, mtx.HeadY, halveRows, halveColumns), // SW
+            Matrix(mtx.Memory, mtx.HeadX + halveRows, mtx.HeadY + halveColumns, halveRows, halveColumns) // SE
+
+
+
+    let reduce quadTreeNode =
+        match quadTreeNode with
+        | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
+        | QuadTree.Node(QuadTree.Leaf nw, QuadTree.Leaf ne, QuadTree.Leaf sw, QuadTree.Leaf se) when
+            nw = ne && nw = sw && nw = se
+            ->
+            QuadTree.Leaf nw
+        | _ -> quadTreeNode
+
 
 
     let getData =
@@ -187,161 +164,139 @@ module MatrixData =
         | Option.None -> QuadTree.None
 
 
-    let allEqual a b c d = a = b && a = c && a = d
-
 
     /// This function coverts a given table into a QudTree by splitting data into 4 quadrants.
-    let mtxToTree (table: array<array<'Value option>>) =
+    let tableToTree (table: 'Value option[,]) =
         let rec maker (mtx: Matrix<'Value>) =
-
             // If we find a cell within bounds of the original data, then store the cell's value accordingly.
             if
-                mtx.LengthX = 1
-                && mtx.LengthY = 1
-                && mtx.Jx <= (mtx.DataRows - 1)
-                && mtx.Jy <= (mtx.DataCols - 1)
-            then
+                mtx.Rows = 1
+                && mtx.Columns = 1
+                && mtx.HeadX <= mtx.MaxRowIndex
+                && mtx.HeadY <= mtx.MaxColumnIndex
 
-                mtx.Data[mtx.Ix][mtx.Iy] |> getData
+            then
+                mtx.Memory[mtx.HeadX, mtx.HeadY] |> getData
 
             // If the Quadrant is fully out of range of the original data, no need to look further.
             // Otherwise we partition the Quadrant again.
-            elif mtx.Iy > (mtx.DataCols - 1) || mtx.Ix > (mtx.DataRows - 1) then
+            elif mtx.HeadX > mtx.MaxRowIndex || mtx.HeadY > mtx.MaxColumnIndex then
                 QuadTree.None
             else
 
                 let nw, ne, sw, se = mtxPartition mtx
 
-                let node = QuadTree.Node(maker nw, maker ne, maker sw, maker se)
+                QuadTree.Node(maker nw, maker ne, maker sw, maker se) |> reduce
 
-                match node with
-                | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
-                | QuadTree.Node(QuadTree.Leaf nw, QuadTree.Leaf ne, QuadTree.Leaf sw, QuadTree.Leaf se) when
-                    allEqual nw ne sw se
-                    ->
-                    QuadTree.Leaf nw
-                | _ -> node
+        // Check a given table's dimensions and act accordingly.
+        let rows, columns = Array2D.length1 table, Array2D.length2 table
 
-        // Empty Matrix cases.
-        if (table.Length = 0) || (table.Length = 1 && table[0].Length = 0) then
+        if rows < 0 || columns < 0 then
+            failwith $"MatrixData.tableToTree: Incorrect table data: %A{table}, rows %A{rows}, columns %A{columns}"
+
+        elif rows = 0 || columns = 0 then
             QuadTree.None
-        // Matrix 1x1
-        elif table.Length = 1 && table[0].Length = 1 then
-            table[0][0] |> getData
+        elif rows = 1 && columns = 1 then
+            table[0, 0] |> getData
         // Matrix m by n.
-        // Construct a matrix 2^n by 2^n (n > 1) from a given table.
-        elif table.Length > 0 && table[0].Length > 0 then
-            let paddedIndex = Numbers.ceilPowTwo (max table.Length table[0].Length) - 1
+        // Construct a matrix 2^n by 2^n from a given table.
+        else
+            let powerSize = Numbers.ceilPowTwo (max rows columns)
 
-
-            let mtx =
-                Matrix(table, table.Length, table[0].Length, 0, 0, paddedIndex, paddedIndex)
+            let mtx = Matrix(table, 0, 0, powerSize, powerSize)
 
             // Make a SparseMatrix from the constructed matrix.
             maker mtx
-        else
-            failwith $"MatrixData.mtxToTree: Incorrect table data: %A{table}"
 
 
+
+open MatrixData
 
 module SparseMatrix =
 
-    type SparseMatrix<'Value> =
-        val Rows: int
-        val Columns: int
-        val Data: QuadTree<'Value>
+    type SparseMatrix<'Value when 'Value: equality>(arr2d: 'Value option[,]) =
+        let data = tableToTree arr2d
+        member this.Rows = Array2D.length1 arr2d
+        member this.Columns = Array2D.length2 arr2d
+        member this.Data = data
 
-        new(rows, columns, data) =
-            { Rows = rows
-              Columns = columns
-              Data = data }
 
 
         member this.Item
             with get (i: int, j: int) =
-
-                // i, j - indices we are looking for.
-                // ix, iy - coordinates of the top-left cell in a quadrant.
-                // jx, jy - coordinates of the bottom-right cell in a quadrant.
-                let rec search (i, j) (ix, iy) (jx, jy) tree =
+                let rec search (i, j) size tree =
 
                     match tree with
                     | QuadTree.Leaf value -> Some value
                     | QuadTree.None -> Option.None
                     | QuadTree.Node(nw, ne, sw, se) ->
 
-                        let middleI = (ix + jx) / 2
-                        let middleJ = (iy + jy) / 2
+                        let middle = size / 2
 
-                        if i <= middleI && j <= middleJ then
-                            search (i, j) (ix, iy) (middleI, middleJ) nw
-                        elif i <= middleI && j > middleJ then
-                            search (i, j) (ix, middleJ + 1) (middleI, jy) ne
-                        elif i > middleI && j <= middleJ then
-                            search (i, j) (middleI + 1, iy) (jx, middleJ) sw
-                        else
-                            search (i, j) (middleI + 1, middleJ + 1) (jx, jy) se
+                        let newI, newJ, quadrant =
+                            if i <= middle && j <= middle then (i, j, nw)
+                            elif i <= middle && j > middle then (i, j - middle, ne)
+                            elif i > middle && j <= middle then (i - middle, j, sw)
+                            else (i - middle, j - middle, se)
 
+                        search (newI, newJ) middle quadrant
 
                 let getValue (i, j) =
-                    // Matrix indices (i, j) start at 1, so we offset by one.
-                    let rowIndex = i - 1
-                    let colIndex = j - 1
 
-                    if
-                        rowIndex < 0
-                        || colIndex < 0
-                        || rowIndex > this.Rows - 1
-                        || colIndex > this.Columns - 1
-                    then
+                    if i < 1 || j < 1 || i > this.Rows || j > this.Columns then
                         failwith $"SparseMatrix.Item with get(i, j): Indices %A{(i, j)} out of range."
                     else
-                        let paddedIndex = Numbers.ceilPowTwo (max this.Rows this.Columns) - 1
-                        search (rowIndex, colIndex) (0, 0) (paddedIndex, paddedIndex) this.Data
+                        let powerSize = Numbers.ceilPowTwo (max this.Rows this.Columns)
+                        search (i, j) powerSize this.Data
 
                 getValue (i, j)
 
 
-    /// Convert a table to SparseMatrix.
-    let toSparse (table: array<array<'Value option>>) =
-        let rows, columns =
-            if table.Length = 0 then 0, 0
-            elif table.Length = 1 && table[0].Length = 0 then 0, 0
-            else table.Length, table[0].Length
 
-        let data = MatrixData.mtxToTree table
-        SparseMatrix(rows, columns, data)
+open SparseMatrix
 
+// module TreeAlgebra =
 
+// let rec treeSum fAdd binTree1 binTree2 =
+//     match binTree1, binTree2 with
+//     // Neutral + Value = Value
+//     | BinTree.None, tree -> tree
+// | tree, BinTree.None -> tree
+// | BinTree.Leaf _, BinTree.Node(b1, b2) ->
+//     BinTree.Node(treeSum fAdd binTree1 b1, treeSum fAdd binTree1 b2)
+// | BinTree.Node(a1, a2), BinTree.Leaf _ ->
+//     BinTree.Node(treeSum fAdd a1 binTree2, treeSum fAdd a2 binTree2)
+// | BinTree.Leaf a, BinTree.Leaf b -> BinTree.Leaf(fAdd a b)
+// | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
+//     BinTree.Node(treeSum fAdd a1 b1, treeSum fAdd a2 b2)
 
-module TreeAlgebra =
-
-    /// Sum of two binary trees.
-    /// This does not cover the case when trees have different depth
-    /// since it's assumed the incorrect data will be filtered before the function call.
-    let rec treeSum fAdd binTree1 binTree2 =
-        let recurse = treeSum fAdd
-
-        match binTree1, binTree2 with
-        // Neutral + Value = Value
-        | BinTree.None, tree
-        | tree, BinTree.None -> tree
-        // This, in fact, is the following case: BinTree.Node(a, a), BinTree.Node(b1, b2) and vice versa.
-        // Since it's assumed that trees have matching depths, summation continues as if the node had two children.
-        | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(recurse binTree1 b1, recurse binTree1 b2)
-        | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(recurse a1 binTree2, recurse a2 binTree2)
-        | BinTree.Leaf a, BinTree.Leaf b -> BinTree.Leaf(fAdd a b)
-        | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(recurse a1 b1, recurse a2 b2)
-
-
-    /// Algebraic operation on elements.
-    let fDo operator a b = operator a b
-
-
+(*
 module MatrixAlgebra =
 
     /// Vector by Matrix multiplication.
-    let vecByMtx fAdd fMult (vec: SparseVector.SparseVector<'Value>) (mtx: SparseMatrix.SparseMatrix<'Value>) =
+    let vecByMtx fAdd fMult (vec: SparseVector<'a>) (mtx: SparseMatrix<'b>) : SparseVector<'c> =
+
+        let rec inner fAdd fMult binTree quadTree =
+            match binTree, quadTree with
+            | BinTree.None, _
+            | _, QuadTree.None -> BinTree.None
+            | BinTree.Leaf a, QuadTree.Leaf b -> BinTree.Leaf(fMult a b)
+            | BinTree.Leaf a, QuadTree.Node(b1, b2, b3, b4) ->
+                let s1 = fAdd (inner fAdd fMult binTree b1) (inner fAdd fMult binTree b3)
+                let s2 = fAdd (inner fAdd fMult binTree b2) (inner fAdd fMult binTree b4)
+                BinTree.Node(s1, s2) |> VectorData.reduce
+            | BinTree.Node(a1, a2), QuadTree.Leaf _ ->
+
+                let s = fAdd (inner fAdd fMult a1 quadTree) (inner fAdd fMult a2 quadTree)
+                BinTree.Node(s, s) |> VectorData.reduce
+
+            | BinTree.Node(a1, a2), QuadTree.Node(b1, b2, b3, b4) ->
+
+
+                let s1 = fAdd (inner fAdd fMult a1 b1) (inner fAdd fMult a2 b3)
+                let s2 = fAdd (inner fAdd fMult a1 b2) (inner fAdd fMult a2 b4)
+                BinTree.Node(s1, s2) |> VectorData.reduce
+
 
         if vec.Length <> mtx.Rows then
 
@@ -349,37 +304,5 @@ module MatrixAlgebra =
                 $"Algebra.vecByMtx: Dimensions of objects vector's length: %A{vec.Length} and Matrix rows %A{mtx.Rows} don't match."
 
         else
-
-            let rec inner fAdd fMult binTree quadTree =
-                let recurse = inner fAdd fMult
-
-                match binTree, quadTree with
-                // Neutral * Value = Neutral.
-                | BinTree.None, _
-                | _, QuadTree.None -> BinTree.None
-
-                | BinTree.Leaf a, QuadTree.Leaf b -> BinTree.Leaf(fMult a b)
-
-                // Left argument is in fact BinTree.Node(Leaf a, Leaf a)
-                | BinTree.Leaf _, QuadTree.Node(b1, b2, b3, b4) ->
-
-
-                    let s1 = fAdd (recurse binTree b1) (recurse binTree b3)
-                    let s2 = fAdd (recurse binTree b2) (recurse binTree b4)
-                    BinTree.Node(s1, s2)
-
-                // Right argument is in fact Quadtree.Node(Leaf a, Leaf a, Leaf a, Leaf a)
-                | BinTree.Node(a1, a2), QuadTree.Leaf _ ->
-
-                    let s = fAdd (recurse a1 quadTree) (recurse a2 quadTree)
-                    BinTree.Node(s, s)
-
-                | BinTree.Node(a1, a2), QuadTree.Node(b1, b2, b3, b4) ->
-
-
-                    let s1 = fAdd (recurse a1 b1) (recurse a2 b3)
-                    let s2 = fAdd (recurse a1 b2) (recurse a2 b4)
-                    BinTree.Node(s1, s2)
-
-            let data = inner fAdd fMult vec.Data mtx.Data
-            SparseVector(mtx.Columns, data)
+            inner fAdd fMult vec.Data mtx.Data
+*)

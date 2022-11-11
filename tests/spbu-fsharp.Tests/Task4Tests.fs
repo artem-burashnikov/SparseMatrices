@@ -4,6 +4,7 @@ open System
 open Helpers.Numbers
 open HomeWork4
 open HomeWork4.MatrixData
+open HomeWork4.SparseMatrix
 open HomeWork4.VectorData
 open Trees
 open Trees.BinTrees
@@ -16,6 +17,7 @@ open Microsoft.FSharp.Core
 module TestCases =
 
     let config = { Config.Default with MaxTest = 10000 }
+    let inline fMult a b = a * b
 
     [<Tests>]
     let tests =
@@ -62,20 +64,26 @@ module TestCases =
               <| fun (arr: array<_>) ->
                   let expectedLeft, expectedRight = Array.splitAt ((ceilPowTwo arr.Length) / 2) arr
 
-                  let actualLeft, actualRight =
-                      vecPartition (Vector(arr, 0, (ceilPowTwo arr.Length) - 1))
+                  let actualLeft, actualRight = vecDiv2 (Vector(arr, 0, ceilPowTwo arr.Length))
 
-                  Expect.sequenceEqual actualLeft.Data[actualLeft.Left .. actualLeft.Right] expectedLeft ""
-                  Expect.sequenceEqual actualRight.Data[actualRight.Left .. actualRight.Right] expectedRight ""
+                  Expect.sequenceEqual
+                      actualLeft.Memory[actualLeft.Head .. actualLeft.Head + actualLeft.Length - 1]
+                      expectedLeft
+                      ""
+
+                  Expect.sequenceEqual
+                      actualRight.Memory[actualRight.Head .. actualRight.Head + actualRight.Length - 1]
+                      expectedRight
+                      ""
 
               testProperty "Partitioning then concatenating should output the initial array"
               <| fun (arr: array<_>) ->
-                  let leftPart, rightPart = vecPartition (Vector(arr, 0, (ceilPowTwo arr.Length) - 1))
+                  let leftPart, rightPart = vecDiv2 (Vector(arr, 0, ceilPowTwo arr.Length))
 
                   let actualResult =
                       Array.concat
-                          [ leftPart.Data[leftPart.Left .. leftPart.Right]
-                            rightPart.Data[rightPart.Left .. rightPart.Right] ]
+                          [ leftPart.Memory[leftPart.Head .. leftPart.Head + leftPart.Length - 1]
+                            rightPart.Memory[rightPart.Head .. rightPart.Head + leftPart.Length - 1] ]
 
                   Expect.sequenceEqual actualResult arr ""
 
@@ -121,7 +129,7 @@ module TestCases =
               testProperty
                   "SparseVector.GetValue loop through each index collecting values. Resulting sequence should be equal to the original."
               <| fun (arr: array<_>) ->
-                  let sparseVec = SparseVector.toSparse arr
+                  let sparseVec = SparseVector.SparseVector arr
                   let mutable actualResult = []
 
                   for i = 1 to arr.Length do
@@ -129,189 +137,188 @@ module TestCases =
 
                   Expect.sequenceEqual (actualResult |> List.rev) arr ""
 
-              testCase "Table partition: empty input"
-              <| fun _ ->
-                  let rows = 0
-                  let cols = 0
+              testProperty "Table partition: empty input"
+              <| fun (arr: _ option[,]) ->
 
-                  let mtx = Matrix([||], rows, cols, -1, -1, -1, -1)
+                  let mtx = Matrix(arr, 0, 0, 0, 0)
 
                   let nw, ne, sw, se = mtxPartition mtx
-                  Expect.equal nw.Data [||] ""
-                  Expect.equal ne.Data [||] ""
-                  Expect.equal sw.Data [||] ""
-                  Expect.equal se.Data [||] ""
+                  Expect.equal nw.Rows 0 ""
+                  Expect.equal nw.Columns 0 ""
+                  Expect.equal ne.Rows 0 ""
+                  Expect.equal ne.Columns 0 ""
+                  Expect.equal sw.Rows 0 ""
+                  Expect.equal sw.Columns 0 ""
+                  Expect.equal se.Rows 0 ""
+                  Expect.equal se.Columns 0 ""
 
               testProperty "Table partition (by indices)"
-              <| fun (x: int) (y: int) ->
+              <| fun (arr: _ option[,]) (x: int) (y: int) (rows: int) (columns: int) ->
 
-                  let rows = abs x
-                  let cols = abs y
+                  let pX = abs x
+                  let pY = abs y
+                  let pRows = abs rows
+                  let pColumns = abs columns
 
-                  if rows = 0 || cols = 0 then
-                      skiptest "Table dimensions must be greater than 0"
-                  else
 
-                      let paddedIndex = ceilPowTwo (max rows cols) - 1
+                  if pRows > 0 && pColumns > 0 then
 
-                      let middle = paddedIndex / 2
+                      let nX = pX % pColumns
+                      let nY = pY % pRows
 
-                      // The data is not important, leaving empty for convenience.
-                      let mtx = Matrix([||], rows, cols, 0, 0, paddedIndex, paddedIndex)
+                      let powerSize = ceilPowTwo (max pRows pColumns)
+
+                      let middle = powerSize / 2
+
+                      // Memory (arr) is not important.
+                      let mtx = Matrix(arr, nX, nY, powerSize, powerSize)
 
                       let nw, ne, sw, se = mtxPartition mtx
-                      Expect.equal nw.Ix 0 ""
-                      Expect.equal nw.Iy 0 ""
-                      Expect.equal nw.Jx middle ""
-                      Expect.equal nw.Jy middle ""
-                      Expect.equal ne.Ix 0 ""
-                      Expect.equal ne.Iy (middle + 1) ""
-                      Expect.equal ne.Jx middle ""
-                      Expect.equal ne.Jy paddedIndex ""
-                      Expect.equal sw.Ix (middle + 1) ""
-                      Expect.equal sw.Iy 0 ""
-                      Expect.equal sw.Jx paddedIndex ""
-                      Expect.equal sw.Jy middle ""
-                      Expect.equal se.Ix (middle + 1) ""
-                      Expect.equal se.Iy (middle + 1) ""
-                      Expect.equal se.Jx paddedIndex ""
-                      Expect.equal se.Jy paddedIndex ""
+                      Expect.equal (nw.HeadX, nw.HeadY) (nX, nY) "NW failed"
+                      Expect.equal (ne.HeadX, ne.HeadY) (nX, nY + middle) "NE failed"
+                      Expect.equal (sw.HeadX, sw.HeadY) (nX + middle, nY) "SW failed"
+                      Expect.equal (se.HeadX, se.HeadY) (nX + middle, nY + middle) "SE failed"
 
               testCase "Table to QuadTree converter: empty table"
               <| fun _ ->
-                  let input = [||]
-                  let actualResult = mtxToTree input
+                  let input = Array2D.zeroCreate 0 0
+                  let actualResult = tableToTree input
                   let expectedResult = QuadTree.None
                   Expect.equal actualResult expectedResult ""
 
               testCase "Table to QuadTree converter: 1x0 table"
               <| fun _ ->
-                  let input = [| [||] |]
-                  let actualResult = mtxToTree input
+                  let input = Array2D.zeroCreate 1 0
+                  let actualResult = tableToTree input
+                  let expectedResult = QuadTree.None
+                  Expect.equal actualResult expectedResult ""
+
+              testCase "Table to QuadTree converter: 0x1 table"
+              <| fun _ ->
+                  let input = Array2D.zeroCreate 0 1
+                  let actualResult = tableToTree input
                   let expectedResult = QuadTree.None
                   Expect.equal actualResult expectedResult ""
 
               testCase "Table to QuadTree converter: 1x1 table"
               <| fun _ ->
-                  let input = [| [| Some 1 |] |]
-                  let actualResult = mtxToTree input
-                  let expectedResult = QuadTree.Leaf 1
+                  let input = Array2D.map Some (Array2D.zeroCreate 1 1)
+                  let actualResult = tableToTree input
+                  let expectedResult = QuadTree.Leaf 0
                   Expect.equal actualResult expectedResult ""
 
               testCase "Table to QuadTree converter: 1x2 table"
               <| fun _ ->
-                  let input = [| [| Some 1; Option.None |] |]
-                  let actualResult = mtxToTree input
+                  // let input = Array2D.map Some (Array2D.zeroCreate 1 1)
+                  let input = Array2D.init 1 2 (fun i j -> Some(i + j))
+                  let actualResult = tableToTree input
 
                   let expectedResult =
-                      QuadTree.Node(QuadTree.Leaf 1, QuadTree.None, QuadTree.None, QuadTree.None)
+                      QuadTree.Node(QuadTree.Leaf 0, QuadTree.Leaf 1, QuadTree.None, QuadTree.None)
 
-                  Expect.equal actualResult expectedResult ""
+                  Expect.equal actualResult expectedResult $"Failed to construct from table: %A{input}"
 
               testCase "Table to QuadTree converter: 2x1 table"
               <| fun _ ->
-                  let input = [| [| Some 1 |]; [| Some 2 |] |]
-                  let actualResult = mtxToTree input
+                  let input = Array2D.init 2 1 (fun i j -> Some(i + j))
+                  let actualResult = tableToTree input
 
                   let expectedResult =
-                      QuadTree.Node(QuadTree.Leaf 1, QuadTree.None, QuadTree.Leaf 2, QuadTree.None)
+                      QuadTree.Node(QuadTree.Leaf 0, QuadTree.None, QuadTree.Leaf 1, QuadTree.None)
 
-                  Expect.equal actualResult expectedResult ""
+                  Expect.equal actualResult expectedResult $"Failed to construct from table: %A{input}"
 
               testCase "Table to QuadTree converter: 2x2 table"
               <| fun _ ->
-                  let input = [| [| Some 1; Some 2 |]; [| Some 2; Some 3 |] |]
+                  let input = Array2D.init 2 2 (fun i j -> Some(i + j))
 
-                  let actualResult = mtxToTree input
+                  let actualResult = tableToTree input
 
                   let expectedResult =
-                      QuadTree.Node(QuadTree.Leaf 1, QuadTree.Leaf 2, QuadTree.Leaf 2, QuadTree.Leaf 3)
+                      QuadTree.Node(QuadTree.Leaf 0, QuadTree.Leaf 1, QuadTree.Leaf 1, QuadTree.Leaf 2)
 
-                  Expect.equal actualResult expectedResult ""
+                  Expect.equal actualResult expectedResult $"Failed to construct from table: %A{input}"
 
               testCase "Table to QuadTree converter: 3x2 table"
               <| fun _ ->
-                  let input = [| [| Some 1; Some 2 |]; [| Some 2; Some 3 |]; [| Some 3; Some 4 |] |]
+                  let input = Array2D.init 3 2 (fun i j -> Some(i + j))
 
-                  let actualResult = mtxToTree input
+                  let actualResult = tableToTree input
 
                   let expectedResult =
                       QuadTree.Node(
-                          QuadTree.Node(QuadTree.Leaf 1, QuadTree.Leaf 2, QuadTree.Leaf 2, QuadTree.Leaf 3),
+                          QuadTree.Node(QuadTree.Leaf 0, QuadTree.Leaf 1, QuadTree.Leaf 1, QuadTree.Leaf 2),
                           QuadTree.None,
-                          QuadTree.Node(QuadTree.Leaf 3, QuadTree.Leaf 4, QuadTree.None, QuadTree.None),
+                          QuadTree.Node(QuadTree.Leaf 2, QuadTree.Leaf 3, QuadTree.None, QuadTree.None),
                           QuadTree.None
                       )
 
-                  Expect.equal actualResult expectedResult ""
+                  Expect.equal actualResult expectedResult $"Failed to construct from table: %A{input}"
 
               testCase "Table to QuadTree converter: 3x3 table"
               <| fun _ ->
-                  let input =
-                      [| [| Some 1; Some 2; Some 3 |]
-                         [| Some 2; Some 3; Some 4 |]
-                         [| Some 3; Some 4; Some 5 |] |]
+                  let input = Array2D.init 3 3 (fun i j -> Some(i + j))
 
-                  let actualResult = mtxToTree input
+                  let actualResult = tableToTree input
 
                   let expectedResult =
                       QuadTree.Node(
-                          QuadTree.Node(QuadTree.Leaf 1, QuadTree.Leaf 2, QuadTree.Leaf 2, QuadTree.Leaf 3),
-                          QuadTree.Node(QuadTree.Leaf 3, QuadTree.None, QuadTree.Leaf 4, QuadTree.None),
-                          QuadTree.Node(QuadTree.Leaf 3, QuadTree.Leaf 4, QuadTree.None, QuadTree.None),
-                          QuadTree.Node(QuadTree.Leaf 5, QuadTree.None, QuadTree.None, QuadTree.None)
+                          QuadTree.Node(QuadTree.Leaf 0, QuadTree.Leaf 1, QuadTree.Leaf 1, QuadTree.Leaf 2),
+                          QuadTree.Node(QuadTree.Leaf 2, QuadTree.None, QuadTree.Leaf 3, QuadTree.None),
+                          QuadTree.Node(QuadTree.Leaf 2, QuadTree.Leaf 3, QuadTree.None, QuadTree.None),
+                          QuadTree.Node(QuadTree.Leaf 4, QuadTree.None, QuadTree.None, QuadTree.None)
                       )
 
-                  Expect.equal actualResult expectedResult ""
+                  Expect.equal actualResult expectedResult $"Failed to construct from table: %A{input}"
 
               testCase "Getting values from 1x1 array"
               <| fun _ ->
 
-                  let table = [| [| Some 3 |] |]
+                  let input = Array2D.zeroCreate 1 1
 
-                  let mtx = SparseMatrix.toSparse table
+                  let mtx = SparseMatrix.SparseMatrix input
 
                   for i = 1 to 1 do
                       for j = 1 to 1 do
-                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) ""
+                          Expect.equal (mtx[i, j]) (input[i - 1, j - 1]) ""
 
               testCase "Getting values from 1x2 array"
               <| fun _ ->
 
-                  let table = [| [| Some 3; Some 1 |] |]
+                  let table = Array2D.init 1 2 (fun i j -> Some(i + j))
 
-                  let mtx = SparseMatrix.toSparse table
+                  let mtx = SparseMatrix.SparseMatrix table
 
                   for i = 1 to 1 do
                       for j = 1 to 2 do
-                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) ""
+                          Expect.equal (mtx[i, j]) (table[i - 1, j - 1]) ""
 
               testCase "Getting values from 2x1 array"
               <| fun _ ->
 
-                  let table = [| [| Some 3 |]; [| Some 1 |] |]
+                  let table = Array2D.init 2 1 (fun i j -> Some(i + j))
 
-                  let mtx = SparseMatrix.toSparse table
+                  let mtx = SparseMatrix.SparseMatrix table
 
                   for i = 1 to 2 do
                       for j = 1 to 1 do
-                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) ""
+                          Expect.equal (mtx[i, j]) (table[i - 1, j - 1]) ""
 
+              // For some reason this test takes somewhat long.
+              testProperty
+                  "FsCheck: Getting values from 2d-array and getting values from SparseMatrix should be the same"
+              <| fun (arr2d: _ option[,]) ->
 
-              testCase "Getting values from 2d-array and getting values from SparseMatrix should be the same"
-              <| fun _ ->
+                  let rows = Array2D.length1 arr2d
+                  let columns = Array2D.length2 arr2d
 
-                  let table =
-                      [| [| Some 3; Some 3; Some 3 |]
-                         [| Some 1; Option.None; Option.None |]
-                         [| Some 3; Some 4; Option.None |] |]
+                  let mtx = SparseMatrix.SparseMatrix arr2d
 
-                  let mtx = SparseMatrix.toSparse table
+                  for i = 1 to rows do
+                      for j = 1 to columns do
+                          Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}"
 
-                  for i = 1 to 3 do
-                      for j = 1 to 3 do
-                          Expect.equal (mtx[i, j]) (table[i - 1][j - 1]) ""
-
+              (*
               testCase "Vector 1x4 * 4x4 Matrix = Vector 1x4"
               <| fun _ ->
                   let arr = [| Some 1; Some 2; Some 3; Some 4 |]
@@ -322,11 +329,16 @@ module TestCases =
                          [| Some 1; Some 2; Some 3; Some 4 |]
                          [| Some 1; Some 2; Some 3; Some 4 |] |]
 
+
                   let vec = SparseVector.toSparse arr
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx
+                          (TreeAlgebra.treeSum (+))
+                          fMult
+                          (vec.Data, vec.Length)
+                          (mtx.Data, mtx.Rows, mtx.Columns)
 
                   let expectedResult =
                       BinTree.Node(
@@ -347,7 +359,11 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx
+                          (TreeAlgebra.treeSum (+))
+                          fMult
+                          (vec.Data, vec.Length)
+                          (mtx.Data, mtx.Rows, mtx.Columns)
 
                   let expectedResult = BinTree.Leaf 2
 
@@ -364,7 +380,11 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx
+                          (TreeAlgebra.treeSum (+))
+                          fMult
+                          (vec.Data, vec.Length)
+                          (mtx.Data, mtx.Rows, mtx.Columns)
 
                   let expectedResult = BinTree.Node(BinTree.Leaf 1, BinTree.None)
 
@@ -381,7 +401,11 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx
+                          (TreeAlgebra.treeSum (+))
+                          fMult
+                          (vec.Data, vec.Length)
+                          (mtx.Data, mtx.Rows, mtx.Columns)
 
                   let expectedResult =
                       BinTree.Node(BinTree.Node(BinTree.Leaf 6, BinTree.Leaf 9), BinTree.None)
@@ -407,16 +431,17 @@ module TestCases =
                   let mtx = SparseMatrix.toSparse table
 
                   let actualResult =
-                      MatrixAlgebra.vecByMtx (TreeAlgebra.treeSum (+)) (TreeAlgebra.fDo (*)) vec mtx
+                      MatrixAlgebra.vecByMtx
+                          (TreeAlgebra.treeSum (+))
+                          fMult
+                          (vec.Data, vec.Length)
+                          (mtx.Data, mtx.Rows, mtx.Columns)
 
                   let expectedResult =
-                      BinTree.Node(
-                          BinTree.Node(
-                              BinTree.Node(BinTree.Leaf 36, BinTree.Leaf 36),
-                              BinTree.Node(BinTree.Leaf 10, BinTree.Leaf 10)
-                          ),
-                          BinTree.None
-                      )
+                      BinTree.Node(BinTree.Node(BinTree.Leaf 36, BinTree.Leaf 10), BinTree.None)
 
                   Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 4 "" ]
+                  Expect.equal actualResult.Length 4 ""
+
+                  *)
+              ]
