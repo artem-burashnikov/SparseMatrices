@@ -4,10 +4,8 @@ open System
 open Helpers.Numbers
 open HomeWork4
 open HomeWork4.MatrixData
-open HomeWork4.SparseMatrix
 open HomeWork4.VectorData
 open Trees
-open Trees.BinTrees
 open Trees.QuadTrees
 open Expecto
 open FsCheck
@@ -17,7 +15,6 @@ open Microsoft.FSharp.Core
 module TestCases =
 
     let config = { Config.Default with MaxTest = 10000 }
-    let inline fMult a b = a * b
 
     [<Tests>]
     let tests =
@@ -142,7 +139,7 @@ module TestCases =
 
                   let mtx = Matrix(arr, 0, 0, 0, 0)
 
-                  let nw, ne, sw, se = mtxPartition mtx
+                  let nw, ne, sw, se = mtxDiv4 mtx
                   Expect.equal nw.Rows 0 ""
                   Expect.equal nw.Columns 0 ""
                   Expect.equal ne.Rows 0 ""
@@ -173,7 +170,7 @@ module TestCases =
                       // Memory (arr) is not important.
                       let mtx = Matrix(arr, nX, nY, powerSize, powerSize)
 
-                      let nw, ne, sw, se = mtxPartition mtx
+                      let nw, ne, sw, se = mtxDiv4 mtx
                       Expect.equal (nw.HeadX, nw.HeadY) (nX, nY) "NW failed"
                       Expect.equal (ne.HeadX, ne.HeadY) (nX, nY + middle) "NE failed"
                       Expect.equal (sw.HeadX, sw.HeadY) (nX + middle, nY) "SW failed"
@@ -318,130 +315,118 @@ module TestCases =
                       for j = 1 to columns do
                           Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}"
 
-              (*
-              testCase "Vector 1x4 * 4x4 Matrix = Vector 1x4"
-              <| fun _ ->
-                  let arr = [| Some 1; Some 2; Some 3; Some 4 |]
+              // testProperty "Vector * Matrix"
+              // <| fun (vecLength: int) (mtxRows: int) (mtxColumns: int) ->
 
-                  let table =
-                      [| [| Some 1; Some 2; Some 3; Some 4 |]
-                         [| Some 1; Some 2; Some 3; Some 4 |]
-                         [| Some 1; Some 2; Some 3; Some 4 |]
-                         [| Some 1; Some 2; Some 3; Some 4 |] |]
+              // if abs vecLength = abs mtxRows && abs vecLength > 0 then
+
+              // let r = Random()
+
+              // let rows = abs mtxRows
+              // let columns = abs mtxColumns
+              // let length = abs vecLength
+
+              // let randomTable rows columns =
+              // let mutable table = Array2D.zeroCreate rows columns
+              // for i = 0 to rows - 1 do
+              // for j = 0 to columns - 1 do
+              // table[i, j] <- r.Next(0, 10)
+              // table
+
+              // let arr = Array.init length (fun _ -> r.Next(0,10))
+              // let table = randomTable rows columns
 
 
-                  let vec = SparseVector.toSparse arr
-                  let mtx = SparseMatrix.toSparse table
+              // let multiply (arr: array<int>) (table: int[,]) =
+              // let rows = arr.Length
+              // let columns = Array2D.length2 table
+              // let mutable result = Array.zeroCreate columns
+              // for j = 0 to columns - 1 do
+              // for i = 0 to rows - 1 do
+              // result[j] <- result[j] + arr[i] * table[i, j]
+              // result
 
-                  let actualResult =
-                      MatrixAlgebra.vecByMtx
-                          (TreeAlgebra.treeSum (+))
-                          fMult
-                          (vec.Data, vec.Length)
-                          (mtx.Data, mtx.Rows, mtx.Columns)
+              // let result = multiply arr table
+              // let expectedResult = Array.map Some result |> SparseVector.SparseVector
 
-                  let expectedResult =
-                      BinTree.Node(
-                          BinTree.Node(BinTree.Leaf 10, BinTree.Leaf 20),
-                          BinTree.Node(BinTree.Leaf 30, BinTree.Leaf 40)
-                      )
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 4 ""
+              // let vec = Array.map Some arr |> SparseVector.SparseVector
+              // let mtx = Array2D.map Some table |> SparseMatrix.SparseMatrix
+              // let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
+
+
+
+              // Expect.equal actualResult expectedResult.Data $"arr: %A{arr}, table %A{table}, result %A{result}"
 
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
               <| fun _ ->
                   let arr = [| Some 1 |]
 
-                  let table = [| [| Some 2 |] |]
+                  let table = Array2D.init 1 1 (fun _ _ -> Some 1)
 
-                  let vec = SparseVector.toSparse arr
-                  let mtx = SparseMatrix.toSparse table
+                  let vec = SparseVector.SparseVector arr
+                  let mtx = SparseMatrix.SparseMatrix table
 
-                  let actualResult =
-                      MatrixAlgebra.vecByMtx
-                          (TreeAlgebra.treeSum (+))
-                          fMult
-                          (vec.Data, vec.Length)
-                          (mtx.Data, mtx.Rows, mtx.Columns)
+                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
 
-                  let expectedResult = BinTree.Leaf 2
+                  let expectedResult = BinTrees.BinTree.Leaf 2
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 1 ""
+                  Expect.equal actualResult expectedResult ""
+              // Expect.equal actualResult.Length 1 ""
+
 
               testCase "Vector 1x2 * 2x1 Matrix = Vector 1x1"
               <| fun _ ->
                   let arr = [| Some 1; Some 1 |]
 
-                  let table = [| [| None |]; [| Some 1 |] |]
+                  let table = Array2D.init 2 1 (fun i j -> Some(i + j))
 
-                  let vec = SparseVector.toSparse arr
-                  let mtx = SparseMatrix.toSparse table
+                  let vec = SparseVector.SparseVector arr
+                  let mtx = SparseMatrix.SparseMatrix table
 
-                  let actualResult =
-                      MatrixAlgebra.vecByMtx
-                          (TreeAlgebra.treeSum (+))
-                          fMult
-                          (vec.Data, vec.Length)
-                          (mtx.Data, mtx.Rows, mtx.Columns)
+                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
 
-                  let expectedResult = BinTree.Node(BinTree.Leaf 1, BinTree.None)
+                  let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.None)
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 1 ""
+                  Expect.equal actualResult expectedResult ""
+              // Expect.equal actualResult.Length 1 ""
 
               testCase "Vector 1x3 * 3x2 Matrix = Vector 1x2"
               <| fun _ ->
                   let arr = [| Some 1; Some 1; Some 1 |]
 
-                  let table = [| [| Some 1; Some 2 |]; [| Some 2; Some 3 |]; [| Some 3; Some 4 |] |]
+                  let table = Array2D.init 3 2 (fun i j -> Some(i + j))
 
-                  let vec = SparseVector.toSparse arr
-                  let mtx = SparseMatrix.toSparse table
+                  let vec = SparseVector.SparseVector arr
+                  let mtx = SparseMatrix.SparseMatrix table
 
-                  let actualResult =
-                      MatrixAlgebra.vecByMtx
-                          (TreeAlgebra.treeSum (+))
-                          fMult
-                          (vec.Data, vec.Length)
-                          (mtx.Data, mtx.Rows, mtx.Columns)
+                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
 
                   let expectedResult =
-                      BinTree.Node(BinTree.Node(BinTree.Leaf 6, BinTree.Leaf 9), BinTree.None)
+                      BinTrees.Node(BinTrees.Node(BinTrees.Leaf 3, BinTrees.Leaf 6), BinTrees.None)
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 2 ""
+                  Expect.equal actualResult expectedResult ""
+              // Expect.equal actualResult.Length 2 ""
 
               testCase "Vector 1x8 * 8x4 Matrix = Vector 1x4"
               <| fun _ ->
-                  let arr = [| Some 1; Some 2; Some 3; Some 4; Some 5; Some 6; Some 7; Some 8 |]
+                  let arr = [| Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1 |]
 
-                  let table =
-                      [| [| Some 1; Some 1; Some 1; Some 1 |]
-                         [| Some 1; Some 1; Some 1; Some 1 |]
-                         [| Some 1; Some 1; Some 1; Some 1 |]
-                         [| Some 1; Some 1; Some 1; Some 1 |]
-                         [| Some 1; Some 1; None; None |]
-                         [| Some 1; Some 1; None; None |]
-                         [| Some 1; Some 1; None; None |]
-                         [| Some 1; Some 1; None; None |] |]
+                  let table = Array2D.init 8 4 (fun i j -> Some(i + j))
+                  let vec = SparseVector.SparseVector arr
+                  let mtx = SparseMatrix.SparseMatrix table
 
-                  let vec = SparseVector.toSparse arr
-                  let mtx = SparseMatrix.toSparse table
-
-                  let actualResult =
-                      MatrixAlgebra.vecByMtx
-                          (TreeAlgebra.treeSum (+))
-                          fMult
-                          (vec.Data, vec.Length)
-                          (mtx.Data, mtx.Rows, mtx.Columns)
+                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
 
                   let expectedResult =
-                      BinTree.Node(BinTree.Node(BinTree.Leaf 36, BinTree.Leaf 10), BinTree.None)
+                      BinTrees.Node(
+                          BinTrees.Node(
+                              BinTrees.Node(BinTrees.Leaf 28, BinTrees.Leaf 36),
+                              BinTrees.Node(BinTrees.Leaf 44, BinTrees.Leaf 52)
+                          ),
+                          BinTrees.None
+                      )
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 4 ""
-
-                  *)
+                  Expect.equal actualResult expectedResult ""
+              // Expect.equal actualResult.Length 4 ""
               ]
