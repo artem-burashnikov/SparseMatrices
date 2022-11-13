@@ -194,7 +194,7 @@ module MatrixData =
             then
                 mtx.Memory[mtx.HeadX, mtx.HeadY] |> store
 
-            // If the Quadrant's top-left cell is in the range of the original data, no need to look further.
+            // If the Quadrant's top-left cell is not in the range of the original data, no need to look further.
             elif mtx.HeadX > mtx.MaxRowIndex || mtx.HeadY > mtx.MaxColumnIndex then
                 QuadTree.None
             // Otherwise we partition the Quadrant again.
@@ -229,10 +229,8 @@ open MatrixData
 module SparseMatrix =
 
     type SparseMatrix<'Value when 'Value: equality>(data: QuadTree<'Value>, rows: int, columns: int) =
-        // let data = tableToTree arr2d
 
         new(arr2d) = SparseMatrix(tableToTree arr2d, Array2D.length1 arr2d, Array2D.length2 arr2d)
-        // new(tree, rows, columns) = SparseMatrix(tree, rows, columns)
 
         member this.Rows = rows
         member this.Columns = columns
@@ -282,7 +280,6 @@ module MatrixAlgebra =
         let powerSize = max (max vec.Length mtx.Rows) mtx.Columns |> Numbers.ceilPowTwo
         let maxDepth = Math.Log2(float powerSize) |> int
 
-
         let rec sum binTree1 binTree2 currDepth =
             match binTree1, binTree2 with
             | BinTree.None, tree
@@ -304,6 +301,7 @@ module MatrixAlgebra =
                 let s1 = sum a1 b1 (currDepth + 1)
                 let s2 = sum a2 b2 (currDepth + 1)
                 BinTree.Node(s1, s2) |> VectorData.reduce
+
 
         // We only increase the depth level when the recursive call is made.
         // Because the sum function is called on the current depth level, the counter for sum does not increase.
@@ -391,6 +389,7 @@ module MatrixAlgebra =
                 let s3 = sum a3 b3 (currDepth + 1)
                 let s4 = sum a4 b4 (currDepth + 1)
                 QuadTree.Node(s1, s2, s3, s4) |> reduce
+
 
         let rec mult quadTree1 quadTree2 currDepth =
             match quadTree1, quadTree2 with
