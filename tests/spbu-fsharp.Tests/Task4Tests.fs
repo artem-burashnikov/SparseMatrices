@@ -315,49 +315,6 @@ module TestCases =
                       for j = 1 to columns do
                           Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}"
 
-              // testProperty "Vector * Matrix"
-              // <| fun (vecLength: int) (mtxRows: int) (mtxColumns: int) ->
-
-              // if abs vecLength = abs mtxRows && abs vecLength > 0 then
-
-              // let r = Random()
-
-              // let rows = abs mtxRows
-              // let columns = abs mtxColumns
-              // let length = abs vecLength
-
-              // let randomTable rows columns =
-              // let mutable table = Array2D.zeroCreate rows columns
-              // for i = 0 to rows - 1 do
-              // for j = 0 to columns - 1 do
-              // table[i, j] <- r.Next(0, 10)
-              // table
-
-              // let arr = Array.init length (fun _ -> r.Next(0,10))
-              // let table = randomTable rows columns
-
-
-              // let multiply (arr: array<int>) (table: int[,]) =
-              // let rows = arr.Length
-              // let columns = Array2D.length2 table
-              // let mutable result = Array.zeroCreate columns
-              // for j = 0 to columns - 1 do
-              // for i = 0 to rows - 1 do
-              // result[j] <- result[j] + arr[i] * table[i, j]
-              // result
-
-              // let result = multiply arr table
-              // let expectedResult = Array.map Some result |> SparseVector.SparseVector
-
-
-              // let vec = Array.map Some arr |> SparseVector.SparseVector
-              // let mtx = Array2D.map Some table |> SparseMatrix.SparseMatrix
-              // let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
-
-
-
-              // Expect.equal actualResult expectedResult.Data $"arr: %A{arr}, table %A{table}, result %A{result}"
-
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
               <| fun _ ->
                   let arr = [| Some 1 |]
@@ -371,8 +328,8 @@ module TestCases =
 
                   let expectedResult = BinTrees.BinTree.Leaf 2
 
-                  Expect.equal actualResult expectedResult ""
-              // Expect.equal actualResult.Length 1 ""
+                  Expect.equal actualResult.Data expectedResult ""
+                  Expect.equal actualResult.Length 1 ""
 
 
               testCase "Vector 1x2 * 2x1 Matrix = Vector 1x1"
@@ -388,8 +345,8 @@ module TestCases =
 
                   let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.None)
 
-                  Expect.equal actualResult expectedResult ""
-              // Expect.equal actualResult.Length 1 ""
+                  Expect.equal actualResult.Data expectedResult ""
+                  Expect.equal actualResult.Length 1 ""
 
               testCase "Vector 1x3 * 3x2 Matrix = Vector 1x2"
               <| fun _ ->
@@ -405,8 +362,8 @@ module TestCases =
                   let expectedResult =
                       BinTrees.Node(BinTrees.Node(BinTrees.Leaf 3, BinTrees.Leaf 6), BinTrees.None)
 
-                  Expect.equal actualResult expectedResult ""
-              // Expect.equal actualResult.Length 2 ""
+                  Expect.equal actualResult.Data expectedResult ""
+                  Expect.equal actualResult.Length 2 ""
 
               testCase "Vector 1x8 * 8x4 Matrix = Vector 1x4"
               <| fun _ ->
@@ -427,6 +384,5 @@ module TestCases =
                           BinTrees.None
                       )
 
-                  Expect.equal actualResult expectedResult ""
-              // Expect.equal actualResult.Length 4 ""
-              ]
+                  Expect.equal actualResult.Data expectedResult ""
+                  Expect.equal actualResult.Length 4 "" ]
