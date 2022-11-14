@@ -55,11 +55,13 @@ module Numbers =
 
     /// Function calculates the smallest power of two which is greater than or equal to the given integer.
     let ceilPowTwo x =
-        let rec looper x acc =
-            if x <= 0 then 1
-            elif x = 1 then 2
-            elif acc >= x then acc
-            else looper x (acc * 2)
 
-        // Identity element for multiplication is 1, hence accumulator starts at 1.
-        looper x 1
+        let rec looper x acc =
+            if acc >= x then
+                acc
+            else
+                looper x (acc * 2)
+
+        if x <= 0 then 1
+        elif x = 1 then 2
+        else looper x 1
