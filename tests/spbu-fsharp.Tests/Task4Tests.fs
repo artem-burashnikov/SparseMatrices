@@ -315,6 +315,59 @@ module TestCases =
                       for j = 1 to columns do
                           Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}"
 
+              testProperty "Adding 1 and then subtracting 1 should output the initial data."
+              <| fun (length: uint) ->
+                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let arrOnes = Array.init (int length) (fun _ -> Some 1)
+                  let vec = SparseVector.SparseVector arr
+                  let vecOnes = SparseVector.SparseVector arrOnes
+                  let plusResult = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec vecOnes
+                  let result = MatrixAlgebra.vecPlusVec (0) (0) (0) (-) plusResult vecOnes
+                  Expect.equal vec.Data result.Data ""
+
+              testProperty "Adding/Subtracting 0 should output the initial data."
+              <| fun (length: uint) ->
+                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let zeroes = Array.zeroCreate (int length)
+                  let vec = SparseVector.SparseVector arr
+                  let vecZeroes = SparseVector.SparseVector zeroes
+                  let plusResult = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec vecZeroes
+                  let result = MatrixAlgebra.vecPlusVec (0) (0) (0) (-) plusResult vecZeroes
+                  Expect.equal vec.Data result.Data ""
+
+              testProperty "Commutative property should hold."
+              <| fun (length: uint) ->
+                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let arr2 = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let vec1 = SparseVector.SparseVector arr
+                  let vec2 = SparseVector.SparseVector arr2
+                  let result1 = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec1 vec2
+                  let result2 = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec2 vec1
+                  Expect.equal result1.Data result2.Data ""
+
+              testProperty "Associative property should hold."
+              <| fun (length: uint) ->
+                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let arr2 = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let arr3 = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let vec1 = SparseVector.SparseVector arr
+                  let vec2 = SparseVector.SparseVector arr2
+                  let vec3 = SparseVector.SparseVector arr3
+
+                  let result1 =
+                      MatrixAlgebra.vecPlusVec (0) (0) (0) (+) (MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec1 vec2) vec3
+
+                  let result2 =
+                      MatrixAlgebra.vecPlusVec (0) (0) (0) (+) (MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec2 vec3) vec1
+
+                  Expect.equal result1.Data result2.Data ""
+
+              testProperty "Adding the inverse should result in neutral element."
+              <| fun (length: uint) ->
+                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let vec = SparseVector.SparseVector arr
+                  let result = MatrixAlgebra.vecPlusVec (0) (0) (0) (-) vec vec
+                  Expect.equal result.Data BinTrees.None ""
               (*
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
               <| fun _ ->
