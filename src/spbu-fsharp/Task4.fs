@@ -1,6 +1,5 @@
 namespace HomeWork4
 
-open System
 open Helpers
 open Microsoft.FSharp.Core
 open Trees.BinTrees
@@ -52,7 +51,7 @@ module VectorData =
                 BinTree.None
             // If we find a 1x1 cell that is within the bounds of the vector's "memory".
             // Then look at data in that cell and store it accordingly.
-            else if vec.Length = 1 then
+            elif vec.Length = 1 then
                 vec.Memory[vec.Head] |> store
             // Otherwise split the vector in half
             // and recursively call the maker function on the resulting halves.
@@ -241,7 +240,7 @@ module SparseMatrix =
 
         member this.Item
             with get (i: int, j: int) =
-                // Binary search the value at a given indices.
+                // Binary search the value at given indices.
                 let rec search (i, j) size tree =
 
                     match tree with
@@ -269,90 +268,152 @@ module SparseMatrix =
 
                 getValue (i, j)
 
-open SparseMatrix
 
 module MatrixAlgebra =
 
+    /// Adds two Sparse vectors together.
+    let vecPlusVec
+        (neutralA: 'a)
+        (neutralB: 'b)
+        (neutralC: 'c)
+        (fAdd: 'a -> 'b -> 'c)
+        (vec1: SparseVector<'a>)
+        (vec2: SparseVector<'b>)
+        =
+
+        let rec sum binTree1 binTree2 =
+
+            let doSum leftChild rightChild leftChild' rightChild' =
+                sum leftChild leftChild', sum rightChild rightChild'
+
+            let newParts binTree1 binTree2 =
+                let leftPart, rightPart =
+                    match binTree1, binTree2 with
+                    | BinTree.None, BinTree.Node(leftChild', rightChild') ->
+                        doSum binTree1 binTree1 leftChild' rightChild'
+
+                    | BinTree.Node(leftChild, rightChild), BinTree.None _ ->
+                        doSum leftChild rightChild binTree2 binTree2
+
+                    | BinTree.Leaf _, BinTree.Node(leftChild', rightChild') ->
+                        doSum binTree1 binTree1 leftChild' rightChild'
+
+                    | BinTree.Node(leftChild, rightChild), BinTree.Leaf _ ->
+                        doSum leftChild rightChild binTree2 binTree2
+
+                    | BinTree.Node(leftChild, rightChild), BinTree.Node(leftChild', rightChild') ->
+                        doSum leftChild rightChild leftChild' rightChild'
+
+                    | _ ->
+                        failwith
+                            $"MatrixAlgebra.vecPlusVec.sum.newParts: Unexpected arguments: %A{(binTree1, binTree2)}"
+
+                leftPart, rightPart
+
+            let children =
+                match binTree1, binTree2 with
+                // Neutral + Value = Value
+                | BinTree.None, BinTree.None -> BinTree.None, BinTree.None
+
+                | BinTree.None, BinTree.Leaf b ->
+                    let result = fAdd neutralA b
+                    BinTree.Leaf result, BinTree.Leaf result
+
+                | BinTree.Leaf a, BinTree.None ->
+                    let result = fAdd a neutralB
+                    BinTree.Leaf result, BinTree.Leaf result
+
+                | BinTree.Leaf a, BinTree.Leaf b ->
+                    let result = fAdd a b
+
+                    if result = neutralC then
+                        BinTree.None, BinTree.None
+                    else
+                        BinTree.Leaf result, BinTree.Leaf result
+
+                | _ -> newParts binTree1 binTree2
+
+            BinTree.Node(fst children, snd children) |> VectorData.reduce
+
+        if vec1.Length <> vec2.Length then
+            failwith "Dimensions of objects don't match."
+        else
+            SparseVector(sum vec1.Data vec2.Data, vec1.Length)
+
+(*
     /// Vector by Matrix multiplication.
     let vecByMtx fAdd (fMult: 'a -> 'b -> 'c) (vec: SparseVector<'a>) (mtx: SparseMatrix<'b>) =
 
         // Since data is stored as a Tree, we need to calculate the maximum depth.
-        // This calculation will allow to make correct assumptions about what operations should we do when a Leaf is reached by recursion.
+        // This calculation will allow us to make correct assumptions about what operations should we do when a Leaf is reached by recursion.
         // Multiplication and addition only occur when the maximum depth is reached.
         // Otherwise we make a recursive call with an increased depth counter.
         let powerSize = max (max vec.Length mtx.Rows) mtx.Columns |> Numbers.ceilPowTwo
         let maxDepth = Math.Log2(float powerSize) |> int
 
-        let rec sum binTree1 binTree2 currDepth =
+        let rec sum binTree1 binTree2 depth =
             match binTree1, binTree2 with
             | BinTree.None, tree
             | tree, BinTree.None -> tree
 
             | BinTree.Leaf a, BinTree.Leaf b ->
-                if currDepth = maxDepth then
+                if depth = maxDepth then
                     BinTree.Leaf(fAdd a b)
                 else
-                    sum binTree1 binTree2 (currDepth + 1)
+                    BinTree.Node(BinTree.Leaf(fAdd a b), BinTree.Leaf(fAdd a b)) |> VectorData.reduce
 
             | BinTree.Leaf _, BinTree.Node(b1, b2) ->
-                let leftPart = sum binTree1 b1 (currDepth + 1)
-                let rightPart = sum binTree1 b2 (currDepth + 1)
+                let leftPart = sum binTree1 b1 (depth + 1)
+                let rightPart = sum binTree1 b2 (depth + 1)
                 BinTree.Node(leftPart, rightPart) |> VectorData.reduce
 
             | BinTree.Node(a1, a2), BinTree.Leaf _ ->
-                let leftPart = sum a1 binTree2 (currDepth + 1)
-                let rightPart = sum a2 binTree2 (currDepth + 1)
+                let leftPart = sum a1 binTree2 (depth + 1)
+                let rightPart = sum a2 binTree2 (depth + 1)
                 BinTree.Node(leftPart, rightPart) |> VectorData.reduce
 
             | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
-                let leftPart = sum a1 b1 (currDepth + 1)
-                let rightPart = sum a2 b2 (currDepth + 1)
+                let leftPart = sum a1 b1 (depth + 1)
+                let rightPart = sum a2 b2 (depth + 1)
                 BinTree.Node(leftPart, rightPart) |> VectorData.reduce
-
 
         // We only increase the depth level when the recursive call is made.
         // Because the sum function is called on the current depth level, the counter for sum does not increase.
-        let rec mult binTree quadTree currDepth =
-            match binTree, quadTree with
-            // Neutral * Value = Neutral
-            | BinTree.None, _
-            | _, QuadTree.None -> BinTree.None
+        let rec mult binTree quadTree depth =
 
-            | BinTree.Leaf a, QuadTree.Leaf b ->
-                if currDepth = maxDepth then
-                    BinTree.Leaf(fMult a b)
-                else
-                    sum (mult binTree quadTree (currDepth + 1)) (mult binTree quadTree (currDepth + 1)) currDepth
+            let fDo leftChild rightChild nw ne sw se depth =
+                sum (mult leftChild nw (depth + 1)) (mult rightChild sw (depth + 1)) depth,
+                sum (mult leftChild ne (depth + 1)) (mult rightChild se (depth + 1)) depth
 
-            // This is the case of BinTree.Node(a, a), QuadTree.Node(b1, b2, b3, b4)
-            | BinTree.Leaf _, QuadTree.Node(b1, b2, b3, b4) ->
-                let leftPart =
-                    sum (mult binTree b1 (currDepth + 1)) (mult binTree b3 (currDepth + 1)) currDepth
+            let newParts binTree quadtree =
+                let leftPart, rightPart =
+                    match binTree, quadtree with
+                    | BinTree.Leaf _, QuadTree.Node(nw, ne, sw, se) -> fDo binTree binTree nw ne sw se depth
+                    | BinTree.Node(leftChild, rightChild), QuadTree.Leaf _ ->
+                        fDo leftChild rightChild quadtree quadtree quadtree quadtree depth
+                    | BinTree.Node(leftChild, rightChild), QuadTree.Node(nw, ne, sw, se) ->
+                        fDo leftChild rightChild nw ne sw se depth
+                    | _ ->
+                        failwith $"MatrixAlgebra.vecByMtx.mult.newParts: Unexpected arguments: %A{(binTree, quadtree)}"
 
-                let rightPart =
-                    sum (mult binTree b2 (currDepth + 1)) (mult binTree b4 (currDepth + 1)) currDepth
+                leftPart, rightPart
 
-                BinTree.Node(leftPart, rightPart) |> VectorData.reduce
+            let children =
+                match binTree, quadTree with
+                // Neutral * Value = Neutral
+                | BinTree.None, _
+                | _, QuadTree.None -> BinTree.None, BinTree.None
 
-            // This is the case of BinTree.Node(a1, a2), QuadTree.Node(b, b, b, b)
-            | BinTree.Node(a1, a2), QuadTree.Leaf _ ->
-                let leftPart =
-                    sum (mult a1 quadTree (currDepth + 1)) (mult a2 quadTree (currDepth + 1)) currDepth
+                | BinTree.Leaf a, QuadTree.Leaf b ->
+                    if depth = maxDepth then
+                        let result = fMult a b
+                        BinTree.Leaf(result), BinTree.Leaf(result)
+                    else
+                        let result = fAdd (fMult a b) (fMult a b)
+                        BinTree.Leaf(result), BinTree.Leaf(result) |> VectorData.reduce
+                | _ -> newParts binTree quadTree
 
-                let rightPart =
-                    sum (mult a1 quadTree (currDepth + 1)) (mult a2 quadTree (currDepth + 1)) currDepth
-
-                BinTree.Node(leftPart, rightPart) |> VectorData.reduce
-
-            // General case.
-            | BinTree.Node(a1, a2), QuadTree.Node(b1, b2, b3, b4) ->
-                let leftPart =
-                    sum (mult a1 b1 (currDepth + 1)) (mult a2 b3 (currDepth + 1)) currDepth
-
-                let rightPart =
-                    sum (mult a1 b2 (currDepth + 1)) (mult a2 b4 (currDepth + 1)) currDepth
-
-                BinTree.Node(leftPart, rightPart) |> VectorData.reduce
+            BinTree.Node(fst children, snd children) |> VectorData.reduce
 
         if vec.Length <> mtx.Rows then
 
@@ -375,88 +436,88 @@ module MatrixAlgebra =
         // Same idea. Calculate overall data structure depth and check a current level when a Leaf is reached.
         let maxDepth = Math.Log2(float powerSize) |> int
 
-        let rec sum quadTree1 quadTree2 currDepth =
+        let rec sum quadTree1 quadTree2 depth =
             match quadTree1, quadTree2 with
             // Neutral + Value = Value
             | QuadTree.None, tree
             | tree, QuadTree.None -> tree
 
             | QuadTree.Leaf a, QuadTree.Leaf b ->
-                if currDepth = maxDepth then
+                if depth = maxDepth then
                     QuadTree.Leaf(fAdd a b)
                 else
-                    sum quadTree1 quadTree2 (currDepth + 1)
+                    let result = QuadTree.Leaf (fAdd a b)
+                    QuadTree.Node(result, result, result, result) |> reduce
 
             // The following two cases are of QuadTree.Node(a1, a2, a3, a4), QuadTree.Node(b1, b2, b3, b4)
             | QuadTree.Leaf _, QuadTree.Node(b1, b2, b3, b4) ->
-                let s1 = sum quadTree1 b1 (currDepth + 1)
-                let s2 = sum quadTree1 b2 (currDepth + 1)
-                let s3 = sum quadTree1 b3 (currDepth + 1)
-                let s4 = sum quadTree1 b4 (currDepth + 1)
+                let s1 = sum quadTree1 b1 (depth + 1)
+                let s2 = sum quadTree1 b2 (depth + 1)
+                let s3 = sum quadTree1 b3 (depth + 1)
+                let s4 = sum quadTree1 b4 (depth + 1)
                 QuadTree.Node(s1, s2, s3, s4) |> reduce
 
             | QuadTree.Node(a1, a2, a3, a4), QuadTree.Leaf _ ->
-                let s1 = sum a1 quadTree2 (currDepth + 1)
-                let s2 = sum a2 quadTree2 (currDepth + 1)
-                let s3 = sum a3 quadTree2 (currDepth + 1)
-                let s4 = sum a4 quadTree2 (currDepth + 1)
+                let s1 = sum a1 quadTree2 (depth + 1)
+                let s2 = sum a2 quadTree2 (depth + 1)
+                let s3 = sum a3 quadTree2 (depth + 1)
+                let s4 = sum a4 quadTree2 (depth + 1)
                 QuadTree.Node(s1, s2, s3, s4) |> reduce
 
             // General case.
             | QuadTree.Node(a1, a2, a3, a4), QuadTree.Node(b1, b2, b3, b4) ->
-                let s1 = sum a1 b1 (currDepth + 1)
-                let s2 = sum a2 b2 (currDepth + 1)
-                let s3 = sum a3 b3 (currDepth + 1)
-                let s4 = sum a4 b4 (currDepth + 1)
+                let s1 = sum a1 b1 (depth + 1)
+                let s2 = sum a2 b2 (depth + 1)
+                let s3 = sum a3 b3 (depth + 1)
+                let s4 = sum a4 b4 (depth + 1)
                 QuadTree.Node(s1, s2, s3, s4) |> reduce
 
 
-        let rec mult quadTree1 quadTree2 currDepth =
+        let rec mult quadTree1 quadTree2 depth =
             match quadTree1, quadTree2 with
             // Neutral * Value = Neutral
             | QuadTree.None, _
             | _, QuadTree.None -> QuadTree.None
 
             | QuadTree.Leaf a, QuadTree.Leaf b ->
-                if currDepth = maxDepth then
+                if depth = maxDepth then
                     QuadTree.Leaf(fMult a b)
                 else
-                    // Note that depth level only increases for the mult function but not for the sum function.
-                    sum (mult quadTree1 quadTree2 (currDepth + 1)) (mult quadTree1 quadTree2 (currDepth + 1)) currDepth
-                    |> reduce
+                    let result = QuadTree.Leaf (fAdd (fMult a b) (fMult a b))
+                    QuadTree.Node(result, result, result, result) |> reduce
 
             // The following two cases are of QuadTree.Node(a1, a2, a3, a4), QuadTree.Node(b1, b2, b3, b4)
             | QuadTree.Leaf _, QuadTree.Node(b1, b2, b3, b4) ->
                 let s1 =
-                    sum (mult quadTree1 b1 (currDepth + 1)) (mult quadTree1 b3 (currDepth + 1)) currDepth
+                    sum (mult quadTree1 b1 (depth + 1)) (mult quadTree1 b3 (depth + 1)) depth
 
                 let s2 =
-                    sum (mult quadTree1 b2 (currDepth + 1)) (mult quadTree1 b4 (currDepth + 1)) currDepth
+                    sum (mult quadTree1 b2 (depth + 1)) (mult quadTree1 b4 (depth + 1)) depth
                 // let sw = sum (mult quadTree1 b1) (mult quadTree1 b3)
                 // let se = sum (mult quadTree1 b2) (mult quadTree1 b4)
                 QuadTree.Node(s1, s2, s1, s2) |> reduce
 
             | QuadTree.Node(a1, a2, a3, a4), QuadTree.Leaf _ ->
                 let nw =
-                    sum (mult a1 quadTree2 (currDepth + 1)) (mult a2 quadTree2 (currDepth + 1)) currDepth
+                    sum (mult a1 quadTree2 (depth + 1)) (mult a2 quadTree2 (depth + 1)) depth
 
                 let ne =
-                    sum (mult a1 quadTree2 (currDepth + 1)) (mult a2 quadTree2 (currDepth + 1)) currDepth
+                    sum (mult a1 quadTree2 (depth + 1)) (mult a2 quadTree2 (depth + 1)) depth
 
                 let sw =
-                    sum (mult a3 quadTree2 (currDepth + 1)) (mult a4 quadTree2 (currDepth + 1)) currDepth
+                    sum (mult a3 quadTree2 (depth + 1)) (mult a4 quadTree2 (depth + 1)) depth
 
                 let se =
-                    sum (mult a3 quadTree2 (currDepth + 1)) (mult a4 quadTree2 (currDepth + 1)) currDepth
+                    sum (mult a3 quadTree2 (depth + 1)) (mult a4 quadTree2 (depth + 1)) depth
 
                 QuadTree.Node(nw, ne, sw, se) |> reduce
 
             // General case.
             | QuadTree.Node(a1, a2, a3, a4), QuadTree.Node(b1, b2, b3, b4) ->
-                let nw = sum (mult a1 b1 (currDepth + 1)) (mult a2 b3 (currDepth + 1)) currDepth
-                let ne = sum (mult a1 b2 (currDepth + 1)) (mult a2 b4 (currDepth + 1)) currDepth
-                let sw = sum (mult a3 b1 (currDepth + 1)) (mult a4 b3 (currDepth + 1)) currDepth
-                let se = sum (mult a3 b2 (currDepth + 1)) (mult a4 b4 (currDepth + 1)) currDepth
+                let nw = sum (mult a1 b1 (depth + 1)) (mult a2 b3 (depth + 1)) depth
+                let ne = sum (mult a1 b2 (depth + 1)) (mult a2 b4 (depth + 1)) depth
+                let sw = sum (mult a3 b1 (depth + 1)) (mult a4 b3 (depth + 1)) depth
+                let se = sum (mult a3 b2 (depth + 1)) (mult a4 b4 (depth + 1)) depth
                 QuadTree.Node(nw, ne, sw, se) |> reduce
 
         if mtx1.Columns <> mtx2.Rows then
@@ -466,3 +527,4 @@ module MatrixAlgebra =
 
         else
             SparseMatrix(mult mtx1.Data mtx2.Data 0, mtx1.Rows, mtx2.Columns)
+*)

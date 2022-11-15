@@ -315,6 +315,7 @@ module TestCases =
                       for j = 1 to columns do
                           Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}"
 
+              (*
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
               <| fun _ ->
                   let arr = [| Some 1 |]
@@ -345,7 +346,7 @@ module TestCases =
 
                   let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.None)
 
-                  Expect.equal actualResult.Data expectedResult ""
+                  Expect.equal actualResult.Data expectedResult $"Input arr: %A{arr}. Input table %A{table}. Vector data: %A{vec.Data}. Matrix data: %A{mtx.Data} "
                   Expect.equal actualResult.Length 1 ""
 
               testCase "Vector 1x3 * 3x2 Matrix = Vector 1x2"
@@ -385,4 +386,26 @@ module TestCases =
                       )
 
                   Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 4 "" ]
+                  Expect.equal actualResult.Length 4 ""
+
+              testCase "Matrix 3x5 * 5x3 Matrix * 3x3 Matrix = Matrix 3x3"
+              <| fun _ ->
+                  let arr = [| Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1 |]
+
+                  let table3x5 = Array2D.init 3 5 (fun i j -> Some(1))
+                  let table5x3 = Array2D.init 5 3 (fun i j -> Some(1))
+                  let table3x3 = Array2D.init 3 3 (fun i j -> Some(1))
+                  let vec = SparseVector.SparseVector arr
+                  let mtx1 = SparseMatrix.SparseMatrix table3x5
+                  let mtx2 = SparseMatrix.SparseMatrix table5x3
+                  let mtx3 = SparseMatrix.SparseMatrix table3x3
+
+                  let actualResult = MatrixAlgebra.mtxByMtx (+) (*) (MatrixAlgebra.mtxByMtx (+) (*) mtx1 mtx2) mtx3
+
+                  let expectedResult = QuadTree.None
+
+                  Expect.equal actualResult.Data expectedResult ""
+                  Expect.equal actualResult.Rows 3 ""
+                  Expect.equal actualResult.Columns 3 "" ]
+*)
+              ]

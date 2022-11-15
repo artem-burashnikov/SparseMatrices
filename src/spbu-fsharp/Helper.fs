@@ -65,3 +65,15 @@ module Numbers =
         if x <= 0 then 1
         elif x = 1 then 2
         else looper x 1
+
+    /// Function calculates the exponent needed to get the smallest power of two which is greater than or equal to the given integer.
+    let powTwo x =
+
+        let rec looper x acc power =
+            if acc >= x then
+                power
+            else
+                looper x (acc * 2) (power + 1)
+
+        if x = 1 then 0
+        else looper x 1 0
