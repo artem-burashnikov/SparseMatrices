@@ -583,4 +583,39 @@ module Algebra =
                           expectedResult.Data
                           $"Input array: %A{arrSome}, \nInput table %A{tableSome}, \nVector data: %A{vec.Data}, \nMatrix data: %A{mtx.Data}"
 
+                      Expect.equal actualResult.Length mtx.Columns ""
+
+              testProperty "Vector x Matrix: multiplying by Id from the right."
+              <| fun (x: int) ->
+                  if abs x > 0 then
+                      let length = abs x
+
+                      // Initialize array of numbers and randomly change some of them to zeroes.
+                      // After which map Some and None.
+                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map randomValueZero
+                      let arrSome = Array.map fromZeroToSomeNone arr
+
+                      // Initialize Identity matrix for a given vector.
+                      let table = Array2D.init length length (fun i j -> if i = j then 1 else 0)
+
+                      let tableSome = table |> Array2D.map fromZeroToSomeNone
+
+                      // Then we make a vector and a matrix using the data and multiply them.
+                      let vec = SparseVector.SparseVector arrSome
+                      let mtx = SparseMatrix.SparseMatrix tableSome
+
+                      // We also calculate the naive approach of multiplying array and a table.
+                      // Result from tree*tree and arr*table should match.
+                      let expectedResult =
+                          lazyVecByMtx arr table
+                          |> Array.map fromZeroToSomeNone
+                          |> SparseVector.SparseVector
+
+                      let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
+
+                      Expect.equal
+                          actualResult.Data
+                          expectedResult.Data
+                          $"Input array: %A{arrSome}, \nInput table %A{tableSome}, \nVector data: %A{vec.Data}, \nMatrix data: %A{mtx.Data}"
+
                       Expect.equal actualResult.Length mtx.Columns "" ]
