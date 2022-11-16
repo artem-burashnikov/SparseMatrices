@@ -343,6 +343,10 @@ module Algebra =
     let randomSomeNone x =
         if r.Next(0, 101) <= 30 then Some x else Option.None
 
+    let randomValueZero x = if r.Next(0, 101) <= 30 then x else 0
+
+    let fromZeroToSomeNone x = if x <> 0 then Some x else Option.None
+
     let fPlus a b =
         match a, b with
         | Option.None, Option.None -> Option.None
@@ -365,6 +369,33 @@ module Algebra =
         match a, b with
         | Some x, Some y -> Some(x * y)
         | _ -> Option.None
+
+
+    let lazyMtxMtx (table1: int[,]) (table2: int[,]) =
+        let mtx1Rows = Array2D.length1 table1
+        let mtx2Rows = Array2D.length1 table2
+        let mtx2Columns = Array2D.length2 table2
+
+        let mutable result = Array2D.zeroCreate mtx1Rows mtx2Columns
+
+        for i = 0 to mtx1Rows - 1 do
+            for j = 0 to mtx2Columns - 1 do
+                for k = 0 to mtx2Rows - 1 do
+                    result[i, j] <- result[i, j] + table1[i, k] * table2[k, j]
+
+        result
+
+
+    let lazyVecByMtx (arr: array<int>) (table: int[,]) =
+        let rows = arr.Length
+        let columns = Array2D.length2 table
+        let mutable result = Array.zeroCreate columns
+
+        for j = 0 to columns - 1 do
+            for i = 0 to rows - 1 do
+                result[j] <- result[j] + arr[i] * table[i, j]
+
+        result
 
 
     [<Tests>]
@@ -480,8 +511,7 @@ module Algebra =
 
                   let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
 
-                  let expectedResult =
-                      BinTrees.Node(BinTrees.Leaf(table[0, 0] + table[1, 0]), BinTrees.None) |> reduce
+                  let expectedResult = BinTrees.Leaf(table[0, 0] + table[1, 0]) |> reduce
 
                   Expect.equal
                       actualResult.Data
@@ -503,63 +533,54 @@ module Algebra =
                   let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
 
                   let expectedResult =
-                      let innerNode =
-                          BinTree.Node(
-                              BinTree.Leaf(table[0, 0] + table[1, 0] + table[2, 0]),
-                              BinTree.Leaf(table[0, 1] + table[1, 1] + table[2, 1])
-                          )
-                          |> reduce
-
-                      BinTree.Node(innerNode, BinTree.None) |> reduce
+                      BinTree.Node(
+                          BinTree.Leaf(table[0, 0] + table[1, 0] + table[2, 0]),
+                          BinTree.Leaf(table[0, 1] + table[1, 1] + table[2, 1])
+                      )
+                      |> reduce
 
                   Expect.equal
                       actualResult.Data
                       expectedResult
                       $"Input arr: %A{arr}. Input table %A{table}. Vector data: %A{vec.Data}. Matrix data: %A{mtx.Data}"
 
-                  Expect.equal actualResult.Length (Array2D.length2 table) "" ]
-(*
-              testCase "Vector 1x8 * 8x4 Matrix = Vector 1x4"
-              <| fun _ ->
-                  let arr = [| Some 1; Some 1; Some 1 ; Some 1; Some 1; Some 1; Some 1; Some 1|]
+                  Expect.equal actualResult.Length (Array2D.length2 table) ""
 
-                  let table = Array2D.init 8 4 (fun _ _ -> r.Next(1,10)) |> Array2D.map randomSomeNone
-                  // let tableSome = table |> Array2D.map Some
+              testProperty "Vector x Matrix"
+              <| fun (x: int) (y: int) ->
+                  if abs x > 0 && abs y > 0 then
+                      let length = abs x
+                      let rows = length
+                      let columns = abs y
 
-                  let vec = SparseVector.SparseVector arr
-                  let mtx = SparseMatrix.SparseMatrix table
+                      // Initialize array of numbers and randomly change some of them to zeroes.
+                      // After which map Some and None.
+                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map randomValueZero
+                      let arrSome = Array.map fromZeroToSomeNone arr
 
-                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
+                      // Do the same with Array2D.
+                      let table =
+                          Array2D.init rows columns (fun _ _ -> r.Next(0, 10))
+                          |> Array2D.map randomValueZero
 
-                  let expectedResult =
-                      BinTrees.Node(
-                          BinTrees.Node(
-                              BinTrees.Node(BinTrees.Leaf 28, BinTrees.Leaf 36),
-                              BinTrees.Node(BinTrees.Leaf 44, BinTrees.Leaf 52)
-                          ),
-                          BinTrees.None
-                      )
+                      let tableSome = table |> Array2D.map fromZeroToSomeNone
 
-                  Expect.equal actualResult.Data expectedResult $"Input arr: %A{arr}. Input table %A{table}. Vector data: %A{vec.Data}. Matrix data: %A{mtx.Data}"
-                  Expect.equal actualResult.Length (Array2D.length2 table) ""]
+                      // Then we make a vector and a matrix using the data and multiply them.
+                      let vec = SparseVector.SparseVector arrSome
+                      let mtx = SparseMatrix.SparseMatrix tableSome
 
-              testCase "Matrix 3x5 * 5x3 Matrix * 3x3 Matrix = Matrix 3x3"
-              <| fun _ ->
-                  let arr = [| Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1 |]
+                      // We also calculate the naive approach of multiplying array and a table.
+                      // Result from tree*tree and arr*table should match.
+                      let expectedResult =
+                          lazyVecByMtx arr table
+                          |> Array.map fromZeroToSomeNone
+                          |> SparseVector.SparseVector
 
-                  let table3x5 = Array2D.init 3 5 (fun i j -> Some(1))
-                  let table5x3 = Array2D.init 5 3 (fun i j -> Some(1))
-                  let table3x3 = Array2D.init 3 3 (fun i j -> Some(1))
-                  let vec = SparseVector.SparseVector arr
-                  let mtx1 = SparseMatrix.SparseMatrix table3x5
-                  let mtx2 = SparseMatrix.SparseMatrix table5x3
-                  let mtx3 = SparseMatrix.SparseMatrix table3x3
+                      let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
 
-                  let actualResult = MatrixAlgebra.mtxByMtx (+) (*) (MatrixAlgebra.mtxByMtx (+) (*) mtx1 mtx2) mtx3
+                      Expect.equal
+                          actualResult.Data
+                          expectedResult.Data
+                          $"Input array: %A{arrSome}, \nInput table %A{tableSome}, \nVector data: %A{vec.Data}, \nMatrix data: %A{mtx.Data}"
 
-                  let expectedResult = QuadTree.None
-
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Rows 3 ""
-                  Expect.equal actualResult.Columns 3 "" ]
-*)
+                      Expect.equal actualResult.Length mtx.Columns "" ]

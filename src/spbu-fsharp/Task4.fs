@@ -327,7 +327,12 @@ module MatrixAlgebra =
         (mtx: SparseMatrix<'b>)
         : SparseVector<'c> =
 
-        let powerSize = (max (max vec.Length mtx.Rows) mtx.Columns) |> Numbers.ceilPowTwo
+
+        // We need to calculate how deep is the deepest tree.
+        // We do it by recalling how it was constructed.
+        // Now and later we may only use number of Rows of a given matrix for necessary calculations,
+        // since a given vector's length would have to match it to produce the result.
+        let powerSize = (max mtx.Rows mtx.Columns) |> Numbers.ceilPowTwo
         let maxDepth = Numbers.powTwo powerSize
 
 
@@ -348,24 +353,22 @@ module MatrixAlgebra =
 
             | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(sum a1 bTree2, sum a2 bTree2) |> VectorData.reduce
 
-            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
-                let leftPart = sum a1 b1
-                let rightPart = sum a2 b2
-                BinTree.Node(leftPart, rightPart) |> VectorData.reduce
+            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(sum a1 b1, sum a2 b2) |> VectorData.reduce
 
 
         // Multiplication optimization.
-        // We need to calculate n sums and the first sum is already given, so the counter stops at 1.
-        let rec optimizer (value: 'c option) (counter: int) =
+        // We need to calculate n sums and the first sum is already given, so the counter stops at 1 (starts at n).
+        let rec optimizer (value: 'c option) counter =
             if counter = 1 then
                 value
             else
-                let tmp = fAdd value value
-                optimizer tmp (counter - 1)
+                let acc = fAdd value value
+                optimizer acc (counter - 1)
 
 
         // Multiplication.
         let rec mult bTree qTree depth =
+
             //
             //          [qt1]
             //          [qt2]
@@ -411,22 +414,63 @@ module MatrixAlgebra =
                 BinTree.Node(fDo a1 a2 nw sw depth, fDo a1 a2 ne se depth) |> VectorData.reduce
 
 
+        // How much wood would a woodchuck chuck if a woodchuck could chuck wood?
+        // Answer: The size of a binTree.
+        /// Chop unnecessary branches of the result of multiplication.
+        let rec chopChop level size bTree =
+            if level < size then
+                match bTree with
+                | BinTree.Node(left, _) -> chopChop (level + 1) size left
+                | BinTree.Leaf _
+                | BinTree.None -> bTree
+            else
+                bTree
+
+
+        // Pad the much needed branches so the multiplication actually works as intended.
+        let rec powerUp level size bTree =
+            if level < size then
+                match bTree with
+                | BinTree.Node _ -> BinTree.Node(powerUp (level + 1) size bTree, BinTree.None)
+                | BinTree.Leaf _
+                | BinTree.None -> bTree
+            else
+                bTree
+
+
+        // Calculate how many levels would we need to pad or to chop.
+        // We then would start at 0 ang go up to that number.
+        let mtxRowPower = mtx.Rows |> Numbers.powTwo
+        let mtxColumnPower = mtx.Columns |> Numbers.powTwo
+        let diff = (max mtxColumnPower mtxRowPower) - (min mtxRowPower mtxColumnPower)
+
+
         if vec.Length <> mtx.Rows then
 
             failwith
                 $"Algebra.vecByMtx: Dimensions of objects vector's length: %A{vec.Length} and Matrix rows %A{mtx.Rows} don't match."
-        elif mtx.Rows = 1 then
 
-            let result = fMult vec[1] mtx[1, 1]
-
+        // 1x1 is an edge case.
+        elif mtx.Rows = 1 && mtx.Columns = 1 then
             let tree =
+                let result = fMult vec[1] mtx[1, 1]
+
                 match result with
                 | Option.None -> BinTree.None
                 | _ -> BinTree.Leaf(result |> getValue)
 
             SparseVector(tree, mtx.Columns)
 
-        else
+        // In this case we would have to pad the vector's length before multiplication.
+        elif mtxRowPower < mtxColumnPower then
+            let tree = mult (powerUp 0 diff vec.Data) mtx.Data 0
+            SparseVector(tree, mtx.Columns)
+
+        // When sizes match no additional action is needed.
+        elif mtxRowPower = mtxColumnPower then
             let tree = mult vec.Data mtx.Data 0
-            //TODO CUT ALL THE BRANCHES!!!
+            SparseVector(tree, mtx.Columns)
+        else
+            // Otherwise we need to clean up the result by chopping.
+            let tree = mult vec.Data mtx.Data 0 |> chopChop 0 diff
             SparseVector(tree, mtx.Columns)
