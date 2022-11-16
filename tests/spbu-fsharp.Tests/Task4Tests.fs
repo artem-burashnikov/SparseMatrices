@@ -1,26 +1,26 @@
 module Task4Tests
 
 open System
-open Helpers.Numbers
 open HomeWork4
+open Helpers.Numbers
 open HomeWork4.MatrixData
 open HomeWork4.VectorData
-open Trees
+open Microsoft.FSharp.Collections
+open Trees.BinTrees
 open Trees.QuadTrees
+open Trees
 open Expecto
-open FsCheck
 open Microsoft.FSharp.Core
 
+let config = { FsCheckConfig.defaultConfig with maxTest = 10000 }
 
-module TestCases =
-
-    let config = { Config.Default with MaxTest = 10000 }
+module GeneralFunctions =
 
     [<Tests>]
     let tests =
 
         testList
-            "samples"
+            "General functions."
             [
 
               testCase "ceilPowTwo: Input is equal to 0."
@@ -55,7 +55,17 @@ module TestCases =
                       elif x = 1 then 2
                       else pown 2 (int << ceil <| Math.Log2(double x))
 
-                  result1 = result2
+                  result1 = result2 ]
+
+
+module SparseVector =
+
+    [<Tests>]
+    let tests =
+
+        testList
+            "SparseVector"
+            [
 
               testProperty "Vector partitioning: built-in function should produce the same result."
               <| fun (arr: array<_>) ->
@@ -132,10 +142,20 @@ module TestCases =
                   for i = 1 to arr.Length do
                       actualResult <- sparseVec[i] :: actualResult
 
-                  Expect.sequenceEqual (actualResult |> List.rev) arr ""
+                  Expect.sequenceEqual (actualResult |> List.rev) arr "" ]
+
+
+module SparseMatrix =
+
+    [<Tests>]
+    let tests =
+
+        testList
+            "SparseMatrix"
+            [
 
               testProperty "Table partition: empty input"
-              <| fun (arr: _ option[,]) ->
+              <| fun (arr: int option[,]) ->
 
                   let mtx = Matrix(arr, 0, 0, 0, 0)
 
@@ -150,7 +170,7 @@ module TestCases =
                   Expect.equal se.Columns 0 ""
 
               testProperty "Table partition (by indices)"
-              <| fun (arr: _ option[,]) (x: int) (y: int) (rows: int) (columns: int) ->
+              <| fun (arr: int option[,]) (x: int) (y: int) (rows: int) (columns: int) ->
 
                   let pX = abs x
                   let pY = abs y
@@ -268,7 +288,7 @@ module TestCases =
 
                   Expect.equal actualResult expectedResult $"Failed to construct from table: %A{input}"
 
-              testCase "Getting values from 1x1 array"
+              testCase "Getting values from 1x1 table"
               <| fun _ ->
 
                   let input = Array2D.zeroCreate 1 1
@@ -279,7 +299,7 @@ module TestCases =
                       for j = 1 to 1 do
                           Expect.equal (mtx[i, j]) (input[i - 1, j - 1]) ""
 
-              testCase "Getting values from 1x2 array"
+              testCase "Getting values from 1x2 table"
               <| fun _ ->
 
                   let table = Array2D.init 1 2 (fun i j -> Some(i + j))
@@ -290,7 +310,7 @@ module TestCases =
                       for j = 1 to 2 do
                           Expect.equal (mtx[i, j]) (table[i - 1, j - 1]) ""
 
-              testCase "Getting values from 2x1 array"
+              testCase "Getting values from 2x1 table"
               <| fun _ ->
 
                   let table = Array2D.init 2 1 (fun i j -> Some(i + j))
@@ -313,121 +333,203 @@ module TestCases =
 
                   for i = 1 to rows do
                       for j = 1 to columns do
-                          Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}"
+                          Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}" ]
+
+
+module Algebra =
+
+    let r = Random()
+
+    let randomSomeNone x =
+        if r.Next(0, 101) <= 30 then Some x else Option.None
+
+    let fPlus a b =
+        match a, b with
+        | Option.None, Option.None -> Option.None
+        | Some x, Some y ->
+            let result = x + y
+            if x = -y then Option.None else Some result
+        | Option.None, Some y -> Some y
+        | Some x, Option.None -> Some x
+
+    let fMinus a b =
+        match a, b with
+        | Option.None, Option.None -> Option.None
+        | Some x, Some y ->
+            let result = x - y
+            if x = y then Option.None else Some result
+        | Option.None, Some y -> Some(-y)
+        | Some x, Option.None -> Some x
+
+    let fMult a b =
+        match a, b with
+        | Some x, Some y -> Some(x * y)
+        | _ -> Option.None
+
+
+    [<Tests>]
+    let tests =
+
+        testList
+            "Algebra"
+            [
 
               testProperty "Adding 1 and then subtracting 1 should output the initial data."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let arr =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
                   let arrOnes = Array.init (int length) (fun _ -> Some 1)
                   let vec = SparseVector.SparseVector arr
                   let vecOnes = SparseVector.SparseVector arrOnes
-                  let plusResult = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec vecOnes
-                  let result = MatrixAlgebra.vecPlusVec (0) (0) (0) (-) plusResult vecOnes
-                  Expect.equal vec.Data result.Data ""
+                  let plusOne = MatrixAlgebra.vecPlusVec fPlus vec vecOnes
+                  let plusMinusOne = MatrixAlgebra.vecPlusVec fMinus plusOne vecOnes
+
+                  Expect.equal
+                      plusMinusOne.Data
+                      vec.Data
+                      $"Array: %A{arr}, vector: %A{vec.Data}, plusOne: %A{plusOne.Data}, plusMinusOne: %A{plusMinusOne.Data}"
 
               testProperty "Adding/Subtracting 0 should output the initial data."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
-                  let zeroes = Array.zeroCreate (int length)
+                  let arr =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
+                  let zeroes = Array.init (int length) (fun _ -> Option.None)
                   let vec = SparseVector.SparseVector arr
                   let vecZeroes = SparseVector.SparseVector zeroes
-                  let plusResult = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec vecZeroes
-                  let result = MatrixAlgebra.vecPlusVec (0) (0) (0) (-) plusResult vecZeroes
-                  Expect.equal vec.Data result.Data ""
+                  let plusZero = MatrixAlgebra.vecPlusVec fPlus vec vecZeroes
+                  let minusZero = MatrixAlgebra.vecPlusVec fMinus plusZero vecZeroes
+                  Expect.equal minusZero.Data vec.Data ""
 
               testProperty "Commutative property should hold."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
-                  let arr2 = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
-                  let vec1 = SparseVector.SparseVector arr
+                  let arr1 =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
+                  let arr2 =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
+                  let vec1 = SparseVector.SparseVector arr1
                   let vec2 = SparseVector.SparseVector arr2
-                  let result1 = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec1 vec2
-                  let result2 = MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec2 vec1
+                  let result1 = MatrixAlgebra.vecPlusVec fPlus vec1 vec2
+                  let result2 = MatrixAlgebra.vecPlusVec fPlus vec2 vec1
                   Expect.equal result1.Data result2.Data ""
 
               testProperty "Associative property should hold."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
-                  let arr2 = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
-                  let arr3 = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
-                  let vec1 = SparseVector.SparseVector arr
+                  let arr1 =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
+                  let arr2 =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
+                  let arr3 =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
+                  let vec1 = SparseVector.SparseVector arr1
                   let vec2 = SparseVector.SparseVector arr2
                   let vec3 = SparseVector.SparseVector arr3
 
                   let result1 =
-                      MatrixAlgebra.vecPlusVec (0) (0) (0) (+) (MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec1 vec2) vec3
+                      MatrixAlgebra.vecPlusVec fPlus (MatrixAlgebra.vecPlusVec fPlus vec1 vec2) vec3
 
                   let result2 =
-                      MatrixAlgebra.vecPlusVec (0) (0) (0) (+) (MatrixAlgebra.vecPlusVec (0) (0) (0) (+) vec2 vec3) vec1
+                      MatrixAlgebra.vecPlusVec fPlus (MatrixAlgebra.vecPlusVec fPlus vec2 vec3) vec1
 
                   Expect.equal result1.Data result2.Data ""
 
-              testProperty "Adding the inverse should result in neutral element."
+              testProperty "Subtracting oneself should result in neutral element."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> Some(Random().Next(1, 10)))
+                  let arr =
+                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+
                   let vec = SparseVector.SparseVector arr
-                  let result = MatrixAlgebra.vecPlusVec (0) (0) (0) (-) vec vec
+                  let result = MatrixAlgebra.vecPlusVec fMinus vec vec
                   Expect.equal result.Data BinTrees.None ""
-              (*
+
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
               <| fun _ ->
                   let arr = [| Some 1 |]
-
-                  let table = Array2D.init 1 1 (fun _ _ -> Some 1)
+                  let table = Array2D.init 1 1 (fun _ _ -> r.Next(1, 10))
+                  let tableSome = table |> Array2D.map Some
 
                   let vec = SparseVector.SparseVector arr
-                  let mtx = SparseMatrix.SparseMatrix table
+                  let mtx = SparseMatrix.SparseMatrix tableSome
 
-                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
+                  let actualResult = (MatrixAlgebra.vecByMtx fPlus fMult vec mtx)
 
-                  let expectedResult = BinTrees.BinTree.Leaf 2
+                  let expectedResult = BinTree.Leaf(table[0, 0])
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 1 ""
+                  Expect.equal
+                      actualResult.Data
+                      expectedResult
+                      $"Array: %A{arr}, vector: %A{vec.Data}, table: %A{table}, QuadTre: %A{mtx.Data}, actualResult: %A{actualResult.Data}"
 
+                  Expect.equal actualResult.Length (Array2D.length2 table) ""
 
               testCase "Vector 1x2 * 2x1 Matrix = Vector 1x1"
               <| fun _ ->
                   let arr = [| Some 1; Some 1 |]
 
-                  let table = Array2D.init 2 1 (fun i j -> Some(i + j))
+                  let table = Array2D.init 2 1 (fun _ _ -> r.Next(1, 10))
+                  let tableSome = table |> Array2D.map Some
 
                   let vec = SparseVector.SparseVector arr
-                  let mtx = SparseMatrix.SparseMatrix table
+                  let mtx = SparseMatrix.SparseMatrix tableSome
 
-                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
+                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
 
-                  let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.None)
+                  let expectedResult =
+                      BinTrees.Node(BinTrees.Leaf(table[0, 0] + table[1, 0]), BinTrees.None) |> reduce
 
-                  Expect.equal actualResult.Data expectedResult $"Input arr: %A{arr}. Input table %A{table}. Vector data: %A{vec.Data}. Matrix data: %A{mtx.Data} "
-                  Expect.equal actualResult.Length 1 ""
+                  Expect.equal
+                      actualResult.Data
+                      expectedResult
+                      $"Input arr: %A{arr}. Input table %A{table}. Vector data: %A{vec.Data}. Matrix data: %A{mtx.Data}"
+
+                  Expect.equal actualResult.Length (Array2D.length2 table) ""
 
               testCase "Vector 1x3 * 3x2 Matrix = Vector 1x2"
               <| fun _ ->
                   let arr = [| Some 1; Some 1; Some 1 |]
 
-                  let table = Array2D.init 3 2 (fun i j -> Some(i + j))
+                  let table = Array2D.init 3 2 (fun _ _ -> r.Next(1, 10))
+                  let tableSome = table |> Array2D.map Some
 
                   let vec = SparseVector.SparseVector arr
-                  let mtx = SparseMatrix.SparseMatrix table
+                  let mtx = SparseMatrix.SparseMatrix tableSome
 
-                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
+                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
 
                   let expectedResult =
-                      BinTrees.Node(BinTrees.Node(BinTrees.Leaf 3, BinTrees.Leaf 6), BinTrees.None)
+                      let innerNode =
+                          BinTree.Node(
+                              BinTree.Leaf(table[0, 0] + table[1, 0] + table[2, 0]),
+                              BinTree.Leaf(table[0, 1] + table[1, 1] + table[2, 1])
+                          )
+                          |> reduce
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 2 ""
+                      BinTree.Node(innerNode, BinTree.None) |> reduce
 
+                  Expect.equal
+                      actualResult.Data
+                      expectedResult
+                      $"Input arr: %A{arr}. Input table %A{table}. Vector data: %A{vec.Data}. Matrix data: %A{mtx.Data}"
+
+                  Expect.equal actualResult.Length (Array2D.length2 table) "" ]
+(*
               testCase "Vector 1x8 * 8x4 Matrix = Vector 1x4"
               <| fun _ ->
-                  let arr = [| Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1; Some 1 |]
+                  let arr = [| Some 1; Some 1; Some 1 ; Some 1; Some 1; Some 1; Some 1; Some 1|]
 
-                  let table = Array2D.init 8 4 (fun i j -> Some(i + j))
+                  let table = Array2D.init 8 4 (fun _ _ -> r.Next(1,10)) |> Array2D.map randomSomeNone
+                  // let tableSome = table |> Array2D.map Some
+
                   let vec = SparseVector.SparseVector arr
                   let mtx = SparseMatrix.SparseMatrix table
 
-                  let actualResult = MatrixAlgebra.vecByMtx (+) (*) vec mtx
+                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
 
                   let expectedResult =
                       BinTrees.Node(
@@ -438,8 +540,8 @@ module TestCases =
                           BinTrees.None
                       )
 
-                  Expect.equal actualResult.Data expectedResult ""
-                  Expect.equal actualResult.Length 4 ""
+                  Expect.equal actualResult.Data expectedResult $"Input arr: %A{arr}. Input table %A{table}. Vector data: %A{vec.Data}. Matrix data: %A{mtx.Data}"
+                  Expect.equal actualResult.Length (Array2D.length2 table) ""]
 
               testCase "Matrix 3x5 * 5x3 Matrix * 3x3 Matrix = Matrix 3x3"
               <| fun _ ->
@@ -461,4 +563,3 @@ module TestCases =
                   Expect.equal actualResult.Rows 3 ""
                   Expect.equal actualResult.Columns 3 "" ]
 *)
-              ]
