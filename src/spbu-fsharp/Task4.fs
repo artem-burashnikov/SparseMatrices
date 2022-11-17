@@ -283,19 +283,30 @@ module MatrixAlgebra =
 
 
     /// Adds two Sparse vectors together.
-    let vecPlusVec fAdd (vec1: SparseVector<'a>) (vec2: SparseVector<'a>) : SparseVector<'a> =
+    let vecPlusVec fAdd (vec1: SparseVector<'a>) (vec2: SparseVector<'b>) : SparseVector<'c> =
 
-        let rec sum binTree1 binTree2 =
-
-            match binTree1, binTree2 with
-            // // Neutral "+" Neutral = Neutral.
+        let rec sum bTree1 bTree2 =
+            match bTree1, bTree2 with
             | BinTree.None, BinTree.None -> BinTree.None
 
-            // Neutral "+" Something = Something.
-            | BinTree.None, tree
-            | tree, BinTree.None -> tree
+            | BinTree.None, BinTree.Leaf b ->
+                let result = fAdd Option.None (Some b)
 
-            // Value "+" Value. It may result in Neutral, so we check.
+                match result with
+                | Option.None -> BinTree.None
+                | _ -> BinTree.Leaf(result |> getValue)
+
+            | BinTree.None, BinTree.Node(b1, b2) -> BinTree.Node(sum bTree1 b1, sum bTree1 b2) |> VectorData.reduce
+
+            | BinTree.Leaf a, BinTree.None ->
+                let result = fAdd (Some a) Option.None
+
+                match result with
+                | Option.None -> BinTree.None
+                | _ -> BinTree.Leaf(result |> getValue)
+
+            | BinTree.Node(a1, a2), BinTree.None -> BinTree.Node(sum a1 bTree2, sum a2 bTree2) |> VectorData.reduce
+
             | BinTree.Leaf a, BinTree.Leaf b ->
                 let result = fAdd (Some a) (Some b)
 
@@ -303,12 +314,9 @@ module MatrixAlgebra =
                 | Option.None -> BinTree.None
                 | _ -> BinTree.Leaf(result |> getValue)
 
-            // Recursive cases. Need to reach data.
-            | BinTree.Leaf _, BinTree.Node(b1, b2) ->
-                BinTree.Node(sum binTree1 b1, sum binTree1 b2) |> VectorData.reduce
+            | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(sum bTree1 b1, sum bTree1 b2) |> VectorData.reduce
 
-            | BinTree.Node(a1, a2), BinTree.Leaf _ ->
-                BinTree.Node(sum a1 binTree2, sum a2 binTree2) |> VectorData.reduce
+            | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(sum a1 bTree2, sum a2 bTree2) |> VectorData.reduce
 
             | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(sum a1 b1, sum a2 b2) |> VectorData.reduce
 
@@ -336,7 +344,6 @@ module MatrixAlgebra =
         let maxDepth = Numbers.powTwo powerSize
 
 
-        // Addition.
         let rec sum bTree1 bTree2 =
             match bTree1, bTree2 with
             | BinTree.None, tree
@@ -358,12 +365,12 @@ module MatrixAlgebra =
 
         // Multiplication optimization.
         // We need to calculate n sums and the first sum is already given, so the counter stops at 1 (starts at n).
-        let rec optimizer (value: 'c option) counter =
+        let rec multMult (value: 'c option) counter =
             if counter = 1 then
                 value
             else
                 let acc = fAdd value value
-                optimizer acc (counter - 1)
+                multMult acc (counter - 1)
 
 
         // Multiplication.
@@ -398,7 +405,7 @@ module MatrixAlgebra =
 
                     match result with
                     | Option.None -> BinTree.None
-                    | _ -> BinTree.Leaf(optimizer result (maxDepth - depth) |> getValue)
+                    | _ -> BinTree.Leaf(multMult result (maxDepth - depth) |> getValue)
 
             // BinTree.Leaf _ is actually BinTree.Node(a, a)
             | BinTree.Leaf _, QuadTree.Node(nw, ne, sw, se) ->

@@ -367,11 +367,13 @@ module Algebra =
 
     let fMult a b =
         match a, b with
-        | Some x, Some y -> Some(x * y)
+        | Some x, Some y ->
+            let result = x * y
+            if result = 0 then Option.None else Some result
         | _ -> Option.None
 
 
-    let lazyMtxMtx (table1: int[,]) (table2: int[,]) =
+    let naiveMtxMtx (table1: int[,]) (table2: int[,]) =
         let mtx1Rows = Array2D.length1 table1
         let mtx2Rows = Array2D.length1 table2
         let mtx2Columns = Array2D.length2 table2
@@ -386,7 +388,7 @@ module Algebra =
         result
 
 
-    let lazyVecByMtx (arr: array<int>) (table: int[,]) =
+    let naiveVecByMtx (arr: array<int>) (table: int[,]) =
         let rows = arr.Length
         let columns = Array2D.length2 table
         let mutable result = Array.zeroCreate columns
@@ -572,7 +574,7 @@ module Algebra =
                       // We also calculate the naive approach of multiplying array and a table.
                       // Result from tree*tree and arr*table should match.
                       let expectedResult =
-                          lazyVecByMtx arr table
+                          naiveVecByMtx arr table
                           |> Array.map fromZeroToSomeNone
                           |> SparseVector.SparseVector
 
@@ -607,7 +609,7 @@ module Algebra =
                       // We also calculate the naive approach of multiplying array and a table.
                       // Result from tree*tree and arr*table should match.
                       let expectedResult =
-                          lazyVecByMtx arr table
+                          naiveVecByMtx arr table
                           |> Array.map fromZeroToSomeNone
                           |> SparseVector.SparseVector
 
@@ -648,7 +650,7 @@ module Algebra =
                       // We also calculate the naive approach of multiplying array and a table.
                       // Result from tree*tree and arr*table should match.
                       let expectedResult =
-                          lazyVecByMtx (lazyVecByMtx arr table1) table2
+                          naiveVecByMtx (naiveVecByMtx arr table1) table2
                           |> Array.map fromZeroToSomeNone
                           |> SparseVector.SparseVector
 
