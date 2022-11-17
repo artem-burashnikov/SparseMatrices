@@ -548,7 +548,7 @@ module Algebra =
 
               testProperty "Vector x Matrix"
               <| fun (x: int) (y: int) ->
-                  if abs x > 0 && abs y > 0 then
+                  if x <> 0 && y <> 0 then
                       let length = abs x
                       let rows = length
                       let columns = abs y
@@ -587,7 +587,7 @@ module Algebra =
 
               testProperty "Vector x Matrix: multiplying by Id from the right."
               <| fun (x: int) ->
-                  if abs x > 0 then
+                  if x <> 0 then
                       let length = abs x
 
                       // Initialize array of numbers and randomly change some of them to zeroes.
@@ -618,4 +618,42 @@ module Algebra =
                           expectedResult.Data
                           $"Input array: %A{arrSome}, \nInput table %A{tableSome}, \nVector data: %A{vec.Data}, \nMatrix data: %A{mtx.Data}"
 
-                      Expect.equal actualResult.Length mtx.Columns "" ]
+                      Expect.equal actualResult.Length mtx.Columns ""
+
+              testProperty "Chain mult: Vector x Matrix x Matrix."
+              <| fun (x: int) (y: int) (z: int) ->
+                  if x <> 0 && y <> 0 && z <> 0 then
+                      let length = abs x
+                      let rows = length
+                      let columns = abs y
+                      let columns2 = abs z
+
+                      // Initialize array of numbers and randomly change some of them to zeroes.
+                      // After which map Some and None.
+                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map randomValueZero
+                      let arrSome = Array.map fromZeroToSomeNone arr
+
+                      // Initialize two matrices.
+                      let table1 = Array2D.init rows columns (fun _ _ -> r.Next(0, 10))
+                      let table2 = Array2D.init columns columns2 (fun _ _ -> r.Next(0, 10))
+
+                      let tableSome1 = table1 |> Array2D.map fromZeroToSomeNone
+                      let tableSome2 = table2 |> Array2D.map fromZeroToSomeNone
+
+                      // Then we make a vector and a matrix using the data and multiply them.
+                      let vec = SparseVector.SparseVector arrSome
+                      let mtx1 = SparseMatrix.SparseMatrix tableSome1
+                      let mtx2 = SparseMatrix.SparseMatrix tableSome2
+
+                      // We also calculate the naive approach of multiplying array and a table.
+                      // Result from tree*tree and arr*table should match.
+                      let expectedResult =
+                          lazyVecByMtx (lazyVecByMtx arr table1) table2
+                          |> Array.map fromZeroToSomeNone
+                          |> SparseVector.SparseVector
+
+                      let actualResult =
+                          MatrixAlgebra.vecByMtx fPlus fMult (MatrixAlgebra.vecByMtx fPlus fMult vec mtx1) mtx2
+
+                      Expect.equal actualResult.Data expectedResult.Data ""
+                      Expect.equal actualResult.Length mtx2.Columns "" ]
