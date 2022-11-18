@@ -340,10 +340,10 @@ module Algebra =
 
     let r = Random()
 
-    let randomSomeNone x =
-        if r.Next(0, 101) <= 30 then Some x else Option.None
+    let toSomeNone x =
+        if x % 2 = 1 then Some x else Option.None
 
-    let randomValueZero x = if r.Next(0, 101) <= 30 then x else 0
+    let valueToZero x = if x % 2 = 1 then x else 0
 
     let fromZeroToSomeNone x = if x <> 0 then Some x else Option.None
 
@@ -409,8 +409,7 @@ module Algebra =
 
               testProperty "Adding 1 and then subtracting 1 should output the initial data."
               <| fun (length: uint) ->
-                  let arr =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
                   let arrOnes = Array.init (int length) (fun _ -> Some 1)
                   let vec = SparseVector.SparseVector arr
@@ -425,8 +424,7 @@ module Algebra =
 
               testProperty "Adding/Subtracting 0 should output the initial data."
               <| fun (length: uint) ->
-                  let arr =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
                   let zeroes = Array.init (int length) (fun _ -> Option.None)
                   let vec = SparseVector.SparseVector arr
@@ -437,11 +435,9 @@ module Algebra =
 
               testProperty "Commutative property should hold."
               <| fun (length: uint) ->
-                  let arr1 =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr1 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
-                  let arr2 =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr2 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
                   let vec1 = SparseVector.SparseVector arr1
                   let vec2 = SparseVector.SparseVector arr2
@@ -451,14 +447,11 @@ module Algebra =
 
               testProperty "Associative property should hold."
               <| fun (length: uint) ->
-                  let arr1 =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr1 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
-                  let arr2 =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr2 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
-                  let arr3 =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr3 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
                   let vec1 = SparseVector.SparseVector arr1
                   let vec2 = SparseVector.SparseVector arr2
@@ -474,8 +467,7 @@ module Algebra =
 
               testProperty "Subtracting oneself should result in neutral element."
               <| fun (length: uint) ->
-                  let arr =
-                      Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map randomSomeNone
+                  let arr = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
 
                   let vec = SparseVector.SparseVector arr
                   let result = MatrixAlgebra.vecPlusVec fMinus vec vec
@@ -557,13 +549,13 @@ module Algebra =
 
                       // Initialize array of numbers and randomly change some of them to zeroes.
                       // After which map Some and None.
-                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map randomValueZero
+                      // We still need unmapped data, so this actions are separate.
+                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map valueToZero
                       let arrSome = Array.map fromZeroToSomeNone arr
 
                       // Do the same with Array2D.
                       let table =
-                          Array2D.init rows columns (fun _ _ -> r.Next(0, 10))
-                          |> Array2D.map randomValueZero
+                          Array2D.init rows columns (fun _ _ -> r.Next(0, 10)) |> Array2D.map valueToZero
 
                       let tableSome = table |> Array2D.map fromZeroToSomeNone
 
@@ -594,7 +586,7 @@ module Algebra =
 
                       // Initialize array of numbers and randomly change some of them to zeroes.
                       // After which map Some and None.
-                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map randomValueZero
+                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map valueToZero
                       let arrSome = Array.map fromZeroToSomeNone arr
 
                       // Initialize Identity matrix for a given vector.
@@ -632,7 +624,7 @@ module Algebra =
 
                       // Initialize array of numbers and randomly change some of them to zeroes.
                       // After which map Some and None.
-                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map randomValueZero
+                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map valueToZero
                       let arrSome = Array.map fromZeroToSomeNone arr
 
                       // Initialize two matrices.

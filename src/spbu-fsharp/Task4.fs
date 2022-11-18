@@ -343,26 +343,6 @@ module MatrixAlgebra =
         let powerSize = (max mtx.Rows mtx.Columns) |> Numbers.ceilPowTwo
         let maxDepth = Numbers.powTwo powerSize
 
-
-        let rec sum bTree1 bTree2 =
-            match bTree1, bTree2 with
-            | BinTree.None, tree
-            | tree, BinTree.None -> tree
-
-            | BinTree.Leaf a, BinTree.Leaf b ->
-                let result = fAdd (Some a) (Some b)
-
-                match result with
-                | Option.None -> BinTree.None
-                | _ -> BinTree.Leaf(result |> getValue)
-
-            | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(sum bTree1 b1, sum bTree1 b2) |> VectorData.reduce
-
-            | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(sum a1 bTree2, sum a2 bTree2) |> VectorData.reduce
-
-            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(sum a1 b1, sum a2 b2) |> VectorData.reduce
-
-
         // Multiplication optimization.
         // We need to calculate n sums and the first sum is already given, so the counter stops at 1 (starts at n).
         let rec multMult (value: 'c option) counter =
@@ -382,7 +362,10 @@ module MatrixAlgebra =
             //  [a1 a2]  *   = a1 * qt1 + a2 * qt2
             //
             let fDo a1 a2 qt1 qt2 depth =
-                sum (mult a1 qt1 (depth + 1)) (mult a2 qt2 (depth + 1))
+                let vec1 = SparseVector((mult a1 qt1 (depth + 1)), mtx.Columns)
+                let vec2 = SparseVector(mult a2 qt2 (depth + 1), mtx.Columns)
+                let result = vecPlusVec fAdd vec1 vec2
+                result.Data
 
             match bTree, qTree with
             // Neutral * Neutral
