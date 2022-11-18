@@ -105,13 +105,13 @@ module SparseVector =
                     | BinTree.Node(leftChild, rightChild) ->
                         let middle = size / 2
 
-                        if i <= middle then
+                        if i < middle then
                             search i middle leftChild
                         else
                             search (i - middle) middle rightChild
 
                 let getValue (i: int) =
-                    if i < 1 || i > this.Length then
+                    if i < 0 || i >= this.Length then
                         failwith $"SparseVector.Item with get(i): Index %A{i} is out of range."
                     else
                         let powerSize = Numbers.ceilPowTwo this.Length
@@ -241,7 +241,7 @@ module SparseMatrix =
         member this.Item
             with get (i: int, j: int) =
                 // Binary search the value at given indices.
-                let rec search (i, j) size tree =
+                let rec search i j size tree =
 
                     match tree with
                     | QuadTree.Leaf value -> Some value
@@ -251,22 +251,22 @@ module SparseMatrix =
                         let middle = size / 2
 
                         let newI, newJ, quadrant =
-                            if i <= middle && j <= middle then (i, j, nw)
-                            elif i <= middle && j > middle then (i, j - middle, ne)
-                            elif i > middle && j <= middle then (i - middle, j, sw)
+                            if i < middle && j < middle then (i, j, nw)
+                            elif i < middle && j >= middle then (i, j - middle, ne)
+                            elif i >= middle && j < middle then (i - middle, j, sw)
                             else (i - middle, j - middle, se)
 
-                        search (newI, newJ) middle quadrant
+                        search newI newJ middle quadrant
 
-                let getValue (i, j) =
+                let getValue i j =
 
-                    if i < 1 || j < 1 || i > this.Rows || j > this.Columns then
+                    if i < 0 || j < 0 || i >= this.Rows || j >= this.Columns then
                         failwith $"SparseMatrix.Item with get(i, j): Indices %A{(i, j)} out of range."
                     else
                         let powerSize = Numbers.ceilPowTwo (max this.Rows this.Columns)
-                        search (i, j) powerSize this.Data
-
-                getValue (i, j)
+                        search i j powerSize this.Data
+                // Since indices in programming start at 0 we offset by one
+                getValue i j
 
 
 open SparseMatrix
@@ -443,7 +443,7 @@ module MatrixAlgebra =
         // 1x1 is an edge case.
         elif mtx.Rows = 1 && mtx.Columns = 1 then
             let tree =
-                let result = fMult vec[1] mtx[1, 1]
+                let result = fMult vec[0] mtx[0, 0]
 
                 match result with
                 | Option.None -> BinTree.None

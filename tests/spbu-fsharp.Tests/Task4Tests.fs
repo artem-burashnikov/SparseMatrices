@@ -139,7 +139,7 @@ module SparseVector =
                   let sparseVec = SparseVector.SparseVector arr
                   let mutable actualResult = []
 
-                  for i = 1 to arr.Length do
+                  for i = 0 to arr.Length - 1 do
                       actualResult <- sparseVec[i] :: actualResult
 
                   Expect.sequenceEqual (actualResult |> List.rev) arr "" ]
@@ -295,9 +295,9 @@ module SparseMatrix =
 
                   let mtx = SparseMatrix.SparseMatrix input
 
-                  for i = 1 to 1 do
-                      for j = 1 to 1 do
-                          Expect.equal (mtx[i, j]) (input[i - 1, j - 1]) ""
+                  for i = 0 to 0 do
+                      for j = 0 to 0 do
+                          Expect.equal (mtx[i, j]) (input[i, j]) ""
 
               testCase "Getting values from 1x2 table"
               <| fun _ ->
@@ -306,9 +306,9 @@ module SparseMatrix =
 
                   let mtx = SparseMatrix.SparseMatrix table
 
-                  for i = 1 to 1 do
-                      for j = 1 to 2 do
-                          Expect.equal (mtx[i, j]) (table[i - 1, j - 1]) ""
+                  for i = 0 to 0 do
+                      for j = 0 to 1 do
+                          Expect.equal (mtx[i, j]) (table[i, j]) ""
 
               testCase "Getting values from 2x1 table"
               <| fun _ ->
@@ -317,9 +317,9 @@ module SparseMatrix =
 
                   let mtx = SparseMatrix.SparseMatrix table
 
-                  for i = 1 to 2 do
-                      for j = 1 to 1 do
-                          Expect.equal (mtx[i, j]) (table[i - 1, j - 1]) ""
+                  for i = 0 to 1 do
+                      for j = 0 to 0 do
+                          Expect.equal (mtx[i, j]) (table[i, j]) ""
 
               // For some reason this test takes somewhat long.
               testProperty
@@ -331,9 +331,9 @@ module SparseMatrix =
 
                   let mtx = SparseMatrix.SparseMatrix arr2d
 
-                  for i = 1 to rows do
-                      for j = 1 to columns do
-                          Expect.equal (mtx[i, j]) (arr2d[i - 1, j - 1]) $"%A{arr2d}, %A{mtx.Data}" ]
+                  for i = 0 to rows - 1 do
+                      for j = 0 to columns - 1 do
+                          Expect.equal (mtx[i, j]) (arr2d[i, j]) $"%A{arr2d}, %A{mtx.Data}" ]
 
 
 module Algebra =
