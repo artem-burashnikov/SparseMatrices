@@ -147,6 +147,10 @@ module SparseVector =
 
 module SparseMatrix =
 
+    let getTableSomeNone rows columns =
+        Array2D.init rows columns (fun i j -> Some(i + j))
+
+
     [<Tests>]
     let tests =
 
@@ -237,7 +241,7 @@ module SparseMatrix =
 
               testCase "Table to QuadTree converter: 2x1 table"
               <| fun _ ->
-                  let input = Array2D.init 2 1 (fun i j -> Some(i + j))
+                  let input = getTableSomeNone 2 1
                   let actualResult = tableToTree input
 
                   let expectedResult =
@@ -247,7 +251,7 @@ module SparseMatrix =
 
               testCase "Table to QuadTree converter: 2x2 table"
               <| fun _ ->
-                  let input = Array2D.init 2 2 (fun i j -> Some(i + j))
+                  let input = getTableSomeNone 2 2
 
                   let actualResult = tableToTree input
 
@@ -258,7 +262,7 @@ module SparseMatrix =
 
               testCase "Table to QuadTree converter: 3x2 table"
               <| fun _ ->
-                  let input = Array2D.init 3 2 (fun i j -> Some(i + j))
+                  let input = getTableSomeNone 3 2
 
                   let actualResult = tableToTree input
 
@@ -274,7 +278,7 @@ module SparseMatrix =
 
               testCase "Table to QuadTree converter: 3x3 table"
               <| fun _ ->
-                  let input = Array2D.init 3 3 (fun i j -> Some(i + j))
+                  let input = getTableSomeNone 3 3
 
                   let actualResult = tableToTree input
 
@@ -302,7 +306,7 @@ module SparseMatrix =
               testCase "Getting values from 1x2 table"
               <| fun _ ->
 
-                  let table = Array2D.init 1 2 (fun i j -> Some(i + j))
+                  let table = getTableSomeNone 1 2
 
                   let mtx = SparseMatrix.SparseMatrix table
 
@@ -313,7 +317,7 @@ module SparseMatrix =
               testCase "Getting values from 2x1 table"
               <| fun _ ->
 
-                  let table = Array2D.init 2 1 (fun i j -> Some(i + j))
+                  let table = getTableSomeNone 2 1
 
                   let mtx = SparseMatrix.SparseMatrix table
 
@@ -399,6 +403,18 @@ module Algebra =
 
         result
 
+    let getRandomVector length =
+        Array.init length (fun _ -> r.Next(1, 10))
+
+    let getRandomSomeNoneVector length =
+        getRandomVector length |> Array.map toSomeNone
+
+    let getRandomTable rows columns =
+        Array2D.init rows columns (fun _ _ -> r.Next(1, 10))
+
+    let getRandomSomeNoneTable rows columns =
+        getRandomTable rows columns |> Array2D.map toSomeNone
+
 
     [<Tests>]
     let tests =
@@ -409,7 +425,7 @@ module Algebra =
 
               testProperty "Adding 1 and then subtracting 1 should output the initial data."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr = getRandomSomeNoneVector (int length)
 
                   let arrOnes = Array.init (int length) (fun _ -> Some 1)
                   let vec = SparseVector.SparseVector arr
@@ -424,7 +440,7 @@ module Algebra =
 
               testProperty "Adding/Subtracting 0 should output the initial data."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr = getRandomSomeNoneVector (int length)
 
                   let zeroes = Array.init (int length) (fun _ -> Option.None)
                   let vec = SparseVector.SparseVector arr
@@ -435,9 +451,9 @@ module Algebra =
 
               testProperty "Commutative property should hold."
               <| fun (length: uint) ->
-                  let arr1 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr1 = getRandomSomeNoneVector (int length)
 
-                  let arr2 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr2 = getRandomSomeNoneVector (int length)
 
                   let vec1 = SparseVector.SparseVector arr1
                   let vec2 = SparseVector.SparseVector arr2
@@ -447,11 +463,11 @@ module Algebra =
 
               testProperty "Associative property should hold."
               <| fun (length: uint) ->
-                  let arr1 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr1 = getRandomSomeNoneVector (int length)
 
-                  let arr2 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr2 = getRandomSomeNoneVector (int length)
 
-                  let arr3 = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr3 = getRandomSomeNoneVector (int length)
 
                   let vec1 = SparseVector.SparseVector arr1
                   let vec2 = SparseVector.SparseVector arr2
@@ -467,7 +483,7 @@ module Algebra =
 
               testProperty "Subtracting oneself should result in neutral element."
               <| fun (length: uint) ->
-                  let arr = Array.init (int length) (fun _ -> r.Next(1, 10)) |> Array.map toSomeNone
+                  let arr = getRandomSomeNoneVector (int length)
 
                   let vec = SparseVector.SparseVector arr
                   let result = MatrixAlgebra.vecPlusVec fMinus vec vec
@@ -476,7 +492,7 @@ module Algebra =
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
               <| fun _ ->
                   let arr = [| Some 1 |]
-                  let table = Array2D.init 1 1 (fun _ _ -> r.Next(1, 10))
+                  let table = getRandomTable 1 1
                   let tableSome = table |> Array2D.map Some
 
                   let vec = SparseVector.SparseVector arr
@@ -497,7 +513,7 @@ module Algebra =
               <| fun _ ->
                   let arr = [| Some 1; Some 1 |]
 
-                  let table = Array2D.init 2 1 (fun _ _ -> r.Next(1, 10))
+                  let table = getRandomTable 2 1
                   let tableSome = table |> Array2D.map Some
 
                   let vec = SparseVector.SparseVector arr
@@ -518,7 +534,7 @@ module Algebra =
               <| fun _ ->
                   let arr = [| Some 1; Some 1; Some 1 |]
 
-                  let table = Array2D.init 3 2 (fun _ _ -> r.Next(1, 10))
+                  let table = getRandomTable 3 2
                   let tableSome = table |> Array2D.map Some
 
                   let vec = SparseVector.SparseVector arr
@@ -550,12 +566,11 @@ module Algebra =
                       // Initialize array of numbers and randomly change some of them to zeroes.
                       // After which map Some and None.
                       // We still need unmapped data, so this actions are separate.
-                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map valueToZero
+                      let arr = getRandomVector length |> Array.map valueToZero
                       let arrSome = Array.map fromZeroToSomeNone arr
 
                       // Do the same with Array2D.
-                      let table =
-                          Array2D.init rows columns (fun _ _ -> r.Next(0, 10)) |> Array2D.map valueToZero
+                      let table = getRandomTable rows columns |> Array2D.map valueToZero
 
                       let tableSome = table |> Array2D.map fromZeroToSomeNone
 
@@ -586,7 +601,7 @@ module Algebra =
 
                       // Initialize array of numbers and randomly change some of them to zeroes.
                       // After which map Some and None.
-                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map valueToZero
+                      let arr = getRandomVector length |> Array.map valueToZero
                       let arrSome = Array.map fromZeroToSomeNone arr
 
                       // Initialize Identity matrix for a given vector.
@@ -624,12 +639,12 @@ module Algebra =
 
                       // Initialize array of numbers and randomly change some of them to zeroes.
                       // After which map Some and None.
-                      let arr = Array.init length (fun _ -> r.Next(0, 10)) |> Array.map valueToZero
+                      let arr = getRandomVector length |> Array.map valueToZero
                       let arrSome = Array.map fromZeroToSomeNone arr
 
                       // Initialize two matrices.
-                      let table1 = Array2D.init rows columns (fun _ _ -> r.Next(0, 10))
-                      let table2 = Array2D.init columns columns2 (fun _ _ -> r.Next(0, 10))
+                      let table1 = getRandomTable rows columns |> Array2D.map valueToZero
+                      let table2 = getRandomTable columns columns2 |> Array2D.map valueToZero
 
                       let tableSome1 = table1 |> Array2D.map fromZeroToSomeNone
                       let tableSome2 = table2 |> Array2D.map fromZeroToSomeNone

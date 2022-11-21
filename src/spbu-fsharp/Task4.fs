@@ -1,5 +1,6 @@
 namespace HomeWork4
 
+open System
 open Helpers
 open Microsoft.FSharp.Core
 open Trees.BinTrees
@@ -281,6 +282,11 @@ module MatrixAlgebra =
         | _ -> failwith "Only accepts Some value"
 
 
+    let convertResult value =
+        match value with
+        | Option.None -> BinTree.None
+        | _ -> BinTree.Leaf(value |> getValue)
+
 
     /// Adds two Sparse vectors together.
     let vecPlusVec fAdd (vec1: SparseVector<'a>) (vec2: SparseVector<'b>) : SparseVector<'c> =
@@ -289,30 +295,15 @@ module MatrixAlgebra =
             match bTree1, bTree2 with
             | BinTree.None, BinTree.None -> BinTree.None
 
-            | BinTree.None, BinTree.Leaf b ->
-                let result = fAdd Option.None (Some b)
-
-                match result with
-                | Option.None -> BinTree.None
-                | _ -> BinTree.Leaf(result |> getValue)
+            | BinTree.None, BinTree.Leaf b -> fAdd Option.None (Some b) |> convertResult
 
             | BinTree.None, BinTree.Node(b1, b2) -> BinTree.Node(sum bTree1 b1, sum bTree1 b2) |> VectorData.reduce
 
-            | BinTree.Leaf a, BinTree.None ->
-                let result = fAdd (Some a) Option.None
-
-                match result with
-                | Option.None -> BinTree.None
-                | _ -> BinTree.Leaf(result |> getValue)
+            | BinTree.Leaf a, BinTree.None -> fAdd (Some a) Option.None |> convertResult
 
             | BinTree.Node(a1, a2), BinTree.None -> BinTree.Node(sum a1 bTree2, sum a2 bTree2) |> VectorData.reduce
 
-            | BinTree.Leaf a, BinTree.Leaf b ->
-                let result = fAdd (Some a) (Some b)
-
-                match result with
-                | Option.None -> BinTree.None
-                | _ -> BinTree.Leaf(result |> getValue)
+            | BinTree.Leaf a, BinTree.Leaf b -> fAdd (Some a) (Some b) |> convertResult
 
             | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(sum bTree1 b1, sum bTree1 b2) |> VectorData.reduce
 
@@ -378,11 +369,8 @@ module MatrixAlgebra =
             // where n is the difference between the maximum depth and the current level (starts at 0).
             | BinTree.Leaf a, QuadTree.Leaf b ->
                 if depth = maxDepth then
-                    let result = fMult (Some a) (Some b)
+                    fMult (Some a) (Some b) |> convertResult
 
-                    match result with
-                    | Option.None -> BinTree.None
-                    | _ -> BinTree.Leaf(result |> getValue)
                 else
                     let result = fAdd (fMult (Some a) (Some b)) (fMult (Some a) (Some b))
 
@@ -442,12 +430,7 @@ module MatrixAlgebra =
 
         // 1x1 is an edge case.
         elif mtx.Rows = 1 && mtx.Columns = 1 then
-            let tree =
-                let result = fMult vec[0] mtx[0, 0]
-
-                match result with
-                | Option.None -> BinTree.None
-                | _ -> BinTree.Leaf(result |> getValue)
+            let tree = fMult vec[0] mtx[0, 0] |> convertResult
 
             SparseVector(tree, mtx.Columns)
 
