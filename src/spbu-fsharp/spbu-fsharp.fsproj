@@ -24,6 +24,7 @@
         <Compile Include="Task2.fs" />
         <Compile Include="Task3.fs" />
         <Compile Include="Task4.fs" />
+        <Compile Include="Task5.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
