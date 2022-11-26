@@ -1,6 +1,5 @@
 namespace HomeWork4
 
-open System
 open Helpers
 open Microsoft.FSharp.Core
 open Trees.BinTrees
