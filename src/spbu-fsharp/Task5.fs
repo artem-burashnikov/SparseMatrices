@@ -1,15 +1,10 @@
 namespace HomeWork5
 
-open Microsoft.FSharp.Data.UnitSystems.SI.UnitNames
-open Trees
-open Trees.QuadTrees
-open Trees.BinTrees
-open Helpers
 
 
 type COOMatrix<'a> =
     struct
-        val Data: (int * int * 'a option) list
+        val Data: (int * int * 'a) list
         val Rows: int
         val Columns: int
 
@@ -20,46 +15,45 @@ type COOMatrix<'a> =
     end
 
 
+
 module Converter =
+
+
+    open Helpers
+    open Trees.QuadTrees
+
 
     let first (a, _, _) = a
     let second (_, a, _) = a
     let third (_, _, a) = a
 
+
+    /// Divide a given COOMatrix into 4 quadrants.
     let mtxDiv4 (mtx: COOMatrix<'a>) =
 
+        // For an empty matrix just return the data immediately.
+        // Otherwise filter triplets.
         if mtx.Rows = 0 || mtx.Columns = 0 then
             mtx, mtx, mtx, mtx
 
         else
+            // Calculate middle points and filter triplets by comparing
+            // corresponding coordinates to their middle points.
             let halfRows = mtx.Rows / 2
             let halfColumns = mtx.Columns / 2
 
-            let q1 triple =
-                (first triple) < halfRows && (second triple) < halfColumns
-
-            let q2 triple =
-                (first triple) < halfRows && (second triple) >= halfColumns
-
-            let q3 triple =
-                (first triple) >= halfRows && (second triple) < halfColumns
-
-            let q4 triple =
-                (first triple) >= halfRows && (second triple) >= halfColumns
-
-            let q1List = List.filter q1 mtx.Data // NW
-
-            let q2List =
-                List.filter q2 mtx.Data
-                |> List.map (fun (i, j, value) -> (i, j - halfColumns, value)) // NE
-
-            let q3List =
-                List.filter q3 mtx.Data
-                |> List.map (fun (i, j, value) -> (i - halfRows, j, value)) // SW
-
-            let q4List =
-                List.filter q4 mtx.Data
-                |> List.map (fun (i, j, value) -> (i - halfRows, j - halfColumns, value)) // SE
+            // NW
+            let isQ1 triple = (first triple) < halfRows && (second triple) < halfColumns
+            let q1List = List.filter isQ1 mtx.Data
+            // NE
+            let isQ2 triple = (first triple) < halfRows && (second triple) >= halfColumns
+            let q2List = List.filter isQ2 mtx.Data |> List.map (fun (i, j, value) -> (i, j - halfColumns, value))
+            // SW
+            let isQ3 triple = (first triple) >= halfRows && (second triple) < halfColumns
+            let q3List = List.filter isQ3 mtx.Data |> List.map (fun (i, j, value) -> (i - halfRows, j, value))
+            // SE
+            let isQ4 triple = (first triple) >= halfRows && (second triple) >= halfColumns
+            let q4List = List.filter isQ4 mtx.Data |> List.map (fun (i, j, value) -> (i - halfRows, j - halfColumns, value))
 
             COOMatrix(q1List, halfRows, halfColumns),
             COOMatrix(q2List, halfRows, halfColumns),
@@ -67,14 +61,14 @@ module Converter =
             COOMatrix(q4List, halfRows, halfColumns)
 
 
-    let reduce quadTreeNode =
-        match quadTreeNode with
-        | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
-        | QuadTree.Node(QuadTree.Leaf nw, QuadTree.Leaf ne, QuadTree.Leaf sw, QuadTree.Leaf se) when
+    let reduce node =
+        match node with
+        | Node(None, None, None, None) -> None
+        | Node(Leaf nw, Leaf ne, Leaf sw, Leaf se) when
             nw = ne && nw = sw && nw = se
             ->
-            QuadTree.Leaf nw
-        | _ -> quadTreeNode
+            Leaf nw
+        | _ -> node
 
 
     let cooToTree (mtx: COOMatrix<'a>) =
@@ -118,7 +112,4 @@ module Converter =
 
         else
             let powerSize = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
-            // Initial top-left cell starts at coordinates (0, 0).
-            let mtx = COOMatrix(mtx.Data, powerSize, powerSize)
-
-            maker mtx
+            COOMatrix(mtx.Data, powerSize, powerSize) |> maker
