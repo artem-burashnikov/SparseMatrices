@@ -30,5 +30,5 @@ module Main =
         // let input = COOMatrix(lst, columns, columns)
         // let res = Converter.cooToTree input
         // printfn $"%A{res}"
-        let (x: Array2D<int>) = array2D([[10]])
+        let (x: Array2D<int>) = array2D ([ [ 10 ] ])
         0

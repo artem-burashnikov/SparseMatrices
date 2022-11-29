@@ -43,17 +43,31 @@ module Converter =
             let halfColumns = mtx.Columns / 2
 
             // NW
-            let isQ1 triple = (first triple) < halfRows && (second triple) < halfColumns
+            let isQ1 triple =
+                (first triple) < halfRows && (second triple) < halfColumns
+
             let q1List = List.filter isQ1 mtx.Data
             // NE
-            let isQ2 triple = (first triple) < halfRows && (second triple) >= halfColumns
-            let q2List = List.filter isQ2 mtx.Data |> List.map (fun (i, j, value) -> (i, j - halfColumns, value))
+            let isQ2 triple =
+                (first triple) < halfRows && (second triple) >= halfColumns
+
+            let q2List =
+                List.filter isQ2 mtx.Data
+                |> List.map (fun (i, j, value) -> (i, j - halfColumns, value))
             // SW
-            let isQ3 triple = (first triple) >= halfRows && (second triple) < halfColumns
-            let q3List = List.filter isQ3 mtx.Data |> List.map (fun (i, j, value) -> (i - halfRows, j, value))
+            let isQ3 triple =
+                (first triple) >= halfRows && (second triple) < halfColumns
+
+            let q3List =
+                List.filter isQ3 mtx.Data
+                |> List.map (fun (i, j, value) -> (i - halfRows, j, value))
             // SE
-            let isQ4 triple = (first triple) >= halfRows && (second triple) >= halfColumns
-            let q4List = List.filter isQ4 mtx.Data |> List.map (fun (i, j, value) -> (i - halfRows, j - halfColumns, value))
+            let isQ4 triple =
+                (first triple) >= halfRows && (second triple) >= halfColumns
+
+            let q4List =
+                List.filter isQ4 mtx.Data
+                |> List.map (fun (i, j, value) -> (i - halfRows, j - halfColumns, value))
 
             COOMatrix(q1List, halfRows, halfColumns),
             COOMatrix(q2List, halfRows, halfColumns),
@@ -64,10 +78,7 @@ module Converter =
     let reduce node =
         match node with
         | Node(None, None, None, None) -> None
-        | Node(Leaf nw, Leaf ne, Leaf sw, Leaf se) when
-            nw = ne && nw = sw && nw = se
-            ->
-            Leaf nw
+        | Node(Leaf nw, Leaf ne, Leaf sw, Leaf se) when nw = ne && nw = sw && nw = se -> Leaf nw
         | _ -> node
 
 
