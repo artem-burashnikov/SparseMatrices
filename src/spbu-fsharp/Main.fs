@@ -1,34 +1,40 @@
 namespace spbu_fsharp
 
-open System
 open HomeWork5
 open Microsoft.FSharp.Core
-open HomeWork5
 
 
 module Main =
 
-    type Array2D<'Value> = 'Value[,]
-
     [<EntryPoint>]
     let main (argv: string array) =
 
+        let fPlus (a: bool option) (b: bool option) =
+            match a, b with
+            | Some true, _
+            | _, Some true -> Some true
+            | _ -> Some false
 
+        let fMult (a: bool option) (b: int option) =
+            match a, b with
+            | Some true, Some _ -> Some true
+            | _ -> Some false
 
-        // let lst =
-        //     [ (4, 3, 3)
-        //       (1, 3, 2)
-        //       (1, 4, 2)
-        //       (5, 7, 5)
-        //       (9, 9, 9) ]
-        //
+        let inputCoord =
+            [ (0, 4, 1)
+              (0, 6, 1)
+              (2, 4, 1)
+              (4, 0, 1)
+              (4, 2, 1)
+              (4, 5, 1)
+              (5, 4, 1)
+              (6, 0, 1)
+              (0, 2, 1)
+              (2, 0, 1) ]
 
-        //
-        //
-        // let rows = 16
-        // let columns = 16
-        // let input = COOMatrix(lst, columns, columns)
-        // let res = Converter.cooToTree input
-        // printfn $"%A{res}"
-        let (x: Array2D<int>) = array2D ([ [ 10 ] ])
+        let rows, columns = 7, 7
+        let cooMtx = COOMatrix(inputCoord, rows, columns)
+        let startV = [ 0; 5 ]
+        let result = Graphs.BFS fPlus fMult startV cooMtx
+        printfn $"%A{result.Data}"
         0
