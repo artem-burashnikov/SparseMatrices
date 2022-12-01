@@ -229,8 +229,7 @@ module Graphs =
 
             | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> Converter.reduceBt
 
-        let res = inner mask.Data vec.Data
-        SparseVector(res, mask.Length)
+        SparseVector(inner mask.Data vec.Data, mask.Length)
 
 
     let markVisited (visited: SparseVector<int>) (frontier: SparseVector<'b>) (iter: int) =
@@ -254,13 +253,13 @@ module Graphs =
 
             | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> Converter.reduceBt
 
-        let res = inner visited.Data frontier.Data
-        SparseVector(res, visited.Length)
+        SparseVector(inner visited.Data frontier.Data, visited.Length)
 
 
     let BFS fAdd fMult (vSet: List<int>) (gMtx: COOMatrix<'a>) =
 
-        // Initialize a frontier from a given list of starting vertices.
+        // Initialize a frontier from a given list of starting vertices and make a BinaryTree.
+        // After which construct a SparseVector from resulting Binary Tree.
         let rec initFrontier frontier vSet =
             match vSet with
             | [] -> frontier
@@ -272,21 +271,26 @@ module Graphs =
 
         let frontier = SparseVector(vecData, gMtx.Rows)
 
+        // Construct a SparseMatrix from a given adjacency matrix.
         let mtxData = Converter.cooMtxToTree gMtx
         let mtx = SparseMatrix(mtxData, gMtx.Rows, gMtx.Columns)
 
+        // Mark given vertices as visited. This counts as an iteration 0.
         let visited = markVisited (SparseVector(BinTree.None, frontier.Length)) frontier 0
 
-        /// Recursive call.
         let rec innerBFS (frontier: SparseVector<bool>) (visited: SparseVector<int>) iter =
-            let newFront = applyMask visited (vecByMtx fAdd fMult frontier mtx)
+            // Follow adjacency matrix to get a new front.
+            // By applying the mask of already visited vertices we will prevent cycling around.
+            let newFrontier = applyMask visited (vecByMtx fAdd fMult frontier mtx)
 
-            if newFront.Data = BinTree.None then
+            // If the resulting front is empty, then return already visited vertices.
+            // Otherwise mark the newly visited vertices and continue BFS.
+            if newFrontier.Data = BinTree.None then
                 visited
             else
-                let newVisited = markVisited visited newFront iter
+                let newVisited = markVisited visited newFrontier iter
 
-                innerBFS newFront newVisited (iter + 1)
+                innerBFS newFrontier newVisited (iter + 1)
 
         if frontier.Data = BinTree.None then
             visited
