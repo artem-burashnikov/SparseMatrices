@@ -9,17 +9,6 @@ module Main =
     [<EntryPoint>]
     let main (argv: string array) =
 
-        let fPlus (a: bool option) (b: bool option) =
-            match a, b with
-            | Some true, _
-            | _, Some true -> Some true
-            | _ -> Some false
-
-        let fMult (a: bool option) (b: int option) =
-            match a, b with
-            | Some true, Some _ -> Some true
-            | _ -> Some false
-
         let inputCoord =
             [ (0, 4, 1)
               (0, 6, 1)
@@ -35,6 +24,6 @@ module Main =
         let rows, columns = 7, 7
         let cooMtx = COOMatrix(inputCoord, rows, columns)
         let startV = [ 0; 5 ]
-        let result = Graphs.BFS fPlus fMult startV cooMtx
+        let result = Graphs.BFS startV cooMtx
         printfn $"%A{result.Data}"
         0

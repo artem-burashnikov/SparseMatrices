@@ -217,7 +217,6 @@ module Graphs =
             match maskTree, vecTree with
             | BinTree.None, BinTree.Leaf b -> BinTree.Leaf b
 
-            // | BinTree.None, BinTree.Node(b1 ,b2) -> BinTree.Node(inner maskTree b1, inner maskTree b2) |> Converter.reduceBt
             | BinTree.None, vecTree -> vecTree
 
             | _, BinTree.None -> BinTree.None
@@ -243,8 +242,6 @@ module Graphs =
 
             | visitedTree, BinTree.None -> visitedTree
 
-            | BinTree.Leaf _, BinTree.Leaf _ -> failwith "markVisited: Troubles with mask"
-
             | BinTree.Leaf _, BinTree.Node(b1, b2) ->
                 BinTree.Node(inner visitedTree b1, inner visitedTree b2) |> Converter.reduceBt
 
@@ -253,10 +250,26 @@ module Graphs =
 
             | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> Converter.reduceBt
 
+            | BinTree.Leaf _, BinTree.Leaf _ ->
+                failwith
+                    "markVisited: frontier should already be masked at this point.\
+                          This case is impossible."
+
         SparseVector(inner visited.Data frontier.Data, visited.Length)
 
 
-    let BFS fAdd fMult (vSet: List<int>) (gMtx: COOMatrix<'a>) =
+    let BFS (vSet: List<int>) (gMtx: COOMatrix<'int>) =
+
+        let fAdd a b =
+            match a, b with
+            | Some true, _
+            | _, Some true -> Some true
+            | _ -> Some false
+
+        let fMult a b =
+            match a, b with
+            | Some true, Some _ -> Some true
+            | _ -> Some false
 
         // Initialize a frontier from a given list of starting vertices and make a BinaryTree.
         // After which construct a SparseVector from resulting Binary Tree.
