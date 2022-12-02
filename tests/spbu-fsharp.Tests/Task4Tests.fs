@@ -430,8 +430,8 @@ module Algebra =
                   let arrOnes = Array.init (int length) (fun _ -> Some 1)
                   let vec = SparseVector.SparseVector arr
                   let vecOnes = SparseVector.SparseVector arrOnes
-                  let plusOne = MatrixAlgebra.vecPlusVec fPlus vec vecOnes
-                  let plusMinusOne = MatrixAlgebra.vecPlusVec fMinus plusOne vecOnes
+                  let plusOne = MatrixAlgebra.elementwiseVecVec fPlus vec vecOnes
+                  let plusMinusOne = MatrixAlgebra.elementwiseVecVec fMinus plusOne vecOnes
 
                   Expect.equal
                       plusMinusOne.Data
@@ -445,8 +445,8 @@ module Algebra =
                   let zeroes = Array.init (int length) (fun _ -> Option.None)
                   let vec = SparseVector.SparseVector arr
                   let vecZeroes = SparseVector.SparseVector zeroes
-                  let plusZero = MatrixAlgebra.vecPlusVec fPlus vec vecZeroes
-                  let minusZero = MatrixAlgebra.vecPlusVec fMinus plusZero vecZeroes
+                  let plusZero = MatrixAlgebra.elementwiseVecVec fPlus vec vecZeroes
+                  let minusZero = MatrixAlgebra.elementwiseVecVec fMinus plusZero vecZeroes
                   Expect.equal minusZero.Data vec.Data ""
 
               testProperty "Commutative property should hold."
@@ -457,8 +457,8 @@ module Algebra =
 
                   let vec1 = SparseVector.SparseVector arr1
                   let vec2 = SparseVector.SparseVector arr2
-                  let result1 = MatrixAlgebra.vecPlusVec fPlus vec1 vec2
-                  let result2 = MatrixAlgebra.vecPlusVec fPlus vec2 vec1
+                  let result1 = MatrixAlgebra.elementwiseVecVec fPlus vec1 vec2
+                  let result2 = MatrixAlgebra.elementwiseVecVec fPlus vec2 vec1
                   Expect.equal result1.Data result2.Data ""
 
               testProperty "Associative property should hold."
@@ -474,10 +474,10 @@ module Algebra =
                   let vec3 = SparseVector.SparseVector arr3
 
                   let result1 =
-                      MatrixAlgebra.vecPlusVec fPlus (MatrixAlgebra.vecPlusVec fPlus vec1 vec2) vec3
+                      MatrixAlgebra.elementwiseVecVec fPlus (MatrixAlgebra.elementwiseVecVec fPlus vec1 vec2) vec3
 
                   let result2 =
-                      MatrixAlgebra.vecPlusVec fPlus (MatrixAlgebra.vecPlusVec fPlus vec2 vec3) vec1
+                      MatrixAlgebra.elementwiseVecVec fPlus (MatrixAlgebra.elementwiseVecVec fPlus vec2 vec3) vec1
 
                   Expect.equal result1.Data result2.Data ""
 
@@ -486,7 +486,7 @@ module Algebra =
                   let arr = getRandomSomeNoneVector (int length)
 
                   let vec = SparseVector.SparseVector arr
-                  let result = MatrixAlgebra.vecPlusVec fMinus vec vec
+                  let result = MatrixAlgebra.elementwiseVecVec fMinus vec vec
                   Expect.equal result.Data BinTrees.None ""
 
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"

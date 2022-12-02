@@ -288,32 +288,34 @@ module MatrixAlgebra =
 
 
     /// Adds two Sparse vectors together.
-    let vecPlusVec fAdd (vec1: SparseVector<'a>) (vec2: SparseVector<'b>) : SparseVector<'c> =
+    let elementwiseVecVec fDo (vec1: SparseVector<'a>) (vec2: SparseVector<'b>) : SparseVector<'c> =
 
-        let rec sum bTree1 bTree2 =
+        let rec inner bTree1 bTree2 =
             match bTree1, bTree2 with
             | BinTree.None, BinTree.None -> BinTree.None
 
-            | BinTree.None, BinTree.Leaf b -> fAdd Option.None (Some b) |> convertResult
+            | BinTree.None, BinTree.Leaf b -> fDo Option.None (Some b) |> convertResult
 
-            | BinTree.None, BinTree.Node(b1, b2) -> BinTree.Node(sum bTree1 b1, sum bTree1 b2) |> VectorData.reduce
+            | BinTree.None, BinTree.Node(b1, b2) -> BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> VectorData.reduce
 
-            | BinTree.Leaf a, BinTree.None -> fAdd (Some a) Option.None |> convertResult
+            | BinTree.Leaf a, BinTree.None -> fDo (Some a) Option.None |> convertResult
 
-            | BinTree.Node(a1, a2), BinTree.None -> BinTree.Node(sum a1 bTree2, sum a2 bTree2) |> VectorData.reduce
+            | BinTree.Node(a1, a2), BinTree.None -> BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> VectorData.reduce
 
-            | BinTree.Leaf a, BinTree.Leaf b -> fAdd (Some a) (Some b) |> convertResult
+            | BinTree.Leaf a, BinTree.Leaf b -> fDo (Some a) (Some b) |> convertResult
 
-            | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(sum bTree1 b1, sum bTree1 b2) |> VectorData.reduce
+            | BinTree.Leaf _, BinTree.Node(b1, b2) ->
+                BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> VectorData.reduce
 
-            | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(sum a1 bTree2, sum a2 bTree2) |> VectorData.reduce
+            | BinTree.Node(a1, a2), BinTree.Leaf _ ->
+                BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> VectorData.reduce
 
-            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(sum a1 b1, sum a2 b2) |> VectorData.reduce
+            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> VectorData.reduce
 
         if vec1.Length <> vec2.Length then
             failwith "Dimensions of objects don't match."
         else
-            SparseVector(sum vec1.Data vec2.Data, vec1.Length)
+            SparseVector(inner vec1.Data vec2.Data, vec1.Length)
 
 
 
@@ -354,7 +356,7 @@ module MatrixAlgebra =
             let fDo a1 a2 qt1 qt2 depth =
                 let vec1 = SparseVector((mult a1 qt1 (depth + 1)), mtx.Columns)
                 let vec2 = SparseVector(mult a2 qt2 (depth + 1), mtx.Columns)
-                let result = vecPlusVec fAdd vec1 vec2
+                let result = elementwiseVecVec fAdd vec1 vec2
                 result.Data
 
             match bTree, qTree with
