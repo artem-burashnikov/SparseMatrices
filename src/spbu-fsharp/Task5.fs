@@ -258,7 +258,7 @@ module Graphs =
         SparseVector(inner visited.Data frontier.Data, visited.Length)
 
 
-    let BFS (vSet: List<int>) (gMtx: COOMatrix<'int>) =
+    let BFS (vSet: List<int>) (gMtx: COOMatrix<'a>) =
 
         let fAdd a b =
             match a, b with
