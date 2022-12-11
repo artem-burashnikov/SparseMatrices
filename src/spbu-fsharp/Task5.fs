@@ -25,7 +25,7 @@ type COOVector<'a> =
         val Data: (int * 'a) list
         val Length: int
 
-        new(list, length) = { Data = list; Length = length }
+        new(tuplesList, length) = { Data = tuplesList; Length = length }
     end
 
 

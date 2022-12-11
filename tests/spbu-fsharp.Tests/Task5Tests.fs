@@ -32,22 +32,11 @@ module GeneralFunctions =
                       |> List.distinct
                       |> List.map (fun x -> (x, true))
 
-                  // We treat list of coordinates as a COO vector.
-                  // This function converts COO data to corresponding array.
-                  let listToArr lst (array: bool array) =
-                      let rec maker lst =
-                          match lst with
-                          | [] -> array
-                          | (i, _) :: tl ->
-                              array[i] <- true
-                              maker tl
 
-                      maker lst
+                  let inputArr = Array.create length Option.None
 
-                  // Some/None is mapped for further conversion to a tree.
-                  let inputArr =
-                      listToArr inputList (Array.create length false)
-                      |> Array.map (fun x -> if x then Some x else Option.None)
+                  for i = 0 to inputList.Length - 1 do
+                      inputArr[fst inputList[i]] <- Some true
 
                   let actualResult = COOVector(inputList, length) |> Converter.cooVecToTree
                   let expectedResult = vecToTree inputArr
@@ -72,19 +61,13 @@ module GeneralFunctions =
                       |> List.distinct
                       |> List.map func
 
-                  let listToArr tripletsList (arr: 'a option[,]) =
-                      let rec maker lst =
-                          match lst with
-                          | [] -> arr
-                          | (i, j, value) :: tl ->
-                              arr[i, j] <- Some value
-                              maker tl
+                  let inputTable = Array2D.create size size Option.None
 
-                      maker tripletsList
+                  for i = 0 to inputList.Length - 1 do
+                      inputTable[Converter.first inputList[i], Converter.second inputList[i]] <- Converter.third inputList[i] |> Some
 
                   let actualResult = COOMatrix(inputList, size, size) |> Converter.cooMtxToTree
 
-                  let expectedResult =
-                      listToArr inputList (Array2D.create size size Option.None) |> tableToTree
+                  let expectedResult = tableToTree inputTable
 
                   Expect.equal actualResult expectedResult "" ]
