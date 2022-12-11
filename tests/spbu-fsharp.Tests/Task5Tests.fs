@@ -1,16 +1,9 @@
 module Task5Tests
 
-open System
-open HomeWork4
-open Helpers.Numbers
 open HomeWork4.MatrixData
-open HomeWork4.SparseVector
 open HomeWork4.VectorData
 open HomeWork5
 open Microsoft.FSharp.Collections
-open Trees.BinTrees
-open Trees.QuadTrees
-open Trees
 open Expecto
 open Microsoft.FSharp.Core
 
@@ -27,36 +20,42 @@ module GeneralFunctions =
             "General functions."
             [
 
-              testProperty "BinTree from COO converter"
+              testProperty
+                  "BinTree from COO converter: Should produce the same tree structure as an array-to-tree converter."
               <| fun (lst: int list) (l: int) ->
                   // We initialize length + 1 because we want to avoid dividing by modulo zero.
                   let length = (abs l) + 1
-                  // We normalize coordinates, so they are within the specified size and leave only distinct values.
-                  let inputList = List.map (fun value -> abs value % length) lst |> List.distinct
+                  // Coordinates are normalized, so they are within the specified size.
+                  // Make sure only distinct coordinates are left.
+                  let inputList =
+                      List.map (fun x -> abs x % length) lst
+                      |> List.distinct
+                      |> List.map (fun x -> (x, true))
 
                   // We treat list of coordinates as a COO vector.
-                  // This function converts COO data to corresponding array of Some/None.
-                  let func lst (array: bool array) =
+                  // This function converts COO data to corresponding array.
+                  let listToArr lst (array: bool array) =
                       let rec maker lst =
                           match lst with
                           | [] -> array
-                          | hd :: tl ->
-                              array[hd] <- true
+                          | (i, _) :: tl ->
+                              array[i] <- true
                               maker tl
 
                       maker lst
 
-
+                  // Some/None is mapped for further conversion to a tree.
                   let inputArr =
-                      func inputList (Array.create length false)
+                      listToArr inputList (Array.create length false)
                       |> Array.map (fun x -> if x then Some x else Option.None)
 
-                  let vecFromCoo = COOVector(inputList, length)
-                  let actualResult = HomeWork5.Converter.cooVecToTree vecFromCoo
+                  let actualResult = COOVector(inputList, length) |> Converter.cooVecToTree
                   let expectedResult = vecToTree inputArr
                   Expect.equal actualResult expectedResult ""
 
-              testProperty "QuadTree from COO converter"
+
+              testProperty
+                  "QuadTree from COO converter: Should produce the same tree structure as an array2d-to-tree converter."
               <| fun (tupleLst: (int * int) list) (s: int) ->
                   let size = (abs s) + 1
 
@@ -66,14 +65,14 @@ module GeneralFunctions =
                       if res % 2 = 0 then
                           (i, j, Option.None)
                       else
-                          (i, j, res |> Some)
+                          (i, j, Some res)
 
                   let inputList =
                       List.map (fun (i, j) -> abs i % size, abs j % size) tupleLst
                       |> List.distinct
                       |> List.map func
 
-                  let func tupleLst (arr: 'a option[,]) =
+                  let listToArr tripletsList (arr: 'a option[,]) =
                       let rec maker lst =
                           match lst with
                           | [] -> arr
@@ -81,10 +80,11 @@ module GeneralFunctions =
                               arr[i, j] <- Some value
                               maker tl
 
-                      maker tupleLst
+                      maker tripletsList
 
-                  let inputArr = func inputList (Array2D.create size size Option.None)
-                  let quadFromCoo = COOMatrix(inputList, size, size)
-                  let actualResult = HomeWork5.Converter.cooMtxToTree quadFromCoo
-                  let expectedResult = tableToTree inputArr
+                  let actualResult = COOMatrix(inputList, size, size) |> Converter.cooMtxToTree
+
+                  let expectedResult =
+                      listToArr inputList (Array2D.create size size Option.None) |> tableToTree
+
                   Expect.equal actualResult expectedResult "" ]

@@ -1,8 +1,6 @@
 namespace HomeWork5
 
 open HomeWork4.SparseVector
-open HomeWork4.SparseMatrix
-open HomeWork4.MatrixAlgebra
 open Microsoft.FSharp.Core
 open Trees.BinTrees
 open Trees.QuadTrees
@@ -11,7 +9,7 @@ open Helpers
 
 type COOMatrix<'a> =
     struct
-        val Data: List<int * int * 'a option>
+        val Data: (int * int * 'a option) list
         val Rows: int
         val Columns: int
 
@@ -24,7 +22,7 @@ type COOMatrix<'a> =
 
 type COOVector<'a> =
     struct
-        val Data: List<int>
+        val Data: (int * 'a) list
         val Length: int
 
         new(list, length) = { Data = list; Length = length }
@@ -108,11 +106,11 @@ module Converter =
             let rec inner lst leftPart rightPart =
                 match lst with
                 | [] -> leftPart, rightPart
-                | hd :: tl ->
-                    if hd < half then
-                        inner tl (hd :: leftPart) rightPart
+                | (i, value) :: tl ->
+                    if i < half then
+                        inner tl ((i, value) :: leftPart) rightPart
                     else
-                        inner tl leftPart ((hd - half) :: rightPart)
+                        inner tl leftPart ((i - half, value) :: rightPart)
 
             let leftPart, rightPart = inner vec.Data [] []
 
@@ -133,7 +131,7 @@ module Converter =
                 && (mtx.Data.Head |> first) <= maxRowIndex
                 && (mtx.Data.Head |> second) <= maxColumnIndex
             then
-                QuadTree.Leaf(mtx.Data.Head |> third)
+                QuadTree.Leaf(third mtx.Data.Head)
             // match third mtx.Data.Head with
             // | Option.None -> QuadTree.None
             // | Some value -> QuadTree.Leaf value
@@ -157,7 +155,7 @@ module Converter =
             QuadTree.None
 
         elif mtx.Rows = 1 && mtx.Columns = 1 && mtx.Data.Length <> 0 then
-            QuadTree.Leaf(mtx.Data.Head |> third)
+            QuadTree.Leaf(third mtx.Data.Head)
         // match third mtx.Data.Head with
         // | Option.None -> QuadTree.None
         // | Some value -> QuadTree.Leaf value
@@ -172,9 +170,9 @@ module Converter =
 
         let rec maker (vec: COOVector<'a>) =
 
-            if vec.Length = 1 && vec.Data.Length = 1 && vec.Data.Head <= maxDataIndex then
+            if vec.Length = 1 && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
 
-                BinTree.Leaf true
+                BinTree.Leaf(snd vec.Data.Head)
 
             elif
                 vec.Data.Length < 1
@@ -195,7 +193,7 @@ module Converter =
             BinTree.None
 
         elif vec.Length = 1 && vec.Data.Length <> 0 then
-            BinTree.Leaf true
+            BinTree.Leaf(snd vec.Data.Head)
 
         else
             let powerSize = Numbers.ceilPowTwo vec.Length
