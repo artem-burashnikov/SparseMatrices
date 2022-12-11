@@ -11,7 +11,7 @@ open Helpers
 
 type COOMatrix<'a> =
     struct
-        val Data: List<int * int * 'a>
+        val Data: List<int * int * 'a option>
         val Rows: int
         val Columns: int
 
@@ -24,10 +24,10 @@ type COOMatrix<'a> =
 
 type COOVector<'a> =
     struct
-        val Data: List<int * 'a>
+        val Data: List<int>
         val Length: int
 
-        new(doublesList, length) = { Data = doublesList; Length = length }
+        new(list, length) = { Data = list; Length = length }
     end
 
 
@@ -70,37 +70,25 @@ module Converter =
             let halfRows = mtx.Rows / 2
             let halfColumns = mtx.Columns / 2
 
-            // NW
-            let isQ1 triple =
-                (first triple) < halfRows && (second triple) < halfColumns
+            let rec inner lst nw ne sw se =
+                match lst with
+                | [] -> nw, ne, sw, se
+                | (i, j, value) :: tl ->
+                    if i < halfRows && j < halfColumns then
+                        inner tl ((i, j, value) :: nw) ne sw se
+                    elif i < halfRows && j >= halfColumns then
+                        inner tl nw ((i, j - halfColumns, value) :: ne) sw se
+                    elif i >= halfRows && j < halfColumns then
+                        inner tl nw ne ((i - halfRows, j, value) :: sw) se
+                    else
+                        inner tl nw ne sw ((i - halfRows, j - halfRows, value) :: se)
 
-            let q1List = List.filter isQ1 mtx.Data
-            // NE
-            let isQ2 triple =
-                (first triple) < halfRows && (second triple) >= halfColumns
+            let nw, ne, sw, se = inner mtx.Data [] [] [] []
 
-            let q2List =
-                List.filter isQ2 mtx.Data
-                |> List.map (fun (i, j, value) -> (i, j - halfColumns, value))
-            // SW
-            let isQ3 triple =
-                (first triple) >= halfRows && (second triple) < halfColumns
-
-            let q3List =
-                List.filter isQ3 mtx.Data
-                |> List.map (fun (i, j, value) -> (i - halfRows, j, value))
-            // SE
-            let isQ4 triple =
-                (first triple) >= halfRows && (second triple) >= halfColumns
-
-            let q4List =
-                List.filter isQ4 mtx.Data
-                |> List.map (fun (i, j, value) -> (i - halfRows, j - halfColumns, value))
-
-            COOMatrix(q1List, halfRows, halfColumns),
-            COOMatrix(q2List, halfRows, halfColumns),
-            COOMatrix(q3List, halfRows, halfColumns),
-            COOMatrix(q4List, halfRows, halfColumns)
+            COOMatrix(nw, halfRows, halfColumns),
+            COOMatrix(ne, halfRows, halfColumns),
+            COOMatrix(sw, halfRows, halfColumns),
+            COOMatrix(se, halfRows, halfColumns)
 
 
     /// Divide a given COOVector into 2 parts.
@@ -108,7 +96,7 @@ module Converter =
     let vecDiv2 (vec: COOVector<'a>) =
 
         // For an empty vector just return the data immediately.
-        // Otherwise filter tuples.
+        // Otherwise filter coordinates.
         if vec.Length = 0 then
             vec, vec
 
@@ -117,13 +105,16 @@ module Converter =
             // them to the middle point.
             let half = vec.Length / 2
 
-            let isLeft doubles = (fst doubles) < half
+            let rec inner lst leftPart rightPart =
+                match lst with
+                | [] -> leftPart, rightPart
+                | hd :: tl ->
+                    if hd < half then
+                        inner tl (hd :: leftPart) rightPart
+                    else
+                        inner tl leftPart ((hd - half) :: rightPart)
 
-            let isRight doubles = (fst doubles) >= half
-
-            let leftPart, rightPart =
-                List.filter isLeft vec.Data,
-                List.filter isRight vec.Data |> List.map (fun (i, value) -> (i - half, value))
+            let leftPart, rightPart = inner vec.Data [] []
 
             COOVector(leftPart, half), COOVector(rightPart, half)
 
@@ -142,8 +133,10 @@ module Converter =
                 && (mtx.Data.Head |> first) <= maxRowIndex
                 && (mtx.Data.Head |> second) <= maxColumnIndex
             then
-
                 QuadTree.Leaf(mtx.Data.Head |> third)
+            // match third mtx.Data.Head with
+            // | Option.None -> QuadTree.None
+            // | Some value -> QuadTree.Leaf value
 
             elif
                 mtx.Data.Length < 1
@@ -157,7 +150,6 @@ module Converter =
 
                 QuadTree.Node(maker nw, maker ne, maker sw, maker se) |> reduceQt
 
-        // Check dimensions and act accordingly.
         if mtx.Rows < 0 || mtx.Columns < 0 then
             failwith $"Converter.cooMtxToTree: Incorrect data: %A{mtx.Data}, rows %A{mtx.Rows}, columns %A{mtx.Columns}"
 
@@ -166,7 +158,9 @@ module Converter =
 
         elif mtx.Rows = 1 && mtx.Columns = 1 && mtx.Data.Length <> 0 then
             QuadTree.Leaf(mtx.Data.Head |> third)
-
+        // match third mtx.Data.Head with
+        // | Option.None -> QuadTree.None
+        // | Some value -> QuadTree.Leaf value
         else
             let powerSize = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
             COOMatrix(mtx.Data, powerSize, powerSize) |> maker
@@ -178,9 +172,9 @@ module Converter =
 
         let rec maker (vec: COOVector<'a>) =
 
-            if vec.Length = 1 && vec.Data.Length = 1 && (vec.Data.Head |> fst) <= maxDataIndex then
+            if vec.Length = 1 && vec.Data.Length = 1 && vec.Data.Head <= maxDataIndex then
 
-                BinTree.Leaf(vec.Data.Head |> snd)
+                BinTree.Leaf true
 
             elif
                 vec.Data.Length < 1
@@ -194,7 +188,6 @@ module Converter =
 
                 BinTree.Node(maker leftPart, maker rightPart) |> reduceBt
 
-        // Check dimensions and act accordingly.
         if vec.Length < 0 then
             failwith $"Converter.cooVecToTree: Incorrect data: %A{vec.Data}, length %A{vec.Length}"
 
@@ -202,7 +195,7 @@ module Converter =
             BinTree.None
 
         elif vec.Length = 1 && vec.Data.Length <> 0 then
-            BinTree.Leaf(vec.Data.Head |> snd)
+            BinTree.Leaf true
 
         else
             let powerSize = Numbers.ceilPowTwo vec.Length
@@ -257,7 +250,7 @@ module Graphs =
 
         SparseVector(inner visited.Data frontier.Data, visited.Length)
 
-
+(*
     let BFS (vSet: List<int>) (gMtx: COOMatrix<'a>) =
 
         let fAdd a b =
@@ -309,3 +302,4 @@ module Graphs =
             visited
         else
             innerBFS frontier visited 1
+*)

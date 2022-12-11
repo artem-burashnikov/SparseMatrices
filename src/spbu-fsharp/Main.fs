@@ -8,22 +8,27 @@ module Main =
 
     [<EntryPoint>]
     let main (argv: string array) =
+        let listTuples = [ (0, 0, Some 4); (2, 1, Some 1); (3, 7, Some 9) ]
+        let size = 10
 
-        let inputCoord =
-            [ (0, 4, 1)
-              (0, 6, 1)
-              (2, 4, 1)
-              (4, 0, 1)
-              (4, 2, 1)
-              (4, 5, 1)
-              (5, 4, 1)
-              (6, 0, 1)
-              (0, 2, 1)
-              (2, 0, 1) ]
+        let func tupleLst (arr: 'a[,]) =
+            let rec maker lst =
+                match lst with
+                | [] -> arr
+                | (i, j, value) :: tl ->
+                    arr[i, j] <- value
+                    maker tl
 
-        let rows, columns = 7, 7
-        let cooMtx = COOMatrix(inputCoord, rows, columns)
-        let startV = [ 0; 5 ]
-        let result = Graphs.BFS startV cooMtx
-        printfn $"%A{result.Data}"
+            maker tupleLst
+
+        let inputArr = func listTuples (Array2D.create size size Option.None)
+        let quadFromCoo = COOMatrix(listTuples, size, size)
+        let actualResult = Converter.cooMtxToTree quadFromCoo
+        let expectedResult = HomeWork4.MatrixData.tableToTree inputArr
+        printfn $"Input list: %A{listTuples}"
+        printfn $"Input arr: %A{inputArr}"
+
+        printfn
+            $"Actual result:\n%A{actualResult}\n--------------------------------------------------------------------------\nExpected result:\n%A{expectedResult}"
+
         0
