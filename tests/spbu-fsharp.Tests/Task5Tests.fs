@@ -64,7 +64,8 @@ module GeneralFunctions =
                   let inputTable = Array2D.create size size Option.None
 
                   for i = 0 to inputList.Length - 1 do
-                      inputTable[Converter.first inputList[i], Converter.second inputList[i]] <- Converter.third inputList[i] |> Some
+                      inputTable[Converter.first inputList[i], Converter.second inputList[i]] <-
+                          Converter.third inputList[i] |> Some
 
                   let actualResult = COOMatrix(inputList, size, size) |> Converter.cooMtxToTree
 
