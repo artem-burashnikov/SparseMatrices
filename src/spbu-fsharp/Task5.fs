@@ -1,5 +1,7 @@
 namespace HomeWork5
 
+open HomeWork4
+open HomeWork4.SparseMatrix
 open HomeWork4.SparseVector
 open Microsoft.FSharp.Core
 open Trees.BinTrees
@@ -61,13 +63,13 @@ module Converter =
         // Otherwise filter triplets.
         if mtx.Rows = 0 || mtx.Columns = 0 then
             mtx, mtx, mtx, mtx
-
         else
             // Calculate middle points and filter triplets by comparing
             // corresponding coordinates to their middle points.
             let halfRows = mtx.Rows / 2
             let halfColumns = mtx.Columns / 2
 
+            //
             let rec inner lst nw ne sw se =
                 match lst with
                 | [] -> nw, ne, sw, se
@@ -81,6 +83,7 @@ module Converter =
                     else
                         inner tl nw ne sw ((i - halfRows, j - halfRows, value) :: se)
 
+            // Construct and return the result.
             let nw, ne, sw, se = inner mtx.Data [] [] [] []
 
             COOMatrix(nw, halfRows, halfColumns),
@@ -92,12 +95,10 @@ module Converter =
     /// Divide a given COOVector into 2 parts.
     /// Returns two vectors.
     let vecDiv2 (vec: COOVector<'a>) =
-
         // For an empty vector just return the data immediately.
         // Otherwise filter coordinates.
         if vec.Length = 0 then
             vec, vec
-
         else
             // Calculate middle point and filter coordinates by comparing
             // them to the middle point.
@@ -112,17 +113,19 @@ module Converter =
                     else
                         inner tl leftPart ((i - half, value) :: rightPart)
 
+            // Construct and return the result.
             let leftPart, rightPart = inner vec.Data [] []
 
             COOVector(leftPart, half), COOVector(rightPart, half)
 
 
+    /// Convert SparseMatrix data from coordinates to QuadTree.
     let cooMtxToTree (mtx: COOMatrix<'a>) =
 
         let maxRowIndex = mtx.Rows - 1
         let maxColumnIndex = mtx.Columns - 1
 
-        let rec maker (mtx: COOMatrix<'a>) =
+        let rec inner (mtx: COOMatrix<'a>) =
 
             if
                 mtx.Rows = 1
@@ -132,36 +135,22 @@ module Converter =
                 && (mtx.Data.Head |> second) <= maxColumnIndex
             then
                 QuadTree.Leaf(third mtx.Data.Head)
-            // match third mtx.Data.Head with
-            // | Option.None -> QuadTree.None
-            // | Some value -> QuadTree.Leaf value
-
-            elif
-                mtx.Data.Length < 1
-
-            then
+            elif mtx.Data.Length < 1 then
                 QuadTree.None
-
             else
-
                 let nw, ne, sw, se = mtxDiv4 mtx
 
-                QuadTree.Node(maker nw, maker ne, maker sw, maker se) |> reduceQt
+                QuadTree.Node(inner nw, inner ne, inner sw, inner se) |> reduceQt
 
         if mtx.Rows < 0 || mtx.Columns < 0 then
             failwith $"Converter.cooMtxToTree: Incorrect data: %A{mtx.Data}, rows %A{mtx.Rows}, columns %A{mtx.Columns}"
-
         elif mtx.Rows = 0 || mtx.Columns = 0 then
             QuadTree.None
-
         elif mtx.Rows = 1 && mtx.Columns = 1 && mtx.Data.Length <> 0 then
             QuadTree.Leaf(third mtx.Data.Head)
-        // match third mtx.Data.Head with
-        // | Option.None -> QuadTree.None
-        // | Some value -> QuadTree.Leaf value
         else
             let powerSize = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
-            COOMatrix(mtx.Data, powerSize, powerSize) |> maker
+            COOMatrix(mtx.Data, powerSize, powerSize) |> inner
 
 
     let cooVecToTree (vec: COOVector<'a>) =
@@ -171,133 +160,97 @@ module Converter =
         let rec maker (vec: COOVector<'a>) =
 
             if vec.Length = 1 && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
-
                 BinTree.Leaf(snd vec.Data.Head)
-
-            elif
-                vec.Data.Length < 1
-
-            then
+            elif vec.Data.Length < 1 then
                 BinTree.None
-
             else
-
                 let leftPart, rightPart = vecDiv2 vec
 
                 BinTree.Node(maker leftPart, maker rightPart) |> reduceBt
 
         if vec.Length < 0 then
             failwith $"Converter.cooVecToTree: Incorrect data: %A{vec.Data}, length %A{vec.Length}"
-
         elif vec.Length = 0 then
             BinTree.None
-
         elif vec.Length = 1 && vec.Data.Length <> 0 then
             BinTree.Leaf(snd vec.Data.Head)
-
         else
             let powerSize = Numbers.ceilPowTwo vec.Length
             COOVector(vec.Data, powerSize) |> maker
 
 
+    let cooToSparseVec (cooVec: COOVector<'a>) =
+        SparseVector(cooVecToTree cooVec, cooVec.Length)
+
+
+    let cooToSparseMtx (cooMtx: COOMatrix<'a>) =
+        SparseMatrix(cooMtxToTree cooMtx, cooMtx.Rows, cooMtx.Columns)
+
+
+    let listToVertices lst size value =
+        COOVector(List.map (fun x -> (x, value)) lst, size)
+
+
 module Graphs =
 
-    let applyMask (mask: SparseVector<'a>) (vec: SparseVector<'b>) =
-
-        let rec inner maskTree vecTree =
-            match maskTree, vecTree with
-            | BinTree.None, BinTree.Leaf b -> BinTree.Leaf b
-
-            | BinTree.None, vecTree -> vecTree
-
-            | _, BinTree.None -> BinTree.None
-
-            | BinTree.Leaf _, _ -> BinTree.None
-
-            | BinTree.Node(a1, a2), BinTree.Leaf _ ->
-                BinTree.Node(inner a1 vecTree, inner a2 vecTree) |> Converter.reduceBt
-
-            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> Converter.reduceBt
-
-        SparseVector(inner mask.Data vec.Data, mask.Length)
+    let fAdd a b =
+        match a, b with
+        | Some true, _
+        | _, Some true -> Some true
+        | _ -> Option.None
 
 
-    let markVisited (visited: SparseVector<int>) (frontier: SparseVector<'b>) (iter: int) =
+    let fMult a b =
+        match a, b with
+        | Some true, Some _ -> Some true
+        | _ -> Option.None
 
-        let rec inner visitedTree frontTree =
-            match visitedTree, frontTree with
-            | BinTree.None, BinTree.Leaf _ -> BinTree.Leaf iter
 
-            | BinTree.None, BinTree.Node(b1, b2) ->
-                BinTree.Node(inner visitedTree b1, inner visitedTree b2) |> Converter.reduceBt
+    let fVisit a b =
+        match a, b with
+        | Some true, Some value -> Some value
+        | _ -> Option.None
 
-            | visitedTree, BinTree.None -> visitedTree
 
-            | BinTree.Leaf _, BinTree.Node(b1, b2) ->
-                BinTree.Node(inner visitedTree b1, inner visitedTree b2) |> Converter.reduceBt
+    let fMask a b =
+        match a, b with
+        | Option.None, Some value -> Some value
+        | _ -> Option.None
 
-            | BinTree.Node(a1, a2), BinTree.Leaf _ ->
-                BinTree.Node(inner a1 frontTree, inner a2 frontTree) |> Converter.reduceBt
 
-            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> Converter.reduceBt
+    let fUpdateCount iter a b =
+        match a, b with
+        | Option.None, Option.None -> Option.None
+        | Option.None, Some true -> Some iter
+        | Some value, Option.None -> Some value
+        | _ -> failwith $"fUpdateCount: Unexpected result\na:%A{a}\nb:%A{b}"
 
-            | BinTree.Leaf _, BinTree.Leaf _ ->
-                failwith
-                    "markVisited: frontier should already be masked at this point.\
-                          This case is impossible."
 
-        SparseVector(inner visited.Data frontier.Data, visited.Length)
+    let BFS (startV: int list) (gMtx: COOMatrix<'a>) =
 
-(*
-    let BFS (vSet: List<int>) (gMtx: COOMatrix<'a>) =
+        let length = gMtx.Rows
+        let mtx = gMtx |> Converter.cooToSparseMtx
 
-        let fAdd a b =
-            match a, b with
-            | Some true, _
-            | _, Some true -> Some true
-            | _ -> Some false
+        let frontier =
+            Converter.listToVertices startV length true |> Converter.cooToSparseVec
 
-        let fMult a b =
-            match a, b with
-            | Some true, Some _ -> Some true
-            | _ -> Some false
+        let visited = Converter.listToVertices startV length 0 |> Converter.cooToSparseVec
 
-        // Initialize a frontier from a given list of starting vertices and make a BinaryTree.
-        // After which construct a SparseVector from resulting Binary Tree.
-        let rec initFrontier frontier vSet =
-            match vSet with
-            | [] -> frontier
-            | [ vertex ] -> (vertex, true) :: frontier
-            | hd :: tl -> initFrontier ((hd, true) :: frontier) tl
+        let rec inner (frontier: SparseVector<bool>) (visited: SparseVector<int>) (counter: int) =
 
-        let vecData =
-            COOVector(initFrontier List.empty vSet, gMtx.Rows) |> Converter.cooVecToTree
+            let newFrontier =
+                MatrixAlgebra.vecByMtx fAdd fMult frontier mtx
+                |> MatrixAlgebra.elementwiseVecVec fMask visited
 
-        let frontier = SparseVector(vecData, gMtx.Rows)
-
-        // Construct a SparseMatrix from a given adjacency matrix.
-        let mtxData = Converter.cooMtxToTree gMtx
-        let mtx = SparseMatrix(mtxData, gMtx.Rows, gMtx.Columns)
-
-        // Mark given vertices as visited. This counts as an iteration 0.
-        let visited = markVisited (SparseVector(BinTree.None, frontier.Length)) frontier 0
-
-        let rec innerBFS (frontier: SparseVector<bool>) (visited: SparseVector<int>) iter =
-            // Follow adjacency matrix to get a new front.
-            // By applying the mask of already visited vertices we will prevent cycling around.
-            let newFrontier = applyMask visited (vecByMtx fAdd fMult frontier mtx)
-
-            // If the resulting front is empty, then return already visited vertices.
-            // Otherwise mark the newly visited vertices and continue BFS.
-            if newFrontier.Data = BinTree.None then
+            if newFrontier.IsEmpty then
                 visited
             else
-                let newVisited = markVisited visited newFrontier iter
+                let newVisited =
+                    MatrixAlgebra.elementwiseVecVec (fUpdateCount counter) visited newFrontier
 
-                innerBFS newFrontier newVisited (iter + 1)
+                inner newFrontier newVisited (counter + 1)
 
-        if frontier.Data = BinTree.None then
+        if frontier.IsEmpty then
             visited
         else
-            innerBFS frontier visited 1
-*)
+            inner frontier visited 1

@@ -1,5 +1,7 @@
 module Task5Tests
 
+open System
+open HomeWork4
 open HomeWork4.MatrixData
 open HomeWork4.VectorData
 open HomeWork5
@@ -11,35 +13,107 @@ let config = { FsCheckConfig.defaultConfig with maxTest = 10000 }
 
 module GeneralFunctions =
 
-    let r = System.Random()
+    let r = Random()
+
+
+    /// Generates random weight to a tuple. Returns a triplet.
+    let func (i, j) =
+        let res = r.Next(10)
+
+        if res % 2 = 0 then
+            (i, j, Option.None)
+        else
+            (i, j, Some res)
+
+
+    /// Normalizes tuples values according to a given size.
+    let makeCOOTriplets tupleLst size =
+        List.map (fun (i, j) -> abs i % size, abs j % size) tupleLst
+        |> List.distinct
+        |> List.map func
+
+
+    /// Returns a list of (value, weight) from a list of values and a given weight.
+    let makeCOOTuples intList weight size =
+        List.map (fun x -> abs x % size) intList
+        |> List.distinct
+        |> List.map (fun x -> (x, weight))
+
+
+    /// Returns an Array2D from a given list of triplets (i, j, weight).
+    let cooTriplesToTable (tripletsList: (int * int * 'a) list) size =
+        let arr = Array2D.create size size Option.None
+
+        for i = 0 to tripletsList.Length - 1 do
+            arr[Converter.first tripletsList[i], Converter.second tripletsList[i]] <-
+                Converter.third tripletsList[i] |> Some
+
+        arr
+
+
+    /// Returns an array from a given list of tuples (i, weight).
+    let cooTuplesToTable (tuplesList: (int * 'a) list) size =
+        let arr = Array.create size Option.None
+
+        for i = 0 to tuplesList.Length - 1 do
+            arr[fst tuplesList[i]] <- snd tuplesList[i] |> Some
+
+        arr
+
+
+    let naiveBFS (startV: int list) (mtx: 'a option[,]) =
+        let queue = startV |> List.map (fun x -> (x, 0))
+
+        let addToQueue queue vertex iter =
+            let rec inner list counter =
+                if counter < 0 then
+                    list
+                else
+                    let value = mtx[vertex, counter]
+
+                    if value = Option.None then
+                        inner list (counter - 1)
+                    else
+                        inner (list @ [ counter, iter ]) (counter - 1)
+
+            inner queue (Array2D.length2 mtx - 1)
+
+
+        let rec inner queue result visited =
+            match queue with
+            | [] -> result
+            | hd as (vertex, iter) :: tl ->
+                if List.contains vertex visited then
+                    inner tl result visited
+                else
+                    let visited = vertex :: visited
+                    let newQ = addToQueue tl vertex (iter + 1)
+                    inner newQ (result @ [ hd ]) visited
+
+        if queue.IsEmpty then [] else inner queue [] []
+
 
     [<Tests>]
     let tests =
 
         testList
-            "General functions."
+            "Breadth-First Search"
             [
 
               testProperty
                   "BinTree from COO converter: Should produce the same tree structure as an array-to-tree converter."
-              <| fun (lst: int list) (l: int) ->
-                  // We initialize length + 1 because we want to avoid dividing by modulo zero.
-                  let length = (abs l) + 1
-                  // Coordinates are normalized, so they are within the specified size.
-                  // Make sure only distinct coordinates are left.
-                  let inputList =
-                      List.map (fun x -> abs x % length) lst
-                      |> List.distinct
-                      |> List.map (fun x -> (x, true))
+              <| fun (lst: int list) (s: int) ->
 
+                  let size = (abs s) + 1
 
-                  let inputArr = Array.create length Option.None
+                  let inputList = makeCOOTuples lst true size
 
-                  for i = 0 to inputList.Length - 1 do
-                      inputArr[fst inputList[i]] <- Some true
+                  let inputArr = cooTuplesToTable inputList size
 
-                  let actualResult = COOVector(inputList, length) |> Converter.cooVecToTree
+                  let actualResult = COOVector(inputList, size) |> Converter.cooVecToTree
+
                   let expectedResult = vecToTree inputArr
+
                   Expect.equal actualResult expectedResult ""
 
 
@@ -48,27 +122,32 @@ module GeneralFunctions =
               <| fun (tupleLst: (int * int) list) (s: int) ->
                   let size = (abs s) + 1
 
-                  let func (i, j) =
-                      let res = r.Next(10)
+                  let inputList = makeCOOTriplets tupleLst size
 
-                      if res % 2 = 0 then
-                          (i, j, Option.None)
-                      else
-                          (i, j, Some res)
-
-                  let inputList =
-                      List.map (fun (i, j) -> abs i % size, abs j % size) tupleLst
-                      |> List.distinct
-                      |> List.map func
-
-                  let inputTable = Array2D.create size size Option.None
-
-                  for i = 0 to inputList.Length - 1 do
-                      inputTable[Converter.first inputList[i], Converter.second inputList[i]] <-
-                          Converter.third inputList[i] |> Some
+                  let inputTable = cooTriplesToTable inputList size
 
                   let actualResult = COOMatrix(inputList, size, size) |> Converter.cooMtxToTree
 
                   let expectedResult = tableToTree inputTable
+
+                  Expect.equal actualResult expectedResult ""
+
+
+              testProperty "NaiveBFS and BFS should produce equal results"
+              <| fun (ints: int list) (tupleLst: (int * int) list) (s: int) ->
+                  let size = (abs s) + 1
+
+                  let startV = List.map (fun i -> abs i % size) ints |> List.distinct
+
+                  let inputList = makeCOOTriplets tupleLst size
+
+                  let cooMtx = COOMatrix(inputList, size, size)
+
+                  let inputTable = cooTriplesToTable inputList size
+
+                  let actualResult = (Graphs.BFS startV cooMtx).Data
+
+                  let expectedResult =
+                      COOVector(naiveBFS startV inputTable, size) |> Converter.cooVecToTree
 
                   Expect.equal actualResult expectedResult "" ]

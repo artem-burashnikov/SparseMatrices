@@ -8,10 +8,10 @@
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Tests.fs" />
-        <Compile Include="Task1Tests.fs" />
-        <Compile Include="Task2Tests.fs" />
-        <Compile Include="Task3Tests.fs" />
-        <Compile Include="Task4Tests.fs" />
+<!--        <Compile Include="Task1Tests.fs" />-->
+<!--        <Compile Include="Task2Tests.fs" />-->
+<!--        <Compile Include="Task3Tests.fs" />-->
+<!--        <Compile Include="Task4Tests.fs" />-->
         <Compile Include="Task5Tests.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>

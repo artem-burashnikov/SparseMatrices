@@ -119,6 +119,7 @@ module SparseVector =
 
                 getValue i
 
+        member this.IsEmpty = this.Data = BinTree.None
 
 
 open SparseVector
@@ -268,6 +269,8 @@ module SparseMatrix =
                 // Since indices in programming start at 0 we offset by one
                 getValue i j
 
+        member this.IsEmpty = this.Data = QuadTree.None
+
 
 open SparseMatrix
 
@@ -292,7 +295,7 @@ module MatrixAlgebra =
 
         let rec inner bTree1 bTree2 =
             match bTree1, bTree2 with
-            | BinTree.None, BinTree.None -> BinTree.None
+            | BinTree.None, BinTree.None -> fDo Option.None Option.None |> convertResult
 
             | BinTree.None, BinTree.Leaf b -> fDo Option.None (Some b) |> convertResult
 
