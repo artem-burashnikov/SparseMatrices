@@ -8,6 +8,7 @@ open HomeWork5
 open Microsoft.FSharp.Collections
 open Expecto
 open Microsoft.FSharp.Core
+open Trees.BinTrees
 
 let config = { FsCheckConfig.defaultConfig with maxTest = 10000 }
 
@@ -88,9 +89,9 @@ module GeneralFunctions =
                 else
                     let visited = vertex :: visited
                     let newQ = addToQueue tl vertex (iter + 1)
-                    inner newQ (result @ [ hd ]) visited
+                    inner newQ (hd :: result) visited
 
-        if queue.IsEmpty then [] else inner queue [] []
+        if queue.IsEmpty then [] else inner queue [] [] |> List.rev
 
 
     [<Tests>]
@@ -149,5 +150,43 @@ module GeneralFunctions =
 
                   let expectedResult =
                       COOVector(naiveBFS startV inputTable, size) |> Converter.cooVecToTree
+
+                  Expect.equal actualResult expectedResult ""
+
+              testCase "BFS: empty starting vertices"
+              <| fun _ ->
+
+                  let tuplesList = [ (0, 1); (0, 2); (1, 3); (2, 3) ]
+
+                  let size = 4
+
+                  let startV = []
+
+                  let inputList = makeCOOTriplets tuplesList size
+
+                  let cooMtx = COOMatrix(inputList, size, size)
+
+                  let actualResult = (Graphs.BFS startV cooMtx).Data
+
+                  Expect.equal actualResult BinTree.None ""
+
+
+              testCase "BFS: All vertices are starting vertices"
+              <| fun _ ->
+
+                  let tuplesList = [ (0, 1); (0, 2); (1, 3); (2, 3) ]
+
+                  let size = 4
+
+                  let startV = [ 0; 1; 2; 3 ]
+
+                  let inputList = makeCOOTriplets tuplesList size
+
+                  let cooMtx = COOMatrix(inputList, size, size)
+
+                  let actualResult = (Graphs.BFS startV cooMtx).Data
+
+                  let expectedResult =
+                      COOVector([ (0, 0); (1, 0); (2, 0); (3, 0) ], size) |> Converter.cooVecToTree
 
                   Expect.equal actualResult expectedResult "" ]
