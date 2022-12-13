@@ -37,22 +37,22 @@ module Converter =
     let second (_, a, _) = a
     let third (_, _, a) = a
 
-
-    let reduceQt node =
-        match node with
-        | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
-        | QuadTree.Node(QuadTree.Leaf nw, QuadTree.Leaf ne, QuadTree.Leaf sw, QuadTree.Leaf se) when
-            nw = ne && nw = sw && nw = se
-            ->
-            QuadTree.Leaf nw
-        | _ -> node
-
-
-    let reduceBt node =
-        match node with
-        | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
-        | BinTree.Node(BinTree.Leaf left, BinTree.Leaf right) when left = right -> BinTree.Leaf left
-        | _ -> node
+    //
+    // let reduceQt node =
+    //     match node with
+    //     | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
+    //     | QuadTree.Node(QuadTree.Leaf nw, QuadTree.Leaf ne, QuadTree.Leaf sw, QuadTree.Leaf se) when
+    //         nw = ne && nw = sw && nw = se
+    //         ->
+    //         QuadTree.Leaf nw
+    //     | _ -> node
+    //
+    //
+    // let reduceBt node =
+    //     match node with
+    //     | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
+    //     | BinTree.Node(BinTree.Leaf left, BinTree.Leaf right) when left = right -> BinTree.Leaf left
+    //     | _ -> node
 
 
     /// Divide a given COOMatrix into 4 quadrants.

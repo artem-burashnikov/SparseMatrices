@@ -24,9 +24,27 @@ module BinTrees =
         | Leaf of 'Value
         | Node of left: BinTree<'Value> * right: BinTree<'Value>
 
+
+    let reduceBt node =
+        match node with
+        | Node(None, None) -> None
+        | Node(Leaf left, Leaf right) when left = right -> Leaf left
+        | _ -> node
+
+
 module QuadTrees =
 
     type QuadTree<'Value> =
         | None
         | Leaf of 'Value
         | Node of NW: QuadTree<'Value> * NE: QuadTree<'Value> * SW: QuadTree<'Value> * SE: QuadTree<'Value>
+
+
+    let reduceQt node =
+        match node with
+        | Node(None, None, None, None) -> None
+        | Node(Leaf nw, Leaf ne, Leaf sw, Leaf se) when
+            nw = ne && nw = sw && nw = se
+            ->
+            Leaf nw
+        | _ -> node
