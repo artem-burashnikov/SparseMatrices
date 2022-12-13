@@ -11,7 +11,7 @@ open Helpers
 
 type COOMatrix<'a> =
     struct
-        val Data: (int * int * 'a option) list
+        val Data: List<int * int * 'a option>
         val Rows: int
         val Columns: int
 
@@ -24,14 +24,14 @@ type COOMatrix<'a> =
 
 type COOVector<'a> =
     struct
-        val Data: (int * 'a) list
+        val Data: List<int * 'a>
         val Length: int
 
         new(tuplesList, length) = { Data = tuplesList; Length = length }
     end
 
 
-type Marker = | Mark
+type Marker = Mark
 
 
 module Converter =
@@ -173,56 +173,63 @@ module Converter =
         SparseMatrix(cooMtxToTree cooMtx, cooMtx.Rows, cooMtx.Columns)
 
 
-    let listToVertices lst size value =
+    let listToVerticesWithWeight lst size value =
         COOVector(List.map (fun x -> (x, value)) lst, size)
+
+
+    let listToVertices lst size =
+        COOVector(List.map (fun x -> (x, x)) lst, size)
 
 
 module Graphs =
 
     let fAdd a b =
         match a, b with
-        | Some Mark, _
-        | _, Some Mark -> Some Mark
+        | Some x, _
+        | _, Some x -> Some x
         | _ -> Option.None
 
 
     let fMult a b =
         match a, b with
-        | Some Mark, Some _ -> Some Mark
+        | Some x, Some _ -> Some x
         | _ -> Option.None
 
 
     let fVisit a b =
         match a, b with
-        | Some Mark, Some value -> Some value
+        | Some _, Some y -> Some y
         | _ -> Option.None
 
 
     let fMask a b =
         match a, b with
-        | Option.None, Some value -> Some value
+        | Option.None, Some y -> Some y
         | _ -> Option.None
 
 
     let fUpdateCount iter a b =
         match a, b with
         | Option.None, Option.None -> Option.None
-        | Option.None, Some Mark -> Some iter
-        | Some value, Option.None -> Some value
-        | _ -> failwith $"fUpdateCount: Unexpected result\na:%A{a}\nb:%A{b}"
+        | Option.None, Some y -> Some iter
+        | Some x, Option.None -> Some x
+        | _ -> failwith $"fUpdateCount: Unexpected result.\nGiven a:%A{a}\nGiven b:%A{b}"
 
 
-    let BFS (startV: int list) (gMtx: COOMatrix<'a>) =
+    let BFS (startV: List<int>) (gMtx: COOMatrix<'a>) =
 
+        // Size and adjacency matrix.
         let length = gMtx.Rows
         let mtx = gMtx |> Converter.cooToSparseMtx
 
-        let frontier =
-            Converter.listToVertices startV length Mark |> Converter.cooToSparseVec
+        // Currently visited vertices.
+        let frontier = Converter.listToVertices startV length |> Converter.cooToSparseVec
 
-        let visited = Converter.listToVertices startV length 0 |> Converter.cooToSparseVec
+        // The result with weights.
+        let visited =
+            Converter.listToVerticesWithWeight startV length 0 |> Converter.cooToSparseVec
 
-        let rec inner (frontier: SparseVector<Marker>) (visited: SparseVector<int>) (counter: int) =
+        let rec inner (frontier: SparseVector<int>) (visited: SparseVector<int>) (counter: int) =
 
             let newFrontier =
                 MatrixAlgebra.vecByMtx fAdd fMult frontier mtx
