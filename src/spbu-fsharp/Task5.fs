@@ -31,28 +31,14 @@ type COOVector<'a> =
     end
 
 
+type Marker = | Mark
+
+
 module Converter =
 
     let first (a, _, _) = a
     let second (_, a, _) = a
     let third (_, _, a) = a
-
-    //
-    // let reduceQt node =
-    //     match node with
-    //     | QuadTree.Node(QuadTree.None, QuadTree.None, QuadTree.None, QuadTree.None) -> QuadTree.None
-    //     | QuadTree.Node(QuadTree.Leaf nw, QuadTree.Leaf ne, QuadTree.Leaf sw, QuadTree.Leaf se) when
-    //         nw = ne && nw = sw && nw = se
-    //         ->
-    //         QuadTree.Leaf nw
-    //     | _ -> node
-    //
-    //
-    // let reduceBt node =
-    //     match node with
-    //     | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
-    //     | BinTree.Node(BinTree.Leaf left, BinTree.Leaf right) when left = right -> BinTree.Leaf left
-    //     | _ -> node
 
 
     /// Divide a given COOMatrix into 4 quadrants.
@@ -195,20 +181,20 @@ module Graphs =
 
     let fAdd a b =
         match a, b with
-        | Some true, _
-        | _, Some true -> Some true
+        | Some Mark, _
+        | _, Some Mark -> Some Mark
         | _ -> Option.None
 
 
     let fMult a b =
         match a, b with
-        | Some true, Some _ -> Some true
+        | Some Mark, Some _ -> Some Mark
         | _ -> Option.None
 
 
     let fVisit a b =
         match a, b with
-        | Some true, Some value -> Some value
+        | Some Mark, Some value -> Some value
         | _ -> Option.None
 
 
@@ -221,7 +207,7 @@ module Graphs =
     let fUpdateCount iter a b =
         match a, b with
         | Option.None, Option.None -> Option.None
-        | Option.None, Some true -> Some iter
+        | Option.None, Some Mark -> Some iter
         | Some value, Option.None -> Some value
         | _ -> failwith $"fUpdateCount: Unexpected result\na:%A{a}\nb:%A{b}"
 
@@ -232,11 +218,11 @@ module Graphs =
         let mtx = gMtx |> Converter.cooToSparseMtx
 
         let frontier =
-            Converter.listToVertices startV length true |> Converter.cooToSparseVec
+            Converter.listToVertices startV length Mark |> Converter.cooToSparseVec
 
         let visited = Converter.listToVertices startV length 0 |> Converter.cooToSparseVec
 
-        let rec inner (frontier: SparseVector<bool>) (visited: SparseVector<int>) (counter: int) =
+        let rec inner (frontier: SparseVector<Marker>) (visited: SparseVector<int>) (counter: int) =
 
             let newFrontier =
                 MatrixAlgebra.vecByMtx fAdd fMult frontier mtx

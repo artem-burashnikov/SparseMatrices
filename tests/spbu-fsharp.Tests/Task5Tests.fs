@@ -1,7 +1,6 @@
 module Task5Tests
 
 open System
-open HomeWork4
 open HomeWork4.MatrixData
 open HomeWork4.VectorData
 open HomeWork5
