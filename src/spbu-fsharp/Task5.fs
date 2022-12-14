@@ -22,13 +22,12 @@ type COOMatrix<'a> =
     end
 
 
-type COOVector<'a> =
-    struct
-        val Data: List<uint * Option<'a>>
-        val Length: uint
+type COOVector<'a>(list: List<uint * Option<'a>>, length: uint) =
+    member this.Data = list
+    member this.Length = length
 
-        new(tuplesList, length) = { Data = tuplesList; Length = length }
-    end
+    static member Init (lst: List<uint>) (size: uint) (value: Option<'a>) =
+        COOVector(List.map (fun x -> (x, value)) lst, size)
 
 
 type Marker = Mark
@@ -169,12 +168,7 @@ module Converter =
         SparseMatrix(cooMtxToTree cooMtx, cooMtx.Rows, cooMtx.Columns)
 
 
-    let listToVerticesWithWeight lst size value =
-        COOVector(List.map (fun x -> (x, Some value)) lst, size)
-
-
-    let listToVertices lst size =
-        COOVector(List.map (fun x -> (x, Some x)) lst, size)
+    let valueToTuples lst = List.map (fun x -> (x, Some x)) lst
 
 
 module Graphs =
@@ -219,11 +213,11 @@ module Graphs =
         let mtx = gMtx |> Converter.cooToSparseMtx
 
         // Currently visited vertices.
-        let frontier = Converter.listToVertices startV length |> Converter.cooToSparseVec
+        let frontier =
+            COOVector(Converter.valueToTuples startV, length) |> Converter.cooToSparseVec
 
         // The result with weights.
-        let visited =
-            Converter.listToVerticesWithWeight startV length 0u |> Converter.cooToSparseVec
+        let visited = COOVector.Init startV length (Some 0u) |> Converter.cooToSparseVec
 
         let rec inner (frontier: SparseVector<Option<uint>>) (visited: SparseVector<Option<uint>>) (counter: uint) =
 
