@@ -11,7 +11,7 @@ open Helpers
 
 type COOMatrix<'a> =
     struct
-        val Data: List<int * int * 'a option>
+        val Data: List<int * int * Option<'a>>
         val Rows: int
         val Columns: int
 
@@ -24,7 +24,7 @@ type COOMatrix<'a> =
 
 type COOVector<'a> =
     struct
-        val Data: List<int * 'a>
+        val Data: List<int * Option<'a>>
         val Length: int
 
         new(tuplesList, length) = { Data = tuplesList; Length = length }
@@ -126,7 +126,7 @@ module Converter =
             else
                 let nw, ne, sw, se = mtxDiv4 mtx
 
-                QuadTree.Node(inner nw, inner ne, inner sw, inner se) |> reduceQt
+                QuadTree.Node(inner nw, inner ne, inner sw, inner se) |> MatrixData.reduce
 
         if mtx.Rows < 0 || mtx.Columns < 0 then
             failwith $"Converter.cooMtxToTree: Incorrect data: %A{mtx.Data}, rows %A{mtx.Rows}, columns %A{mtx.Columns}"
@@ -152,7 +152,7 @@ module Converter =
             else
                 let leftPart, rightPart = vecDiv2 vec
 
-                BinTree.Node(maker leftPart, maker rightPart) |> reduceBt
+                BinTree.Node(maker leftPart, maker rightPart) |> VectorData.reduce
 
         if vec.Length < 0 then
             failwith $"Converter.cooVecToTree: Incorrect data: %A{vec.Data}, length %A{vec.Length}"
@@ -174,11 +174,11 @@ module Converter =
 
 
     let listToVerticesWithWeight lst size value =
-        COOVector(List.map (fun x -> (x, value)) lst, size)
+        COOVector(List.map (fun x -> (x, Some value)) lst, size)
 
 
     let listToVertices lst size =
-        COOVector(List.map (fun x -> (x, x)) lst, size)
+        COOVector(List.map (fun x -> (x, Some x)) lst, size)
 
 
 module Graphs =
@@ -211,9 +211,9 @@ module Graphs =
     let fUpdateCount iter a b =
         match a, b with
         | Option.None, Option.None -> Option.None
-        | Option.None, Some y -> Some iter
+        | Option.None, Some _ -> Some(Some iter)
         | Some x, Option.None -> Some x
-        | _ -> failwith $"fUpdateCount: Unexpected result.\nGiven a:%A{a}\nGiven b:%A{b}"
+        | Some x, Some _ -> Some x
 
 
     let BFS (startV: List<int>) (gMtx: COOMatrix<'a>) =
@@ -229,7 +229,7 @@ module Graphs =
         let visited =
             Converter.listToVerticesWithWeight startV length 0 |> Converter.cooToSparseVec
 
-        let rec inner (frontier: SparseVector<int>) (visited: SparseVector<int>) (counter: int) =
+        let rec inner (frontier: SparseVector<Option<int>>) (visited: SparseVector<Option<int>>) (counter: int) =
 
             let newFrontier =
                 MatrixAlgebra.vecByMtx fAdd fMult frontier mtx

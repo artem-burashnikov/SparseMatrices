@@ -37,7 +37,7 @@ module GeneralFunctions =
     let makeCOOTuples intList weight size =
         List.map (fun x -> abs x % size) intList
         |> List.distinct
-        |> List.map (fun x -> (x, weight))
+        |> List.map (fun x -> (x, Some weight))
 
 
     /// Returns an Array2D from a given list of triplets (i, j, weight).
@@ -82,13 +82,13 @@ module GeneralFunctions =
         let rec inner queue result visited =
             match queue with
             | [] -> result
-            | hd as (vertex, iter) :: tl ->
+            | (vertex, iter) :: tl ->
                 if List.contains vertex visited then
                     inner tl result visited
                 else
                     let visited = vertex :: visited
                     let newQ = addToQueue tl vertex (iter + 1)
-                    inner newQ (hd :: result) visited
+                    inner newQ ((vertex, Some iter) :: result) visited
 
         if queue.IsEmpty then [] else inner queue [] [] |> List.rev
 
@@ -106,7 +106,7 @@ module GeneralFunctions =
 
                   let size = (abs s) + 1
 
-                  let inputList = makeCOOTuples lst true size
+                  let inputList = makeCOOTuples lst 1 size
 
                   let inputArr = cooTuplesToTable inputList size
 
@@ -187,7 +187,8 @@ module GeneralFunctions =
                   let actualResult = (Graphs.BFS startV cooMtx).Data
 
                   let expectedResult =
-                      COOVector([ (0, 0); (1, 0); (2, 0); (3, 0) ], size) |> Converter.cooVecToTree
+                      COOVector([ (0, Some 0); (1, Some 0); (2, Some 0); (3, Some 0) ], size)
+                      |> Converter.cooVecToTree
 
                   Expect.equal actualResult expectedResult ""
 

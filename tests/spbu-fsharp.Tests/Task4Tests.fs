@@ -521,7 +521,7 @@ module Algebra =
 
                   let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
 
-                  let expectedResult = BinTrees.Leaf(table[0, 0] + table[1, 0]) |> reduceBt
+                  let expectedResult = BinTrees.Leaf(table[0, 0] + table[1, 0]) |> reduce
 
                   Expect.equal
                       actualResult.Data
@@ -547,7 +547,7 @@ module Algebra =
                           BinTree.Leaf(table[0, 0] + table[1, 0] + table[2, 0]),
                           BinTree.Leaf(table[0, 1] + table[1, 1] + table[2, 1])
                       )
-                      |> reduceBt
+                      |> reduce
 
                   Expect.equal
                       actualResult.Data

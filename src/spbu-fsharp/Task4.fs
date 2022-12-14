@@ -24,14 +24,12 @@ module VectorData =
         Vector(vec.Memory, vec.Head, newLength), Vector(vec.Memory, vec.Head + newLength, newLength)
 
 
-    (*
     /// Reduces identical data in a node of a binary tree to save space.
     let reduce binTreeNode =
         match binTreeNode with
         | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
         | BinTree.Node(BinTree.Leaf a1, BinTree.Leaf a2) when a1 = a2 -> BinTree.Leaf a1
         | _ -> binTreeNode
-    *)
 
 
     /// Stores a value (if anything) in a binary tree's branch.
@@ -58,7 +56,7 @@ module VectorData =
             else
                 let leftPart, rightPart = vecDiv2 vec
 
-                BinTree.Node(maker leftPart, maker rightPart) |> reduceBt
+                BinTree.Node(maker leftPart, maker rightPart) |> reduce
 
         let vec = Vector(arr, 0, arr.Length)
 
@@ -163,8 +161,6 @@ module MatrixData =
             Matrix(mtx.Memory, mtx.HeadX + halfRows, mtx.HeadY + halfColumns, halfRows, halfColumns) // SE
 
 
-
-    (*
     /// Reduces identical data in a node of a quad tree to save space.
     let reduce quadTreeNode =
         match quadTreeNode with
@@ -174,7 +170,6 @@ module MatrixData =
             ->
             QuadTree.Leaf nw
         | _ -> quadTreeNode
-    *)
 
 
     /// Stores a value (if anything) in a quad tree's branch.
@@ -206,7 +201,7 @@ module MatrixData =
 
                 let nw, ne, sw, se = mtxDiv4 mtx
 
-                QuadTree.Node(maker nw, maker ne, maker sw, maker se) |> reduceQt
+                QuadTree.Node(maker nw, maker ne, maker sw, maker se) |> reduce
 
         // Check a given table's dimensions and act accordingly.
         let rows, columns = Array2D.length1 table, Array2D.length2 table
@@ -300,19 +295,21 @@ module MatrixAlgebra =
 
             | BinTree.None, BinTree.Leaf b -> fDo Option.None (Some b) |> convertResult
 
-            | BinTree.None, BinTree.Node(b1, b2) -> BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> reduceBt
+            | BinTree.None, BinTree.Node(b1, b2) -> BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> VectorData.reduce
 
             | BinTree.Leaf a, BinTree.None -> fDo (Some a) Option.None |> convertResult
 
-            | BinTree.Node(a1, a2), BinTree.None -> BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> reduceBt
+            | BinTree.Node(a1, a2), BinTree.None -> BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> VectorData.reduce
 
             | BinTree.Leaf a, BinTree.Leaf b -> fDo (Some a) (Some b) |> convertResult
 
-            | BinTree.Leaf _, BinTree.Node(b1, b2) -> BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> reduceBt
+            | BinTree.Leaf _, BinTree.Node(b1, b2) ->
+                BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> VectorData.reduce
 
-            | BinTree.Node(a1, a2), BinTree.Leaf _ -> BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> reduceBt
+            | BinTree.Node(a1, a2), BinTree.Leaf _ ->
+                BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> VectorData.reduce
 
-            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> reduceBt
+            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) -> BinTree.Node(inner a1 b1, inner a2 b2) |> VectorData.reduce
 
         if vec1.Length <> vec2.Length then
             failwith "Dimensions of objects don't match."
@@ -384,15 +381,15 @@ module MatrixAlgebra =
             // BinTree.Leaf _ is actually BinTree.Node(a, a)
             | BinTree.Leaf _, QuadTree.Node(nw, ne, sw, se) ->
                 BinTree.Node(fDo bTree bTree nw sw depth, fDo bTree bTree ne se depth)
-                |> reduceBt
+                |> VectorData.reduce
 
             // QuadTree.Leaf _ is actually QuadTree.Node(b, b, b, b)
             | BinTree.Node(a1, a2), QuadTree.Leaf _ ->
                 let result = fDo a1 a2 qTree qTree depth
-                BinTree.Node(result, result) |> reduceBt
+                BinTree.Node(result, result) |> VectorData.reduce
 
             | BinTree.Node(a1, a2), QuadTree.Node(nw, ne, sw, se) ->
-                BinTree.Node(fDo a1 a2 nw sw depth, fDo a1 a2 ne se depth) |> reduceBt
+                BinTree.Node(fDo a1 a2 nw sw depth, fDo a1 a2 ne se depth) |> VectorData.reduce
 
 
         // How much wood would a woodchuck chuck if a woodchuck could chuck wood?
