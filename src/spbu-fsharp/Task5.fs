@@ -11,9 +11,9 @@ open Helpers
 
 type COOMatrix<'a> =
     struct
-        val Data: List<int * int * Option<'a>>
-        val Rows: int
-        val Columns: int
+        val Data: List<uint * uint * Option<'a>>
+        val Rows: uint
+        val Columns: uint
 
         new(triplesList, rows, columns) =
             { Data = triplesList
@@ -24,8 +24,8 @@ type COOMatrix<'a> =
 
 type COOVector<'a> =
     struct
-        val Data: List<int * Option<'a>>
-        val Length: int
+        val Data: List<uint * Option<'a>>
+        val Length: uint
 
         new(tuplesList, length) = { Data = tuplesList; Length = length }
     end
@@ -47,13 +47,13 @@ module Converter =
 
         // For an empty matrix just return the data immediately.
         // Otherwise filter triplets.
-        if mtx.Rows = 0 || mtx.Columns = 0 then
+        if mtx.Rows = 0u || mtx.Columns = 0u then
             mtx, mtx, mtx, mtx
         else
             // Calculate middle points and filter triplets by comparing
             // corresponding coordinates to their middle points.
-            let halfRows = mtx.Rows / 2
-            let halfColumns = mtx.Columns / 2
+            let halfRows = mtx.Rows / 2u
+            let halfColumns = mtx.Columns / 2u
 
             //
             let rec inner lst nw ne sw se =
@@ -83,12 +83,12 @@ module Converter =
     let vecDiv2 (vec: COOVector<'a>) =
         // For an empty vector just return the data immediately.
         // Otherwise filter coordinates.
-        if vec.Length = 0 then
+        if vec.Length = 0u then
             vec, vec
         else
             // Calculate middle point and filter coordinates by comparing
             // them to the middle point.
-            let half = vec.Length / 2
+            let half = vec.Length / 2u
 
             let rec inner lst leftPart rightPart =
                 match lst with
@@ -108,14 +108,14 @@ module Converter =
     /// Convert SparseMatrix data from coordinates to QuadTree.
     let cooMtxToTree (mtx: COOMatrix<'a>) =
 
-        let maxRowIndex = mtx.Rows - 1
-        let maxColumnIndex = mtx.Columns - 1
+        let maxRowIndex = mtx.Rows - 1u
+        let maxColumnIndex = mtx.Columns - 1u
 
         let rec inner (mtx: COOMatrix<'a>) =
 
             if
-                mtx.Rows = 1
-                && mtx.Columns = 1
+                mtx.Rows = 1u
+                && mtx.Columns = 1u
                 && mtx.Data.Length = 1
                 && (mtx.Data.Head |> first) <= maxRowIndex
                 && (mtx.Data.Head |> second) <= maxColumnIndex
@@ -128,11 +128,9 @@ module Converter =
 
                 QuadTree.Node(inner nw, inner ne, inner sw, inner se) |> MatrixData.reduce
 
-        if mtx.Rows < 0 || mtx.Columns < 0 then
-            failwith $"Converter.cooMtxToTree: Incorrect data: %A{mtx.Data}, rows %A{mtx.Rows}, columns %A{mtx.Columns}"
-        elif mtx.Rows = 0 || mtx.Columns = 0 then
+        if mtx.Rows = 0u || mtx.Columns = 0u then
             QuadTree.None
-        elif mtx.Rows = 1 && mtx.Columns = 1 && mtx.Data.Length <> 0 then
+        elif mtx.Rows = 1u && mtx.Columns = 1u && mtx.Data.Length <> 0 then
             QuadTree.Leaf(third mtx.Data.Head)
         else
             let powerSize = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
@@ -141,11 +139,11 @@ module Converter =
 
     let cooVecToTree (vec: COOVector<'a>) =
 
-        let maxDataIndex = vec.Length - 1
+        let maxDataIndex = vec.Length - 1u
 
         let rec maker (vec: COOVector<'a>) =
 
-            if vec.Length = 1 && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
+            if vec.Length = 1u && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
                 BinTree.Leaf(snd vec.Data.Head)
             elif vec.Data.Length < 1 then
                 BinTree.None
@@ -154,11 +152,9 @@ module Converter =
 
                 BinTree.Node(maker leftPart, maker rightPart) |> VectorData.reduce
 
-        if vec.Length < 0 then
-            failwith $"Converter.cooVecToTree: Incorrect data: %A{vec.Data}, length %A{vec.Length}"
-        elif vec.Length = 0 then
+        if vec.Length = 0u then
             BinTree.None
-        elif vec.Length = 1 && vec.Data.Length <> 0 then
+        elif vec.Length = 1u && vec.Data.Length <> 0 then
             BinTree.Leaf(snd vec.Data.Head)
         else
             let powerSize = Numbers.ceilPowTwo vec.Length
@@ -216,7 +212,7 @@ module Graphs =
         | Some x, Some _ -> Some x
 
 
-    let BFS (startV: List<int>) (gMtx: COOMatrix<'a>) =
+    let BFS (startV: List<uint>) (gMtx: COOMatrix<'a>) =
 
         // Size and adjacency matrix.
         let length = gMtx.Rows
@@ -227,9 +223,9 @@ module Graphs =
 
         // The result with weights.
         let visited =
-            Converter.listToVerticesWithWeight startV length 0 |> Converter.cooToSparseVec
+            Converter.listToVerticesWithWeight startV length 0u |> Converter.cooToSparseVec
 
-        let rec inner (frontier: SparseVector<Option<int>>) (visited: SparseVector<Option<int>>) (counter: int) =
+        let rec inner (frontier: SparseVector<Option<uint>>) (visited: SparseVector<Option<uint>>) (counter: uint) =
 
             let newFrontier =
                 MatrixAlgebra.vecByMtx fAdd fMult frontier mtx
@@ -241,9 +237,9 @@ module Graphs =
                 let newVisited =
                     MatrixAlgebra.elementwiseVecVec (fUpdateCount counter) visited newFrontier
 
-                inner newFrontier newVisited (counter + 1)
+                inner newFrontier newVisited (counter + 1u)
 
         if frontier.IsEmpty then
             visited
         else
-            inner frontier visited 1
+            inner frontier visited 1u

@@ -1,26 +1,26 @@
 namespace HomeWork4
 
+open System
 open Helpers
 open Microsoft.FSharp.Core
 open Trees.BinTrees
 open Trees.QuadTrees
 
-
 module VectorData =
 
-    type Vector<'Value>(arr: 'Value option array, head: int, length: int) =
+    type Vector<'Value>(arr: 'Value option array, head: uint, length: uint) =
         struct
             member this.Memory = arr
             member this.Head = head
             member this.Length = length
-            member this.DataMaxIndex = arr.Length - 1
+            member this.DataMaxIndex = arr.Length - 1 |> uint
         end
 
 
 
     /// Splits a given Vector in half.
     let vecDiv2 (vec: Vector<'Value>) =
-        let newLength = vec.Length / 2
+        let newLength = vec.Length / 2u
         Vector(vec.Memory, vec.Head, newLength), Vector(vec.Memory, vec.Head + newLength, newLength)
 
 
@@ -49,8 +49,9 @@ module VectorData =
                 BinTree.None
             // If we find a 1x1 cell that is within the bounds of the vector's "memory".
             // Then look at data in that cell and store it accordingly.
-            elif vec.Length = 1 then
-                vec.Memory[vec.Head] |> store
+            elif vec.Length = 1u then
+                let index = Convert.ToInt32 vec.Head
+                vec.Memory[index] |> store
             // Otherwise split the vector in half
             // and recursively call the maker function on the resulting halves.
             else
@@ -58,36 +59,37 @@ module VectorData =
 
                 BinTree.Node(maker leftPart, maker rightPart) |> reduce
 
-        let vec = Vector(arr, 0, arr.Length)
+        let vec = Vector(arr, 0u, arr.Length |> uint)
 
         // Special cases to save space in a resulting binary tree.
         // i.e. BinTree.Leaf('a) instead of BinTree.Node(BinTree.Leaf('a), BinTree.None)
-        if vec.Length = 0 then
+        if vec.Length = 0u then
             BinTree.None
-        elif (vec.Length = 1) then
-            vec.Memory[vec.Head] |> store
+        elif (vec.Length = 1u) then
+            let index = Convert.ToInt32 vec.Head
+            vec.Memory[index] |> store
         else
             // In general case we upsize a given vector's length to a power of 2 so that the data correctly gets split in half on each recursive call.
             // Result is a healthy binary tree.
-            let powerSize = Numbers.ceilPowTwo arr.Length
+            let powerSize = Numbers.ceilPowTwo (arr.Length |> uint)
 
-            let vec = Vector(arr, 0, powerSize)
+            let vec = Vector(arr, 0u, powerSize)
             maker vec
 
 
 
 module SparseVector =
 
-    type SparseVector<'Value when 'Value: equality>(tree: BinTree<'Value>, length: int) =
+    type SparseVector<'Value when 'Value: equality>(tree: BinTree<'Value>, length: uint) =
 
-        new(arr) = SparseVector(VectorData.vecToTree arr, arr.Length)
+        new(arr) = SparseVector(VectorData.vecToTree arr, arr.Length |> uint)
 
         member this.Length = length
 
         member this.Data = tree
 
         member this.Item
-            with get i =
+            with get (i: uint) =
 
                 // Given an index i (starts at 1) we want to find a corresponding data in a tree.
                 // By recalling how the tree was constructed we recursively call each node's child according to
@@ -96,20 +98,20 @@ module SparseVector =
                 //     i      middle
                 // ------------||------------
                 //
-                let rec search i size tree =
+                let rec search (i: uint) (size: uint) tree =
                     match tree with
                     | BinTree.Leaf value -> Some value
                     | BinTree.None -> Option.None
                     | BinTree.Node(leftChild, rightChild) ->
-                        let middle = size / 2
+                        let middle = size / 2u
 
                         if i < middle then
                             search i middle leftChild
                         else
                             search (i - middle) middle rightChild
 
-                let getValue (i: int) =
-                    if i < 0 || i >= this.Length then
+                let getValue (i: uint) =
+                    if i >= this.Length then
                         failwith $"SparseVector.Item with get(i): Index %A{i} is out of range."
                     else
                         let powerSize = Numbers.ceilPowTwo this.Length
@@ -124,7 +126,7 @@ open SparseVector
 
 module MatrixData =
 
-    type Matrix<'Value>(arr2d: 'Value option[,], x: int, y: int, rows: int, columns: int) =
+    type Matrix<'Value>(arr2d: 'Value option[,], x: uint, y: uint, rows: uint, columns: uint) =
         struct
             member this.Memory = arr2d
             member this.HeadX = x
@@ -132,20 +134,20 @@ module MatrixData =
             member this.Rows = rows
             member this.Columns = columns
 
-            member this.MaxRowIndex = (Array2D.length1 arr2d) - 1
+            member this.MaxRowIndex = (Array2D.length1 arr2d) - 1 |> uint
 
-            member this.MaxColumnIndex = (Array2D.length2 arr2d) - 1
+            member this.MaxColumnIndex = (Array2D.length2 arr2d) - 1 |> uint
         end
 
 
 
     /// Splits a given table in 4 quadrants by middle-points.
     let mtxDiv4 (mtx: Matrix<'Value>) =
-        if mtx.Rows = 0 || mtx.Columns = 0 then
+        if mtx.Rows = 0u || mtx.Columns = 0u then
             mtx, mtx, mtx, mtx
         else
-            let halfRows = mtx.Rows / 2
-            let halfColumns = mtx.Columns / 2
+            let halfRows = mtx.Rows / 2u
+            let halfColumns = mtx.Columns / 2u
             //
             //         halfColumns
             //   |          |           |
@@ -185,13 +187,15 @@ module MatrixData =
         let rec maker (mtx: Matrix<'Value>) =
             // If we find a cell within bounds of the original data, then store the cell's value accordingly.
             if
-                mtx.Rows = 1
-                && mtx.Columns = 1
+                mtx.Rows = 1u
+                && mtx.Columns = 1u
                 && mtx.HeadX <= mtx.MaxRowIndex
                 && mtx.HeadY <= mtx.MaxColumnIndex
 
             then
-                mtx.Memory[mtx.HeadX, mtx.HeadY] |> store
+                let i = Numbers.toIntConv mtx.HeadX
+                let j = Numbers.toIntConv mtx.HeadY
+                mtx.Memory[i, j] |> store
 
             // If the Quadrant's top-left cell is not in the range of the original data, no need to look further.
             elif mtx.HeadX > mtx.MaxRowIndex || mtx.HeadY > mtx.MaxColumnIndex then
@@ -204,20 +208,17 @@ module MatrixData =
                 QuadTree.Node(maker nw, maker ne, maker sw, maker se) |> reduce
 
         // Check a given table's dimensions and act accordingly.
-        let rows, columns = Array2D.length1 table, Array2D.length2 table
+        let rows, columns = Array2D.length1 table |> uint, Array2D.length2 table |> uint
 
-        if rows < 0 || columns < 0 then
-            failwith $"MatrixData.tableToTree: Incorrect table data: %A{table}, rows %A{rows}, columns %A{columns}"
-
-        elif rows = 0 || columns = 0 then
+        if rows = 0u || columns = 0u then
             QuadTree.None
-        elif rows = 1 && columns = 1 then
+        elif rows = 1u && columns = 1u then
             table[0, 0] |> store
 
         else
             let powerSize = Numbers.ceilPowTwo (max rows columns)
             // Initial top-left cell starts at coordinates (0, 0).
-            let mtx = Matrix(table, 0, 0, powerSize, powerSize)
+            let mtx = Matrix(table, 0u, 0u, powerSize, powerSize)
 
             maker mtx
 
@@ -227,25 +228,25 @@ open MatrixData
 
 module SparseMatrix =
 
-    type SparseMatrix<'Value when 'Value: equality>(data: QuadTree<'Value>, rows: int, columns: int) =
+    type SparseMatrix<'Value when 'Value: equality>(data: QuadTree<'Value>, rows: uint, columns: uint) =
 
-        new(arr2d) = SparseMatrix(tableToTree arr2d, Array2D.length1 arr2d, Array2D.length2 arr2d)
+        new(arr2d) = SparseMatrix(tableToTree arr2d, Array2D.length1 arr2d |> uint, Array2D.length2 arr2d |> uint)
 
         member this.Rows = rows
         member this.Columns = columns
         member this.Data = data
 
         member this.Item
-            with get (i: int, j: int) =
+            with get (i: uint, j: uint) =
                 // Binary search the value at given indices.
-                let rec search i j size tree =
+                let rec search (i: uint) (j: uint) (size: uint) tree =
 
                     match tree with
                     | QuadTree.Leaf value -> Some value
                     | QuadTree.None -> Option.None
                     | QuadTree.Node(nw, ne, sw, se) ->
 
-                        let middle = size / 2
+                        let middle = size / 2u
 
                         let newI, newJ, quadrant =
                             if i < middle && j < middle then (i, j, nw)
@@ -255,9 +256,9 @@ module SparseMatrix =
 
                         search newI newJ middle quadrant
 
-                let getValue i j =
+                let getValue (i: uint) (j: uint) =
 
-                    if i < 0 || j < 0 || i >= this.Rows || j >= this.Columns then
+                    if i >= this.Rows || j >= this.Columns then
                         failwith $"SparseMatrix.Item with get(i, j): Indices %A{(i, j)} out of range."
                     else
                         let powerSize = Numbers.ceilPowTwo (max this.Rows this.Columns)
@@ -336,12 +337,12 @@ module MatrixAlgebra =
 
         // Multiplication optimization.
         // We need to calculate n sums and the first sum is already given, so the counter stops at 1 (starts at n).
-        let rec multMult (value: 'c option) counter =
-            if counter = 1 then
+        let rec multMult (value: 'c option) (counter: uint) =
+            if counter = 1u then
                 value
             else
                 let acc = fAdd value value
-                multMult acc (counter - 1)
+                multMult acc (counter - 1u)
 
 
         // Multiplication.
@@ -353,8 +354,8 @@ module MatrixAlgebra =
             //  [a1 a2]  *   = a1 * qt1 + a2 * qt2
             //
             let fDo a1 a2 qt1 qt2 depth =
-                let vec1 = SparseVector((mult a1 qt1 (depth + 1)), mtx.Columns)
-                let vec2 = SparseVector(mult a2 qt2 (depth + 1), mtx.Columns)
+                let vec1 = SparseVector((mult a1 qt1 (depth + 1u)), mtx.Columns)
+                let vec2 = SparseVector(mult a2 qt2 (depth + 1u), mtx.Columns)
                 let result = elementwiseVecVec fAdd vec1 vec2
                 result.Data
 
@@ -398,7 +399,7 @@ module MatrixAlgebra =
         let rec chopChop level size bTree =
             if level < size then
                 match bTree with
-                | BinTree.Node(left, _) -> chopChop (level + 1) size left
+                | BinTree.Node(left, _) -> chopChop (level + 1u) size left
                 | BinTree.Leaf _
                 | BinTree.None -> bTree
             else
@@ -409,7 +410,7 @@ module MatrixAlgebra =
         let rec powerUp level size bTree =
             if level < size then
                 match bTree with
-                | BinTree.Node _ -> BinTree.Node(powerUp (level + 1) size bTree, BinTree.None)
+                | BinTree.Node _ -> BinTree.Node(powerUp (level + 1u) size bTree, BinTree.None)
                 | BinTree.Leaf _
                 | BinTree.None -> bTree
             else
@@ -429,21 +430,21 @@ module MatrixAlgebra =
                 $"Algebra.vecByMtx: Dimensions of objects vector's length: %A{vec.Length} and Matrix rows %A{mtx.Rows} don't match."
 
         // 1x1 is an edge case.
-        elif mtx.Rows = 1 && mtx.Columns = 1 then
-            let tree = fMult vec[0] mtx[0, 0] |> convertResult
+        elif mtx.Rows = 1u && mtx.Columns = 1u then
+            let tree = fMult vec[0u] mtx[0u, 0u] |> convertResult
 
             SparseVector(tree, mtx.Columns)
 
         // In this case we would have to pad the vector's length before multiplication.
         elif mtxRowPower < mtxColumnPower then
-            let tree = mult (powerUp 0 diff vec.Data) mtx.Data 0
+            let tree = mult (powerUp 0u diff vec.Data) mtx.Data 0u
             SparseVector(tree, mtx.Columns)
 
         // When sizes match no additional action is needed.
         elif mtxRowPower = mtxColumnPower then
-            let tree = mult vec.Data mtx.Data 0
+            let tree = mult vec.Data mtx.Data 0u
             SparseVector(tree, mtx.Columns)
         else
             // Otherwise we need to clean up the result by chopping.
-            let tree = mult vec.Data mtx.Data 0 |> chopChop 0 diff
+            let tree = mult vec.Data mtx.Data 0u |> chopChop 0u diff
             SparseVector(tree, mtx.Columns)

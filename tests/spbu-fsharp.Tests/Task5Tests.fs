@@ -28,69 +28,77 @@ module GeneralFunctions =
 
     /// Normalizes tuples values according to a given size.
     let makeCOOTriplets tupleLst size =
-        List.map (fun (i, j) -> abs i % size, abs j % size) tupleLst
+        List.map (fun (i, j) -> i % size, j % size) tupleLst
         |> List.distinct
         |> List.map func
 
 
     /// Returns a list of (value, weight) from a list of values and a given weight.
-    let makeCOOTuples intList weight size =
-        List.map (fun x -> abs x % size) intList
+    let makeCOOTuples uintList weight size =
+        List.map (fun x -> x % size) uintList
         |> List.distinct
         |> List.map (fun x -> (x, Some weight))
 
 
     /// Returns an Array2D from a given list of triplets (i, j, weight).
-    let cooTriplesToTable (tripletsList: List<int * int * 'a>) size =
-        let arr = Array2D.create size size Option.None
+    let cooTriplesToTable (tripletsList: List<uint * uint * Option<'a>>) size =
+        let s = Helpers.Numbers.toIntConv size
+        let arr = Array2D.create s s Option.None
 
         for i = 0 to tripletsList.Length - 1 do
-            arr[Converter.first tripletsList[i], Converter.second tripletsList[i]] <-
-                Converter.third tripletsList[i] |> Some
+            let indexI = Converter.first tripletsList[i] |> Helpers.Numbers.toIntConv
+            let indexJ = Converter.second tripletsList[i] |> Helpers.Numbers.toIntConv
+            arr[indexI, indexJ] <- Converter.third tripletsList[i] |> Some
 
         arr
 
 
     /// Returns an array from a given list of tuples (i, weight).
-    let cooTuplesToTable (tuplesList: List<int * 'a>) size =
-        let arr = Array.create size Option.None
+    let cooTuplesToTable (tuplesList: List<uint * Option<'a>>) size =
+        let s = Helpers.Numbers.toIntConv size
+        let arr = Array.create s Option.None
 
         for i = 0 to tuplesList.Length - 1 do
-            arr[fst tuplesList[i]] <- snd tuplesList[i] |> Some
+            let index = Helpers.Numbers.toIntConv (fst tuplesList[i])
+            arr[index] <- snd tuplesList[i] |> Some
 
         arr
 
 
-    let naiveBFS (startV: List<int>) (mtx: 'a option[,]) =
-        let queue = startV |> List.map (fun x -> (x, 0))
+    let naiveBFS (startV: List<uint>) (mtx: Option<'a>[,]) =
+        let queue = startV |> List.map (fun x -> (x, 0u))
 
-        let addToQueue queue vertex iter =
-            let rec inner list counter =
+        let addToQueue (queue: List<uint * uint>) (vertex: uint) iter =
+            let rec inner (list: List<uint * uint>) counter =
                 if counter < 0 then
                     list
                 else
-                    let value = mtx[vertex, counter]
+                    let i = Helpers.Numbers.toIntConv vertex
+                    let value = mtx[i, counter]
 
                     if value = Option.None then
                         inner list (counter - 1)
                     else
-                        inner (list @ [ counter, iter ]) (counter - 1)
+                        inner (list @ [ counter |> uint, iter ]) (counter - 1)
 
             inner queue (Array2D.length2 mtx - 1)
 
 
-        let rec inner queue result visited =
+        let rec innerBFS queue result visited =
             match queue with
             | [] -> result
             | (vertex, iter) :: tl ->
                 if List.contains vertex visited then
-                    inner tl result visited
+                    innerBFS tl result visited
                 else
                     let visited = vertex :: visited
-                    let newQ = addToQueue tl vertex (iter + 1)
-                    inner newQ ((vertex, Some iter) :: result) visited
+                    let newQ = addToQueue tl vertex (iter + 1u)
+                    innerBFS newQ ((vertex, Some iter) :: result) visited
 
-        if queue.IsEmpty then [] else inner queue [] [] |> List.rev
+        if queue.IsEmpty then
+            []
+        else
+            innerBFS queue [] [] |> List.rev
 
 
     [<Tests>]
@@ -102,9 +110,9 @@ module GeneralFunctions =
 
               testProperty
                   "BinTree from COO converter: Should produce the same tree structure as an array-to-tree converter."
-              <| fun (lst: List<int>) (s: int) ->
+              <| fun (lst: List<uint>) (s: uint) ->
 
-                  let size = (abs s) + 1
+                  let size = s + 1u
 
                   let inputList = makeCOOTuples lst 1 size
 
@@ -119,8 +127,8 @@ module GeneralFunctions =
 
               testProperty
                   "QuadTree from COO converter: Should produce the same tree structure as an array2d-to-tree converter."
-              <| fun (tupleLst: List<int * int>) (s: int) ->
-                  let size = (abs s) + 1
+              <| fun (tupleLst: List<uint * uint>) (s: uint) ->
+                  let size = s + 1u
 
                   let inputList = makeCOOTriplets tupleLst size
 
@@ -134,10 +142,10 @@ module GeneralFunctions =
 
 
               testProperty "NaiveBFS and BFS should produce equal results"
-              <| fun (ints: List<int>) (tupleLst: List<int * int>) (s: int) ->
-                  let size = (abs s) + 1
+              <| fun (uints: List<uint>) (tupleLst: List<uint * uint>) (s: uint) ->
+                  let size = s + 1u
 
-                  let startV = List.map (fun i -> abs i % size) ints |> List.distinct
+                  let startV = List.map (fun i -> i % size) uints |> List.distinct
 
                   let inputList = makeCOOTriplets tupleLst size
 
@@ -156,9 +164,9 @@ module GeneralFunctions =
               testCase "BFS: empty starting vertices"
               <| fun _ ->
 
-                  let tuplesList = [ (0, 1); (0, 2); (1, 3); (2, 3) ]
+                  let tuplesList = [ (0u, 1u); (0u, 2u); (1u, 3u); (2u, 3u) ]
 
-                  let size = 4
+                  let size = 4u
 
                   let startV = []
 
@@ -174,11 +182,11 @@ module GeneralFunctions =
               testCase "BFS: All vertices are starting vertices"
               <| fun _ ->
 
-                  let tuplesList = [ (0, 1); (0, 2); (1, 3); (2, 3) ]
+                  let tuplesList = [ (0u, 1u); (0u, 2u); (1u, 3u); (2u, 3u) ]
 
-                  let size = 4
+                  let size = 4u
 
-                  let startV = [ 0; 1; 2; 3 ]
+                  let startV = [ 0u; 1u; 2u; 3u ]
 
                   let inputList = makeCOOTriplets tuplesList size
 
@@ -187,7 +195,7 @@ module GeneralFunctions =
                   let actualResult = (Graphs.BFS startV cooMtx).Data
 
                   let expectedResult =
-                      COOVector([ (0, Some 0); (1, Some 0); (2, Some 0); (3, Some 0) ], size)
+                      COOVector([ (0u, Some 0u); (1u, Some 0u); (2u, Some 0u); (3u, Some 0u) ], size)
                       |> Converter.cooVecToTree
 
                   Expect.equal actualResult expectedResult ""
@@ -198,9 +206,9 @@ module GeneralFunctions =
 
                   let tuplesList = []
 
-                  let size = 0
+                  let size = 0u
 
-                  let startV = [ 0; 1; 2; 3 ]
+                  let startV = [ 0u; 1u; 2u; 3u ]
 
                   let inputList = makeCOOTriplets tuplesList size
 
@@ -218,7 +226,7 @@ module GeneralFunctions =
 
                   let tuplesList = []
 
-                  let size = 0
+                  let size = 0u
 
                   let startV = []
 

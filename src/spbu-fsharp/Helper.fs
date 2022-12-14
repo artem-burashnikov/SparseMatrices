@@ -3,6 +3,7 @@ namespace Helpers
 open CLists
 open Microsoft.FSharp.Collections
 open OOPLists
+open System
 
 
 module ListConverters =
@@ -60,11 +61,11 @@ module Numbers =
             if acc >= x then
                 acc
             else
-                looper x (acc * 2)
+                looper x (acc * 2u)
 
-        if x <= 0 then 1
-        elif x = 1 then 2
-        else looper x 1
+        if x = 0u then 1u
+        elif x = 1u then 2u
+        else looper x 1u
 
     /// Function calculates the exponent needed to get the smallest power of two which is greater than or equal to the given integer.
     let powTwo x =
@@ -73,7 +74,13 @@ module Numbers =
             if acc >= x then
                 power
             else
-                looper x (acc * 2) (power + 1)
+                looper x (acc * 2u) (power + 1u)
 
-        if x = 1 then 0
-        else looper x 1 0
+        if x = 1u then 0u
+        else looper x 1u 0u
+
+    let toIntConv (unsignedInt: uint) =
+        try
+            Convert.ToInt32(unsignedInt)
+        with
+            | :? OverflowException -> failwith $"%A{unsignedInt} is outside the range of the Int32 type."
