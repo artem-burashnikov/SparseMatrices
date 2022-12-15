@@ -26,8 +26,8 @@ type COOVector<'a>(list: List<uint * Option<'a>>, length: uint) =
     member this.Data = list
     member this.Length = length
 
-    static member Init (lst: List<uint>) (size: uint) (value: Option<'a>) =
-        COOVector(List.map (fun x -> (x, value)) lst, size)
+    static member CreateFromListOfIndices (lst: List<uint>) length (value: Option<'a>) =
+        COOVector(List.map (fun x -> (x, value)) lst, length)
 
 
 type Marker = Mark
@@ -168,9 +168,6 @@ module Converter =
         SparseMatrix(cooMtxToTree cooMtx, cooMtx.Rows, cooMtx.Columns)
 
 
-    let valueToTuples lst = List.map (fun x -> (x, Some x)) lst
-
-
 module Graphs =
 
     let fAdd a b =
@@ -214,12 +211,15 @@ module Graphs =
 
         // Currently visited vertices.
         let frontier =
-            COOVector(Converter.valueToTuples startV, length) |> Converter.cooToSparseVec
+            COOVector.CreateFromListOfIndices startV length (Some())
+            |> Converter.cooToSparseVec
 
         // The result with weights.
-        let visited = COOVector.Init startV length (Some 0u) |> Converter.cooToSparseVec
+        let visited =
+            COOVector.CreateFromListOfIndices startV length (Some 0u)
+            |> Converter.cooToSparseVec
 
-        let rec inner (frontier: SparseVector<Option<uint>>) (visited: SparseVector<Option<uint>>) (counter: uint) =
+        let rec inner frontier visited counter =
 
             let newFrontier =
                 MatrixAlgebra.vecByMtx fAdd fMult frontier mtx

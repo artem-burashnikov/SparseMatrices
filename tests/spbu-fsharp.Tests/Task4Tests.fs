@@ -173,13 +173,6 @@ module SparseMatrix =
               testProperty "Table partition (by indices)"
               <| fun (arr: int option[,]) (x: uint) (y: uint) (rows: uint) (columns: uint) ->
 
-                  // let pX = abs x
-                  // let pY = abs y
-                  // let pRows = abs rows
-                  // let pColumns = abs columns
-
-
-                  // if rows > 0 && pColumns > 0 then
                   let columns = columns + 1u
                   let rows = rows + 1u
                   let x = x % columns

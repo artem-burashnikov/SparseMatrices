@@ -89,7 +89,7 @@ module SparseVector =
         member this.Data = tree
 
         member this.Item
-            with get (i: uint) =
+            with get i =
 
                 // Given an index i (starts at 1) we want to find a corresponding data in a tree.
                 // By recalling how the tree was constructed we recursively call each node's child according to
@@ -98,7 +98,7 @@ module SparseVector =
                 //     i      middle
                 // ------------||------------
                 //
-                let rec search (i: uint) (size: uint) tree =
+                let rec search i size tree =
                     match tree with
                     | BinTree.Leaf value -> Some value
                     | BinTree.None -> Option.None
@@ -110,7 +110,7 @@ module SparseVector =
                         else
                             search (i - middle) middle rightChild
 
-                let getValue (i: uint) =
+                let getValue i =
                     if i >= this.Length then
                         failwith $"SparseVector.Item with get(i): Index %A{i} is out of range."
                     else
@@ -237,9 +237,9 @@ module SparseMatrix =
         member this.Data = data
 
         member this.Item
-            with get (i: uint, j: uint) =
+            with get (i, j) =
                 // Binary search the value at given indices.
-                let rec search (i: uint) (j: uint) (size: uint) tree =
+                let rec search i j size tree =
 
                     match tree with
                     | QuadTree.Leaf value -> Some value
@@ -256,7 +256,7 @@ module SparseMatrix =
 
                         search newI newJ middle quadrant
 
-                let getValue (i: uint) (j: uint) =
+                let getValue i j =
 
                     if i >= this.Rows || j >= this.Columns then
                         failwith $"SparseMatrix.Item with get(i, j): Indices %A{(i, j)} out of range."
@@ -337,7 +337,7 @@ module MatrixAlgebra =
 
         // Multiplication optimization.
         // We need to calculate n sums and the first sum is already given, so the counter stops at 1 (starts at n).
-        let rec multMult (value: 'c option) (counter: uint) =
+        let rec multMult value counter =
             if counter = 1u then
                 value
             else

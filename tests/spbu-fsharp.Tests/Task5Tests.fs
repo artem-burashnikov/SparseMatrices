@@ -96,15 +96,15 @@ module GeneralFunctions =
                 // After which accumulate the vertex to the result.
                 let vertex, iter = queue.Dequeue()
 
-                if List.contains vertex visited then
+                if Set.contains vertex visited then
                     innerBFS result visited
                 else
-                    let visited = vertex :: visited
+                    // let visited = vertex :: visited
                     addToQueue vertex (iter + 1u)
-                    innerBFS ((vertex, Some iter) :: result) visited
+                    innerBFS ((vertex, Some iter) :: result) (Set.add vertex visited)
 
         // If the starting queue is empty then return immediately, otherwise traverse the graph.
-        if queue.Count = 0 then [] else innerBFS [] [] |> List.rev
+        if queue.Count = 0 then [] else innerBFS [] Set.empty
 
 
     [<Tests>]
