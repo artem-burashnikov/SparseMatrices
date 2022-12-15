@@ -1,6 +1,7 @@
 module Task5Tests
 
 open System
+open System.Collections.Generic
 open HomeWork4.MatrixData
 open HomeWork4.VectorData
 open HomeWork5
@@ -64,41 +65,46 @@ module GeneralFunctions =
 
         arr
 
-
+    /// Naive BFS approach.
     let naiveBFS (startV: List<uint>) (mtx: Option<'a>[,]) =
-        let queue = startV |> List.map (fun x -> (x, 0u))
 
-        let addToQueue (queue: List<uint * uint>) (vertex: uint) iter =
-            let rec inner (list: List<uint * uint>) counter =
-                if counter < 0 then
-                    list
-                else
-                    let i = Helpers.Numbers.toIntConv vertex
-                    let value = mtx[i, counter]
+        let length = Array2D.length2 mtx
 
-                    if value = Option.None then
-                        inner list (counter - 1)
-                    else
-                        inner (list @ [ counter |> uint, iter ]) (counter - 1)
+        // Enqueue starting vertices.
+        let queue = Queue<uint * uint>()
 
-            inner queue (Array2D.length2 mtx - 1)
+        for x in startV do
+            queue.Enqueue(x, 0u)
 
+        /// Function adds successors of a given vertex to the queue.
+        let addToQueue vertexIndex iter =
+            for j = 0 to length - 1 do
+                let i = Helpers.Numbers.toIntConv vertexIndex
+                let value = mtx[i, j]
 
-        let rec innerBFS queue result visited =
-            match queue with
-            | [] -> result
-            | (vertex, iter) :: tl ->
+                if value <> Option.None then
+                    queue.Enqueue(j |> uint, iter)
+
+        /// Go through the queue accumulating the result.
+        let rec innerBFS result visited =
+            if queue.Count = 0 then
+                result
+            else
+                // Dequeue an item.
+                // If it was already visited then skip it,
+                // otherwise mark the vertex as visited, go through its neighbours and add them to the queue.
+                // After which accumulate the vertex to the result.
+                let vertex, iter = queue.Dequeue()
+
                 if List.contains vertex visited then
-                    innerBFS tl result visited
+                    innerBFS result visited
                 else
                     let visited = vertex :: visited
-                    let newQ = addToQueue tl vertex (iter + 1u)
-                    innerBFS newQ ((vertex, Some iter) :: result) visited
+                    addToQueue vertex (iter + 1u)
+                    innerBFS ((vertex, Some iter) :: result) visited
 
-        if queue.IsEmpty then
-            []
-        else
-            innerBFS queue [] [] |> List.rev
+        // If the starting queue is empty then return immediately, otherwise traverse the graph.
+        if queue.Count = 0 then [] else innerBFS [] [] |> List.rev
 
 
     [<Tests>]
