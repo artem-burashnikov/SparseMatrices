@@ -8,7 +8,7 @@ open Trees.QuadTrees
 
 module VectorData =
 
-    type ArrVector<'Value>(arr: array<Option<'Value>>, head: uint, length: uint) =
+    type ArrVector<'A>(arr: array<Option<'A>>, head: uint, length: uint) =
         struct
             member this.Memory = arr
             member this.Head = head
@@ -21,12 +21,9 @@ module VectorData =
         member this.Data = list
         member this.Length = length
 
-        static member CreateFromList lst length (value: 'A) =
-            COOVector(List.map (fun x -> x, value) lst, length)
-
 
     /// Splits a given Vector in half.
-    let arrVecPartition (vec: ArrVector<'Value>) =
+    let arrVecPartition (vec: ArrVector<'A>) =
         let newLength = vec.Length / 2u
         ArrVector(vec.Memory, vec.Head, newLength), ArrVector(vec.Memory, vec.Head + newLength, newLength)
 
@@ -74,8 +71,8 @@ module VectorData =
 
 
     /// Converts an array to Vector.
-    let arrVecToTree (arr: array<Option<'Value>>) =
-        let rec maker (vec: ArrVector<'Value>) =
+    let arrVecToTree (arr: array<Option<'A>>) =
+        let rec maker (vec: ArrVector<'A>) =
             // If a given vector's starting index is outside of bounds of "memory",
             // then there is no need to store anything in a binary tree.
             if vec.Head > vec.DataMaxIndex then
@@ -138,18 +135,23 @@ open VectorData
 
 module SparseVector =
 
-    type SparseVector<'Value when 'Value: equality>(tree: BinTree<'Value>, length: uint) =
+    type SparseVector<'A when 'A: equality> =
+        val Data: BinTree<'A>
+        val Length: uint
 
-        new(arr) = SparseVector(arrVecToTree arr, arr.Length |> uint)
-        new(cooVec) = SparseVector(cooVecToTree cooVec, cooVec.Length)
+        new(tree, length) = { Data = tree; Length = length }
 
-        // new(cooList, length) =
-        // new(cooList, length) = SparseVector(COOVector(cooList, length) |> cooVecToTree, length)
+        new(arr) =
+            { Data = arrVecToTree arr
+              Length = arr.Length |> uint }
 
+        new(cooVec) =
+            { Data = cooVecToTree cooVec
+              Length = cooVec.Length }
 
-        member this.Length = length
-
-        member this.Data = tree
+        new(cooList, length) =
+            { Data = COOVector(cooList, length) |> cooVecToTree
+              Length = length }
 
         member this.Item
             with get i =
@@ -190,7 +192,7 @@ open Helpers.GeneralFunction
 
 module MatrixData =
 
-    type TableMatrix<'Value>(arr2d: 'Value option[,], x: uint, y: uint, rows: uint, columns: uint) =
+    type TableMatrix<'A>(arr2d: Option<'A>[,], x: uint, y: uint, rows: uint, columns: uint) =
         struct
             member this.Memory = arr2d
             member this.HeadX = x
@@ -218,7 +220,7 @@ module MatrixData =
 
 
     /// Splits a given table in 4 quadrants by middle-points.
-    let tableMTXPartition (mtx: TableMatrix<'Value>) =
+    let tableMTXPartition (mtx: TableMatrix<'A>) =
         if mtx.Rows = 0u || mtx.Columns = 0u then
             mtx, mtx, mtx, mtx
         else
@@ -294,8 +296,8 @@ module MatrixData =
 
 
     /// Converts a given table into a QudTree.
-    let tableToTree (table: 'Value option[,]) =
-        let rec maker (mtx: TableMatrix<'Value>) =
+    let tableToTree (table: Option<'A>[,]) =
+        let rec maker (mtx: TableMatrix<'A>) =
             // If we find a cell within bounds of the original data, then store the cell's value accordingly.
             if
                 mtx.Rows = 1u
@@ -371,7 +373,7 @@ open MatrixData
 
 module SparseMatrix =
 
-    type SparseMatrix<'Value when 'Value: equality>(data: QuadTree<'Value>, rows: uint, columns: uint) =
+    type SparseMatrix<'A when 'A: equality>(data: QuadTree<'A>, rows: uint, columns: uint) =
 
         new(arr2d) = SparseMatrix(tableToTree arr2d, Array2D.length1 arr2d |> uint, Array2D.length2 arr2d |> uint)
         new(cooMTX) = SparseMatrix(cooMtxToTree cooMTX, cooMTX.Rows, cooMTX.Columns)
@@ -464,7 +466,7 @@ module MatrixAlgebra =
     /// Vector by Matrix multiplication.
     let vecByMtx
         fAdd
-        (fMult: 'A option -> 'B option -> 'C option)
+        (fMult: Option<'A> -> Option<'B> -> Option<'C>)
         (vec: SparseVector<'A>)
         (mtx: SparseMatrix<'B>)
         : SparseVector<'C> =
@@ -488,7 +490,7 @@ module MatrixAlgebra =
 
 
         // Multiplication.
-        let rec mult bTree qTree depth =
+        let rec mult bTree qTree depth : BinTree<'C> =
 
             //
             //          [qt1]

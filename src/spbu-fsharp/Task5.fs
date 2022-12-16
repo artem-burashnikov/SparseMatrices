@@ -1,7 +1,6 @@
 namespace HomeWork5
 
 open HomeWork4
-open HomeWork4.VectorData
 open Microsoft.FSharp.Core
 
 open MatrixData
@@ -43,13 +42,17 @@ module BreadthFirstSearch =
         | Some x, Some _ -> Some x
 
 
+    let markVertices lst value = List.map (fun x -> x, value) lst
+
+
     let BFS (startV: List<uint>) (gMtx: COOMatrix<'A>) =
 
         let mtx = SparseMatrix gMtx
+        let length = mtx.Rows
 
-        let frontier = COOVector.CreateFromList startV mtx.Rows (Some()) |> SparseVector
+        let frontier = SparseVector(markVertices startV (Some()), length)
 
-        let visited = COOVector.CreateFromList startV mtx.Rows (Some 0u) |> SparseVector
+        let visited = SparseVector(markVertices startV (Some 0u), length)
 
         let rec inner frontier visited counter =
 
