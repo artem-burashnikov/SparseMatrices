@@ -9,9 +9,9 @@ open Trees.QuadTrees
 open Helpers
 
 
-type COOMatrix<'a> =
+type COOMatrix<'A> =
     struct
-        val Data: List<uint * uint * Option<'a>>
+        val Data: List<uint * uint * Option<'A>>
         val Rows: uint
         val Columns: uint
 
@@ -22,15 +22,12 @@ type COOMatrix<'a> =
     end
 
 
-type COOVector<'a>(list: List<uint * Option<'a>>, length: uint) =
+type COOVector<'A>(list: List<uint * Option<'A>>, length: uint) =
     member this.Data = list
     member this.Length = length
 
-    static member CreateFromListOfIndices (lst: List<uint>) length (value: Option<'a>) =
+    static member CreateFromListOfIndices (lst: List<uint>) length (value: Option<'A>) =
         COOVector(List.map (fun x -> (x, value)) lst, length)
-
-
-type Marker = Mark
 
 
 module Converter =
@@ -42,7 +39,7 @@ module Converter =
 
     /// Divide a given COOMatrix into 4 quadrants.
     /// Returns four matrices.
-    let mtxDiv4 (mtx: COOMatrix<'a>) =
+    let mtxDiv4 (mtx: COOMatrix<'A>) =
 
         // For an empty matrix just return the data immediately.
         // Otherwise filter triplets.
@@ -79,7 +76,7 @@ module Converter =
 
     /// Divide a given COOVector into 2 parts.
     /// Returns two vectors.
-    let vecDiv2 (vec: COOVector<'a>) =
+    let vecDiv2 (vec: COOVector<'A>) =
         // For an empty vector just return the data immediately.
         // Otherwise filter coordinates.
         if vec.Length = 0u then
@@ -105,12 +102,12 @@ module Converter =
 
 
     /// Convert SparseMatrix data from coordinates to QuadTree.
-    let cooMtxToTree (mtx: COOMatrix<'a>) =
+    let cooMtxToTree (mtx: COOMatrix<'A>) =
 
         let maxRowIndex = mtx.Rows - 1u
         let maxColumnIndex = mtx.Columns - 1u
 
-        let rec inner (mtx: COOMatrix<'a>) =
+        let rec inner (mtx: COOMatrix<'A>) =
 
             if
                 mtx.Rows = 1u
@@ -136,11 +133,11 @@ module Converter =
             COOMatrix(mtx.Data, powerSize, powerSize) |> inner
 
 
-    let cooVecToTree (vec: COOVector<'a>) =
+    let cooVecToTree (vec: COOVector<'A>) =
 
         let maxDataIndex = vec.Length - 1u
 
-        let rec maker (vec: COOVector<'a>) =
+        let rec maker (vec: COOVector<'A>) =
 
             if vec.Length = 1u && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
                 BinTree.Leaf(snd vec.Data.Head)
@@ -160,11 +157,11 @@ module Converter =
             COOVector(vec.Data, powerSize) |> maker
 
 
-    let cooToSparseVec (cooVec: COOVector<'a>) =
+    let cooToSparseVec (cooVec: COOVector<'A>) =
         SparseVector(cooVecToTree cooVec, cooVec.Length)
 
 
-    let cooToSparseMtx (cooMtx: COOMatrix<'a>) =
+    let cooToSparseMtx (cooMtx: COOMatrix<'A>) =
         SparseMatrix(cooMtxToTree cooMtx, cooMtx.Rows, cooMtx.Columns)
 
 
@@ -203,7 +200,7 @@ module Graphs =
         | Some x, Some _ -> Some x
 
 
-    let BFS (startV: List<uint>) (gMtx: COOMatrix<'a>) =
+    let BFS (startV: List<uint>) (gMtx: COOMatrix<'A>) =
 
         // Size and adjacency matrix.
         let length = gMtx.Rows

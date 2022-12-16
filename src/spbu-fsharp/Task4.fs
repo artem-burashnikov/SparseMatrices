@@ -8,7 +8,7 @@ open Trees.QuadTrees
 
 module VectorData =
 
-    type Vector<'Value>(arr: 'Value option array, head: uint, length: uint) =
+    type Vector<'Value>(arr: array<Option<'Value>>, head: uint, length: uint) =
         struct
             member this.Memory = arr
             member this.Head = head
@@ -41,7 +41,7 @@ module VectorData =
 
 
     /// Converts an array to Vector.
-    let vecToTree (arr: array<'Value option>) =
+    let vecToTree (arr: array<Option<'Value>>) =
         let rec maker (vec: Vector<'Value>) =
             // If a given vector's starting index is outside of bounds of "memory",
             // then there is no need to store anything in a binary tree.
@@ -288,7 +288,7 @@ module MatrixAlgebra =
 
 
     /// Adds two Sparse vectors together.
-    let elementwiseVecVec fDo (vec1: SparseVector<'a>) (vec2: SparseVector<'b>) : SparseVector<'c> =
+    let elementwiseVecVec fDo (vec1: SparseVector<'A>) (vec2: SparseVector<'B>) : SparseVector<'C> =
 
         let rec inner bTree1 bTree2 =
             match bTree1, bTree2 with
@@ -322,10 +322,10 @@ module MatrixAlgebra =
     /// Vector by Matrix multiplication.
     let vecByMtx
         fAdd
-        (fMult: 'a option -> 'b option -> 'c option)
-        (vec: SparseVector<'a>)
-        (mtx: SparseMatrix<'b>)
-        : SparseVector<'c> =
+        (fMult: 'A option -> 'B option -> 'C option)
+        (vec: SparseVector<'A>)
+        (mtx: SparseMatrix<'B>)
+        : SparseVector<'C> =
 
 
         // We need to calculate how deep is the deepest tree.
