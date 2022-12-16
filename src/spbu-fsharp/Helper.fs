@@ -84,3 +84,10 @@ module Numbers =
             Convert.ToInt32(unsignedInt)
         with
             | :? OverflowException -> failwith $"%A{unsignedInt} is outside the range of the Int32 type."
+
+
+module GeneralFunction =
+
+    let takeFirst (a, _, _) = a
+    let takeSecond (_, a, _) = a
+    let takeThird (_, _, a) = a

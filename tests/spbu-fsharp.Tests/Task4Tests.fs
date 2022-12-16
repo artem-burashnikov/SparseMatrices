@@ -66,7 +66,7 @@ module SparseVector =
                   let powNum = ceilPowTwo (arr.Length |> uint)
                   let expectedLeft, expectedRight = Array.splitAt (powNum / 2u |> toIntConv) arr
 
-                  let actualLeft, actualRight = vecDiv2 (Vector(arr, 0u, powNum))
+                  let actualLeft, actualRight = arrVecPartition (ArrVector(arr, 0u, powNum))
 
                   let ll, lr = toIntConv actualLeft.Head, toIntConv actualLeft.Length
                   let rl, rr = toIntConv actualRight.Head, toIntConv actualRight.Length
@@ -82,7 +82,7 @@ module SparseVector =
               testProperty "Partitioning then concatenating should output the initial array"
               <| fun (arr: array<_>) ->
                   let powNum = ceilPowTwo (arr.Length |> uint)
-                  let leftPart, rightPart = vecDiv2 (Vector(arr, 0u, powNum))
+                  let leftPart, rightPart = arrVecPartition (ArrVector(arr, 0u, powNum))
 
                   let actualResult =
                       let ll, lr = toIntConv leftPart.Head, toIntConv leftPart.Length
@@ -93,19 +93,19 @@ module SparseVector =
 
               testCase "vecToTree: empty array should produce an empty tree"
               <| fun _ ->
-                  let actualResult = vecToTree [||]
+                  let actualResult = arrVecToTree [||]
                   let expectedResult = BinTrees.None
                   Expect.equal actualResult expectedResult ""
 
               testCase "vecToTree: 1-element array"
               <| fun _ ->
-                  let actualResult = vecToTree [| Some 1 |]
+                  let actualResult = arrVecToTree [| Some 1 |]
                   let expectedResult = BinTrees.Leaf 1
                   Expect.equal actualResult expectedResult ""
 
               testCase "vecToTree: 2-elements array (different values)"
               <| fun _ ->
-                  let actualResult = vecToTree [| Some 1; Some 2 |]
+                  let actualResult = arrVecToTree [| Some 1; Some 2 |]
 
                   let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.Leaf 2)
 
@@ -113,14 +113,14 @@ module SparseVector =
 
               testCase "vecToTree: 2-elements array (identical values)"
               <| fun _ ->
-                  let actualResult = vecToTree [| Some 1; Some 1 |]
+                  let actualResult = arrVecToTree [| Some 1; Some 1 |]
 
                   let expectedResult = BinTrees.Leaf(1)
                   Expect.equal actualResult expectedResult ""
 
               testCase "vecToTree: 3-elements array (different values)"
               <| fun _ ->
-                  let actualResult = vecToTree [| Some 1; Option.None; Some 2 |]
+                  let actualResult = arrVecToTree [| Some 1; Option.None; Some 2 |]
 
                   let expectedResult =
                       BinTrees.Node(
@@ -158,9 +158,9 @@ module SparseMatrix =
               testProperty "Table partition: empty input"
               <| fun (arr: int option[,]) ->
 
-                  let mtx = Matrix(arr, 0u, 0u, 0u, 0u)
+                  let mtx = TableMatrix(arr, 0u, 0u, 0u, 0u)
 
-                  let nw, ne, sw, se = mtxDiv4 mtx
+                  let nw, ne, sw, se = tableMTXPartition mtx
                   Expect.equal nw.Rows 0u ""
                   Expect.equal nw.Columns 0u ""
                   Expect.equal ne.Rows 0u ""
@@ -183,9 +183,9 @@ module SparseMatrix =
                   let middle = powerSize / 2u
 
                   // Memory (arr) is not important.
-                  let mtx = Matrix(arr, x, y, powerSize, powerSize)
+                  let mtx = TableMatrix(arr, x, y, powerSize, powerSize)
 
-                  let nw, ne, sw, se = mtxDiv4 mtx
+                  let nw, ne, sw, se = tableMTXPartition mtx
                   Expect.equal (nw.HeadX, nw.HeadY) (x, y) "NW failed"
                   Expect.equal (ne.HeadX, ne.HeadY) (x, y + middle) "NE failed"
                   Expect.equal (sw.HeadX, sw.HeadY) (x + middle, y) "SW failed"

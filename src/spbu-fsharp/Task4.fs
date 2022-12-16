@@ -8,7 +8,7 @@ open Trees.QuadTrees
 
 module VectorData =
 
-    type Vector<'Value>(arr: array<Option<'Value>>, head: uint, length: uint) =
+    type ArrVector<'Value>(arr: array<Option<'Value>>, head: uint, length: uint) =
         struct
             member this.Memory = arr
             member this.Head = head
@@ -17,11 +17,45 @@ module VectorData =
         end
 
 
+    type COOVector<'A>(list: List<uint * 'A>, length: uint) =
+        member this.Data = list
+        member this.Length = length
+
+        static member CreateFromList lst length (value: 'A) =
+            COOVector(List.map (fun x -> x, value) lst, length)
+
 
     /// Splits a given Vector in half.
-    let vecDiv2 (vec: Vector<'Value>) =
+    let arrVecPartition (vec: ArrVector<'Value>) =
         let newLength = vec.Length / 2u
-        Vector(vec.Memory, vec.Head, newLength), Vector(vec.Memory, vec.Head + newLength, newLength)
+        ArrVector(vec.Memory, vec.Head, newLength), ArrVector(vec.Memory, vec.Head + newLength, newLength)
+
+
+    /// Divide a given COOVector into 2 parts.
+    /// Returns two vectors.
+    let cooVecPartition (vec: COOVector<'A>) =
+        // For an empty vector just return the data immediately.
+        // Otherwise filter coordinates.
+        if vec.Length = 0u then
+            vec, vec
+        else
+            // Calculate middle point and filter coordinates by comparing
+            // them to the middle point.
+            let half = vec.Length / 2u
+
+            let rec inner lst leftPart rightPart =
+                match lst with
+                | [] -> leftPart, rightPart
+                | (i, value) :: tl ->
+                    if i < half then
+                        inner tl ((i, value) :: leftPart) rightPart
+                    else
+                        inner tl leftPart ((i - half, value) :: rightPart)
+
+            // Construct and return the result.
+            let leftPart, rightPart = inner vec.Data [] []
+
+            COOVector(leftPart, half), COOVector(rightPart, half)
 
 
     /// Reduces identical data in a node of a binary tree to save space.
@@ -39,10 +73,9 @@ module VectorData =
         | Option.None -> BinTree.None
 
 
-
     /// Converts an array to Vector.
-    let vecToTree (arr: array<Option<'Value>>) =
-        let rec maker (vec: Vector<'Value>) =
+    let arrVecToTree (arr: array<Option<'Value>>) =
+        let rec maker (vec: ArrVector<'Value>) =
             // If a given vector's starting index is outside of bounds of "memory",
             // then there is no need to store anything in a binary tree.
             if vec.Head > vec.DataMaxIndex then
@@ -55,11 +88,11 @@ module VectorData =
             // Otherwise split the vector in half
             // and recursively call the maker function on the resulting halves.
             else
-                let leftPart, rightPart = vecDiv2 vec
+                let leftPart, rightPart = arrVecPartition vec
 
                 BinTree.Node(maker leftPart, maker rightPart) |> reduce
 
-        let vec = Vector(arr, 0u, arr.Length |> uint)
+        let vec = ArrVector(arr, 0u, arr.Length |> uint)
 
         // Special cases to save space in a resulting binary tree.
         // i.e. BinTree.Leaf('a) instead of BinTree.Node(BinTree.Leaf('a), BinTree.None)
@@ -73,16 +106,46 @@ module VectorData =
             // Result is a healthy binary tree.
             let powerSize = Numbers.ceilPowTwo (arr.Length |> uint)
 
-            let vec = Vector(arr, 0u, powerSize)
+            let vec = ArrVector(arr, 0u, powerSize)
             maker vec
 
 
+    let cooVecToTree (vec: COOVector<'A>) =
+
+        let maxDataIndex = vec.Length - 1u
+
+        let rec maker (vec: COOVector<'A>) =
+
+            if vec.Length = 1u && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
+                BinTree.Leaf(snd vec.Data.Head)
+            elif vec.Data.Length < 1 then
+                BinTree.None
+            else
+                let leftPart, rightPart = cooVecPartition vec
+
+                BinTree.Node(maker leftPart, maker rightPart) |> reduce
+
+        if vec.Length = 0u then
+            BinTree.None
+        elif vec.Length = 1u && vec.Data.Length <> 0 then
+            BinTree.Leaf(snd vec.Data.Head)
+        else
+            let powerSize = Numbers.ceilPowTwo vec.Length
+            COOVector(vec.Data, powerSize) |> maker
+
+
+open VectorData
 
 module SparseVector =
 
     type SparseVector<'Value when 'Value: equality>(tree: BinTree<'Value>, length: uint) =
 
-        new(arr) = SparseVector(VectorData.vecToTree arr, arr.Length |> uint)
+        new(arr) = SparseVector(arrVecToTree arr, arr.Length |> uint)
+        new(cooVec) = SparseVector(cooVecToTree cooVec, cooVec.Length)
+
+        // new(cooList, length) =
+        // new(cooList, length) = SparseVector(COOVector(cooList, length) |> cooVecToTree, length)
+
 
         member this.Length = length
 
@@ -123,10 +186,11 @@ module SparseVector =
 
 
 open SparseVector
+open Helpers.GeneralFunction
 
 module MatrixData =
 
-    type Matrix<'Value>(arr2d: 'Value option[,], x: uint, y: uint, rows: uint, columns: uint) =
+    type TableMatrix<'Value>(arr2d: 'Value option[,], x: uint, y: uint, rows: uint, columns: uint) =
         struct
             member this.Memory = arr2d
             member this.HeadX = x
@@ -140,9 +204,21 @@ module MatrixData =
         end
 
 
+    type COOMatrix<'A> =
+        struct
+            val Data: List<uint * uint * 'A>
+            val Rows: uint
+            val Columns: uint
+
+            new(triplesList, rows, columns) =
+                { Data = triplesList
+                  Rows = rows
+                  Columns = columns }
+        end
+
 
     /// Splits a given table in 4 quadrants by middle-points.
-    let mtxDiv4 (mtx: Matrix<'Value>) =
+    let tableMTXPartition (mtx: TableMatrix<'Value>) =
         if mtx.Rows = 0u || mtx.Columns = 0u then
             mtx, mtx, mtx, mtx
         else
@@ -157,10 +233,46 @@ module MatrixData =
             //   |    SW    |    SE     |
             //   |          |           |
             //
-            Matrix(mtx.Memory, mtx.HeadX, mtx.HeadY, halfRows, halfColumns), // NW
-            Matrix(mtx.Memory, mtx.HeadX, mtx.HeadY + halfColumns, halfRows, halfColumns), // NE
-            Matrix(mtx.Memory, mtx.HeadX + halfRows, mtx.HeadY, halfRows, halfColumns), // SW
-            Matrix(mtx.Memory, mtx.HeadX + halfRows, mtx.HeadY + halfColumns, halfRows, halfColumns) // SE
+            TableMatrix(mtx.Memory, mtx.HeadX, mtx.HeadY, halfRows, halfColumns), // NW
+            TableMatrix(mtx.Memory, mtx.HeadX, mtx.HeadY + halfColumns, halfRows, halfColumns), // NE
+            TableMatrix(mtx.Memory, mtx.HeadX + halfRows, mtx.HeadY, halfRows, halfColumns), // SW
+            TableMatrix(mtx.Memory, mtx.HeadX + halfRows, mtx.HeadY + halfColumns, halfRows, halfColumns) // SE
+
+
+    /// Divide a given COOMatrix into 4 quadrants.
+    /// Returns four matrices.
+    let cooMTXPartition (mtx: COOMatrix<'A>) =
+
+        // For an empty matrix just return the data immediately.
+        // Otherwise filter triplets.
+        if mtx.Rows = 0u || mtx.Columns = 0u then
+            mtx, mtx, mtx, mtx
+        else
+            // Calculate middle points and filter triplets by comparing
+            // corresponding coordinates to their middle points.
+            let halfRows = mtx.Rows / 2u
+            let halfColumns = mtx.Columns / 2u
+
+            let rec inner lst nw ne sw se =
+                match lst with
+                | [] -> nw, ne, sw, se
+                | (i, j, value) :: tl ->
+                    if i < halfRows && j < halfColumns then
+                        inner tl ((i, j, value) :: nw) ne sw se
+                    elif i < halfRows && j >= halfColumns then
+                        inner tl nw ((i, j - halfColumns, value) :: ne) sw se
+                    elif i >= halfRows && j < halfColumns then
+                        inner tl nw ne ((i - halfRows, j, value) :: sw) se
+                    else
+                        inner tl nw ne sw ((i - halfRows, j - halfRows, value) :: se)
+
+            // Construct and return the result.
+            let nw, ne, sw, se = inner mtx.Data [] [] [] []
+
+            COOMatrix(nw, halfRows, halfColumns),
+            COOMatrix(ne, halfRows, halfColumns),
+            COOMatrix(sw, halfRows, halfColumns),
+            COOMatrix(se, halfRows, halfColumns)
 
 
     /// Reduces identical data in a node of a quad tree to save space.
@@ -181,10 +293,9 @@ module MatrixData =
         | Option.None -> QuadTree.None
 
 
-
     /// Converts a given table into a QudTree.
     let tableToTree (table: 'Value option[,]) =
-        let rec maker (mtx: Matrix<'Value>) =
+        let rec maker (mtx: TableMatrix<'Value>) =
             // If we find a cell within bounds of the original data, then store the cell's value accordingly.
             if
                 mtx.Rows = 1u
@@ -203,7 +314,7 @@ module MatrixData =
             // Otherwise we partition the Quadrant again.
             else
 
-                let nw, ne, sw, se = mtxDiv4 mtx
+                let nw, ne, sw, se = tableMTXPartition mtx
 
                 QuadTree.Node(maker nw, maker ne, maker sw, maker se) |> reduce
 
@@ -218,9 +329,41 @@ module MatrixData =
         else
             let powerSize = Numbers.ceilPowTwo (max rows columns)
             // Initial top-left cell starts at coordinates (0, 0).
-            let mtx = Matrix(table, 0u, 0u, powerSize, powerSize)
+            let mtx = TableMatrix(table, 0u, 0u, powerSize, powerSize)
 
             maker mtx
+
+
+    /// Convert SparseMatrix data from coordinates to QuadTree.
+    let cooMtxToTree (mtx: COOMatrix<'A>) =
+
+        let maxRowIndex = mtx.Rows - 1u
+        let maxColumnIndex = mtx.Columns - 1u
+
+        let rec inner (mtx: COOMatrix<'A>) =
+
+            if
+                mtx.Rows = 1u
+                && mtx.Columns = 1u
+                && mtx.Data.Length = 1
+                && (mtx.Data.Head |> takeFirst) <= maxRowIndex
+                && (mtx.Data.Head |> takeSecond) <= maxColumnIndex
+            then
+                QuadTree.Leaf(takeThird mtx.Data.Head)
+            elif mtx.Data.Length < 1 then
+                QuadTree.None
+            else
+                let nw, ne, sw, se = cooMTXPartition mtx
+
+                QuadTree.Node(inner nw, inner ne, inner sw, inner se) |> reduce
+
+        if mtx.Rows = 0u || mtx.Columns = 0u then
+            QuadTree.None
+        elif mtx.Rows = 1u && mtx.Columns = 1u && mtx.Data.Length <> 0 then
+            QuadTree.Leaf(takeThird mtx.Data.Head)
+        else
+            let powerSize = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
+            COOMatrix(mtx.Data, powerSize, powerSize) |> inner
 
 
 
@@ -231,6 +374,7 @@ module SparseMatrix =
     type SparseMatrix<'Value when 'Value: equality>(data: QuadTree<'Value>, rows: uint, columns: uint) =
 
         new(arr2d) = SparseMatrix(tableToTree arr2d, Array2D.length1 arr2d |> uint, Array2D.length2 arr2d |> uint)
+        new(cooMTX) = SparseMatrix(cooMtxToTree cooMTX, cooMTX.Rows, cooMTX.Columns)
 
         member this.Rows = rows
         member this.Columns = columns
@@ -272,8 +416,6 @@ module SparseMatrix =
 open SparseMatrix
 
 module MatrixAlgebra =
-
-
 
     let getValue x =
         match x with

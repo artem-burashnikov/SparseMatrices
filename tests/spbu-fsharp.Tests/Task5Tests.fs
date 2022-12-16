@@ -47,9 +47,13 @@ module GeneralFunctions =
         let arr = Array2D.create s s Option.None
 
         for i = 0 to tripletsList.Length - 1 do
-            let indexI = Converter.first tripletsList[i] |> Helpers.Numbers.toIntConv
-            let indexJ = Converter.second tripletsList[i] |> Helpers.Numbers.toIntConv
-            arr[indexI, indexJ] <- Converter.third tripletsList[i] |> Some
+            let indexI =
+                Helpers.GeneralFunction.takeFirst tripletsList[i] |> Helpers.Numbers.toIntConv
+
+            let indexJ =
+                Helpers.GeneralFunction.takeSecond tripletsList[i] |> Helpers.Numbers.toIntConv
+
+            arr[indexI, indexJ] <- Helpers.GeneralFunction.takeThird tripletsList[i] |> Some
 
         arr
 
@@ -115,7 +119,7 @@ module GeneralFunctions =
             [
 
               testProperty
-                  "BinTree from COO converter: Should produce the same tree structure as an array-to-tree converter."
+                  "BinTree from COO Converters: Should produce the same tree structure as an array-to-tree Converters."
               <| fun (lst: List<uint>) (s: uint) ->
 
                   let size = s + 1u
@@ -124,15 +128,15 @@ module GeneralFunctions =
 
                   let inputArr = cooTuplesToTable inputList size
 
-                  let actualResult = COOVector(inputList, size) |> Converter.cooVecToTree
+                  let actualResult = COOVector(inputList, size) |> cooVecToTree
 
-                  let expectedResult = vecToTree inputArr
+                  let expectedResult = arrVecToTree inputArr
 
                   Expect.equal actualResult expectedResult ""
 
 
               testProperty
-                  "QuadTree from COO converter: Should produce the same tree structure as an array2d-to-tree converter."
+                  "QuadTree from COO Converters: Should produce the same tree structure as an array2d-to-tree Converters."
               <| fun (tupleLst: List<uint * uint>) (s: uint) ->
                   let size = s + 1u
 
@@ -140,7 +144,7 @@ module GeneralFunctions =
 
                   let inputTable = cooTriplesToTable inputList size
 
-                  let actualResult = COOMatrix(inputList, size, size) |> Converter.cooMtxToTree
+                  let actualResult = COOMatrix(inputList, size, size) |> cooMtxToTree
 
                   let expectedResult = tableToTree inputTable
 
@@ -159,10 +163,9 @@ module GeneralFunctions =
 
                   let inputTable = cooTriplesToTable inputList size
 
-                  let actualResult = (Graphs.BFS startV cooMtx).Data
+                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
 
-                  let expectedResult =
-                      COOVector(naiveBFS startV inputTable, size) |> Converter.cooVecToTree
+                  let expectedResult = COOVector(naiveBFS startV inputTable, size) |> cooVecToTree
 
                   Expect.equal actualResult expectedResult ""
 
@@ -180,7 +183,7 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (Graphs.BFS startV cooMtx).Data
+                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
 
                   Expect.equal actualResult BinTree.None ""
 
@@ -198,11 +201,11 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (Graphs.BFS startV cooMtx).Data
+                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
 
                   let expectedResult =
                       COOVector([ (0u, Some 0u); (1u, Some 0u); (2u, Some 0u); (3u, Some 0u) ], size)
-                      |> Converter.cooVecToTree
+                      |> cooVecToTree
 
                   Expect.equal actualResult expectedResult ""
 
@@ -220,9 +223,9 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (Graphs.BFS startV cooMtx).Data
+                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
 
-                  let expectedResult = COOVector([], size) |> Converter.cooVecToTree
+                  let expectedResult = COOVector([], size) |> cooVecToTree
 
                   Expect.equal actualResult expectedResult ""
 
@@ -240,8 +243,8 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (Graphs.BFS startV cooMtx).Data
+                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
 
-                  let expectedResult = COOVector([], size) |> Converter.cooVecToTree
+                  let expectedResult = COOVector([], size) |> cooVecToTree
 
                   Expect.equal actualResult expectedResult "" ]
