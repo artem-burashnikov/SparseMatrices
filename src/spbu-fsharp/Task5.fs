@@ -54,21 +54,19 @@ module BreadthFirstSearch =
 
         let visited = SparseVector(markVertices startV (Some 0u), length)
 
-        let rec inner frontier visited counter =
+        let rec inner (frontier: SparseVector<Option<unit>>) visited counter =
 
-            let newFrontier =
-                MatrixAlgebra.vecByMtx fAdd fMult frontier mtx
-                |> MatrixAlgebra.elementwiseVecVec fMask visited
-
-            if newFrontier.IsEmpty then
+            if frontier.IsEmpty then
                 visited
             else
+
+                let newFrontier =
+                    MatrixAlgebra.vecByMtx fAdd fMult frontier mtx
+                    |> MatrixAlgebra.elementwiseVecVec fMask visited
+
                 let newVisited =
                     MatrixAlgebra.elementwiseVecVec (fUpdateCount counter) visited newFrontier
 
                 inner newFrontier newVisited (counter + 1u)
 
-        if frontier.IsEmpty then
-            visited
-        else
-            inner frontier visited 1u
+        inner frontier visited 1u
