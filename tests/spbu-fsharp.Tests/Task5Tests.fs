@@ -42,7 +42,7 @@ module GeneralFunctions =
 
 
     /// Returns an Array2D from a given list of triplets (i, j, weight).
-    let cooTriplesToTable (tripletsList: List<uint * uint * Option<'a>>) size =
+    let cooTriplesToTable (tripletsList: List<uint * uint * Option<'A>>) size =
         let s = Helpers.Numbers.toIntConv size
         let arr = Array2D.create s s Option.None
 
@@ -59,7 +59,7 @@ module GeneralFunctions =
 
 
     /// Returns an array from a given list of tuples (i, weight).
-    let cooTuplesToTable (tuplesList: List<uint * Option<'a>>) size =
+    let cooTuplesToTable (tuplesList: List<uint * Option<'A>>) size =
         let s = Helpers.Numbers.toIntConv size
         let arr = Array.create s Option.None
 
@@ -70,7 +70,7 @@ module GeneralFunctions =
         arr
 
     /// Naive BFS approach.
-    let naiveBFS (startV: List<uint>) (mtx: Option<'a>[,]) =
+    let naiveBFS (startV: List<uint>) (mtx: Option<'A>[,]) =
 
         let length = Array2D.length2 mtx
 

@@ -11,14 +11,14 @@ module ListConverters =
     /// Convert List type to OOPList type.
     let rec listToOOP list =
         match list with
-        | Empty -> EmptyList() :> IList<'value>
+        | Empty -> EmptyList() :> IList<'Value>
         | Cons (head, tail) -> List(head, listToOOP tail)
 
     /// Convert OOPList type to List type.
-    let rec oopToList (oopList: IList<'value>) =
+    let rec oopToList (oopList: IList<'Value>) =
         match oopList with
-        | :? EmptyList<'value> -> Empty
-        | :? List<'value> as oopList -> Cons(oopList.Head, oopToList oopList.Tail)
+        | :? EmptyList<'Value> -> Empty
+        | :? List<'Value> as oopList -> Cons(oopList.Head, oopToList oopList.Tail)
         | _ ->
             failwith
                 $"Helpers.ListConverters.oopToList: \
@@ -27,14 +27,14 @@ module ListConverters =
     /// Convert System type to OOPList type.
     let rec lstToOOP lst =
         match lst with
-        | [] -> EmptyList() :> IList<'value>
+        | [] -> EmptyList() :> IList<'Value>
         | head :: tail -> List(head, lstToOOP tail)
 
     /// Convert OOPList type to System list type.
-    let rec oopToLst (lst: IList<'value>) =
+    let rec oopToLst (lst: IList<'Value>) =
         match lst with
-        | :? EmptyList<'value> -> []
-        | :? List<'value> as lst -> lst.Head :: oopToLst lst.Tail
+        | :? EmptyList<'Value> -> []
+        | :? List<'Value> as lst -> lst.Head :: oopToLst lst.Tail
         | _ ->
             failwith
                 $"Lists.myOOPListToList caused an exception in matching. \

@@ -216,12 +216,15 @@ module dotnet =
     let fantomas args =
         DotNet.exec id "fantomas" args
 
+    let fsharplint arg =
+        DotNet.exec id "fsharplint" arg
+
 module FSharpAnalyzers =
     type Arguments =
     | Project of string
-    | Analyzers_Path of string
-    | Fail_On_Warnings of string list
-    | Ignore_Files of string list
+    | AnalyzersPath of string
+    | FailOnWarnings of string list
+    | IgnoreFiles of string list
     | Verbose
     with
         interface IArgParserTemplate with
@@ -357,9 +360,9 @@ let fsharpAnalyzers _ =
     |> Seq.iter(fun proj ->
         let args  =
             [
-                FSharpAnalyzers.Analyzers_Path (__SOURCE_DIRECTORY__ </> ".." </> "packages/analyzers")
+                FSharpAnalyzers.AnalyzersPath (__SOURCE_DIRECTORY__ </> ".." </> "packages/analyzers")
                 FSharpAnalyzers.Arguments.Project proj
-                FSharpAnalyzers.Arguments.Fail_On_Warnings [
+                FSharpAnalyzers.Arguments.FailOnWarnings [
                     "BDH0002"
                 ]
                 FSharpAnalyzers.Verbose
@@ -577,6 +580,11 @@ let checkFormatCode _ =
     else
         Trace.logf "Errors while formatting: %A" result.Errors
 
+let linterCode _ =
+    let result = dotnet.fsharplint (sprintf "lint --file-type solution %s" sln)
+    if not result.OK then
+        failwith "Some files need Linter, check output for more info"
+
 let initTargets () =
     BuildServer.install [
         GitHubActions.Installer
@@ -610,6 +618,7 @@ let initTargets () =
     Target.create "GitRelease" gitRelease
     Target.create "GitHubRelease" githubRelease
     Target.create "FormatCode" formatCode
+    Target.create "Linter" linterCode
     Target.create "CheckFormatCode" checkFormatCode
     Target.create "Release" ignore
 
@@ -636,6 +645,7 @@ let initTargets () =
 
     "DotnetRestore"
         ==> "CheckFormatCode"
+        ==> "Linter"
         ==> "DotnetBuild"
         // ==> "FSharpAnalyzers"
         ==> "DotnetTest"

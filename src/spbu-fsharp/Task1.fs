@@ -63,8 +63,8 @@ let diff (arr: float array) : float =
 
     let result = // This will be returned.
 
-        if arr = [||] then
-            failwith "undefined"
+        if Array.isEmpty arr then
+            failwith "This operation with an empty array is not supported."
         else
 
             let mutable mx = arr[0]
