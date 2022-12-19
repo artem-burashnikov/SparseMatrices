@@ -1,10 +1,10 @@
-module Task5Tests
+module BreadthFirstSearchTests
 
 open System
 open System.Collections.Generic
-open HomeWork4.MatrixData
-open HomeWork4.VectorData
-open HomeWork5
+open SparseMatrix.MatrixData
+open SparseVector.VectorData
+open BreadthFirstSearch
 open Microsoft.FSharp.Collections
 open Expecto
 open Microsoft.FSharp.Core
@@ -163,7 +163,7 @@ module GeneralFunctions =
 
                   let inputTable = cooTriplesToTable inputList size
 
-                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
+                  let actualResult = (BFS.BFS startV cooMtx).Data
 
                   let expectedResult = COOVector(naiveBFS startV inputTable, size) |> cooVecToTree
 
@@ -183,7 +183,7 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
+                  let actualResult = (BFS.BFS startV cooMtx).Data
 
                   Expect.equal actualResult BinTree.None ""
 
@@ -201,7 +201,7 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
+                  let actualResult = (BFS.BFS startV cooMtx).Data
 
                   let expectedResult =
                       COOVector([ (0u, 0u); (1u, 0u); (2u, 0u); (3u, 0u) ], size) |> cooVecToTree
@@ -222,7 +222,7 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
+                  let actualResult = (BFS.BFS startV cooMtx).Data
 
                   let expectedResult = COOVector([], size) |> cooVecToTree
 
@@ -242,7 +242,7 @@ module GeneralFunctions =
 
                   let cooMtx = COOMatrix(inputList, size, size)
 
-                  let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
+                  let actualResult = (BFS.BFS startV cooMtx).Data
 
                   let expectedResult = COOVector([], size) |> cooVecToTree
 

@@ -1,13 +1,13 @@
-namespace HomeWork5
+namespace BreadthFirstSearch
 
-open HomeWork4
 open Microsoft.FSharp.Core
 
-open MatrixData
-open SparseVector
-open SparseMatrix
+open MatrixAlgebra
+open SparseVector.SparseVector
+open SparseMatrix.SparseMatrix
+open SparseMatrix.MatrixData
 
-module BreadthFirstSearch =
+module BFS =
 
     let fAdd a b =
         match a, b with

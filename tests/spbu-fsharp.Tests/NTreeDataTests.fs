@@ -1,9 +1,9 @@
-module Task3Tests
+module NTreeDataTests
 
 open System.Collections.Generic
 open CLists
 open Trees.NTrees
-open HomeWork3.NTrees
+open NTreeData
 open Expecto
 open FsCheck
 open Microsoft.FSharp.Core

@@ -1,10 +1,12 @@
-module Task4Tests
+module MatrixVectorTests
 
 open System
-open HomeWork4
 open Helpers.Numbers
-open HomeWork4.MatrixData
-open HomeWork4.VectorData
+open SparseVector.SparseVector
+open SparseMatrix.MatrixData
+open SparseVector.VectorData
+open SparseMatrix.SparseMatrix
+open MatrixAlgebra.MatrixAlgebra
 open Microsoft.FSharp.Collections
 open Trees.BinTrees
 open Trees.QuadTrees
@@ -133,7 +135,7 @@ module SparseVector =
               testProperty
                   "SparseVector.GetValue loop through each index collecting values. Resulting sequence should be equal to the original."
               <| fun (arr: array<_>) ->
-                  let sparseVec = SparseVector.SparseVector arr
+                  let sparseVec = SparseVector arr
                   let mutable actualResult = []
 
                   for i = 0 to arr.Length - 1 do
@@ -288,7 +290,7 @@ module SparseMatrix =
 
                   let input = Array2D.zeroCreate 1 1
 
-                  let mtx = SparseMatrix.SparseMatrix input
+                  let mtx = SparseMatrix input
 
                   for i = 0 to 0 do
                       for j = 0 to 0 do
@@ -299,7 +301,7 @@ module SparseMatrix =
 
                   let table = getTableSomeNone 1 2
 
-                  let mtx = SparseMatrix.SparseMatrix table
+                  let mtx = SparseMatrix table
 
                   for i = 0 to 0 do
                       for j = 0 to 1 do
@@ -310,7 +312,7 @@ module SparseMatrix =
 
                   let table = getTableSomeNone 2 1
 
-                  let mtx = SparseMatrix.SparseMatrix table
+                  let mtx = SparseMatrix table
 
                   for i = 0 to 1 do
                       for j = 0 to 0 do
@@ -324,7 +326,7 @@ module SparseMatrix =
                   let rows = Array2D.length1 arr2d
                   let columns = Array2D.length2 arr2d
 
-                  let mtx = SparseMatrix.SparseMatrix arr2d
+                  let mtx = SparseMatrix arr2d
 
                   for i = 0 to rows - 1 do
                       for j = 0 to columns - 1 do
@@ -421,10 +423,10 @@ module Algebra =
                   let arr = getRandomSomeNoneVector l
 
                   let arrOnes = Array.init l (fun _ -> Some 1)
-                  let vec = SparseVector.SparseVector arr
-                  let vecOnes = SparseVector.SparseVector arrOnes
-                  let plusOne = MatrixAlgebra.elementwiseVecVec fPlus vec vecOnes
-                  let plusMinusOne = MatrixAlgebra.elementwiseVecVec fMinus plusOne vecOnes
+                  let vec = SparseVector arr
+                  let vecOnes = SparseVector arrOnes
+                  let plusOne = elementwiseVecVec fPlus vec vecOnes
+                  let plusMinusOne = elementwiseVecVec fMinus plusOne vecOnes
 
                   Expect.equal
                       plusMinusOne.Data
@@ -438,10 +440,10 @@ module Algebra =
                   let arr = getRandomSomeNoneVector l
 
                   let zeroes = Array.init l (fun _ -> Option.None)
-                  let vec = SparseVector.SparseVector arr
-                  let vecZeroes = SparseVector.SparseVector zeroes
-                  let plusZero = MatrixAlgebra.elementwiseVecVec fPlus vec vecZeroes
-                  let minusZero = MatrixAlgebra.elementwiseVecVec fMinus plusZero vecZeroes
+                  let vec = SparseVector arr
+                  let vecZeroes = SparseVector zeroes
+                  let plusZero = elementwiseVecVec fPlus vec vecZeroes
+                  let minusZero = elementwiseVecVec fMinus plusZero vecZeroes
                   Expect.equal minusZero.Data vec.Data ""
 
               testProperty "Commutative property should hold."
@@ -452,10 +454,10 @@ module Algebra =
 
                   let arr2 = getRandomSomeNoneVector l
 
-                  let vec1 = SparseVector.SparseVector arr1
-                  let vec2 = SparseVector.SparseVector arr2
-                  let result1 = MatrixAlgebra.elementwiseVecVec fPlus vec1 vec2
-                  let result2 = MatrixAlgebra.elementwiseVecVec fPlus vec2 vec1
+                  let vec1 = SparseVector arr1
+                  let vec2 = SparseVector arr2
+                  let result1 = elementwiseVecVec fPlus vec1 vec2
+                  let result2 = elementwiseVecVec fPlus vec2 vec1
                   Expect.equal result1.Data result2.Data ""
 
               testProperty "Associative property should hold."
@@ -468,15 +470,13 @@ module Algebra =
 
                   let arr3 = getRandomSomeNoneVector l
 
-                  let vec1 = SparseVector.SparseVector arr1
-                  let vec2 = SparseVector.SparseVector arr2
-                  let vec3 = SparseVector.SparseVector arr3
+                  let vec1 = SparseVector arr1
+                  let vec2 = SparseVector arr2
+                  let vec3 = SparseVector arr3
 
-                  let result1 =
-                      MatrixAlgebra.elementwiseVecVec fPlus (MatrixAlgebra.elementwiseVecVec fPlus vec1 vec2) vec3
+                  let result1 = elementwiseVecVec fPlus (elementwiseVecVec fPlus vec1 vec2) vec3
 
-                  let result2 =
-                      MatrixAlgebra.elementwiseVecVec fPlus (MatrixAlgebra.elementwiseVecVec fPlus vec2 vec3) vec1
+                  let result2 = elementwiseVecVec fPlus (elementwiseVecVec fPlus vec2 vec3) vec1
 
                   Expect.equal result1.Data result2.Data ""
 
@@ -486,8 +486,8 @@ module Algebra =
 
                   let arr = getRandomSomeNoneVector l
 
-                  let vec = SparseVector.SparseVector arr
-                  let result = MatrixAlgebra.elementwiseVecVec fMinus vec vec
+                  let vec = SparseVector arr
+                  let result = elementwiseVecVec fMinus vec vec
                   Expect.equal result.Data BinTrees.None ""
 
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
@@ -496,10 +496,10 @@ module Algebra =
                   let table = getRandomTable 1 1
                   let tableSome = table |> Array2D.map Some
 
-                  let vec = SparseVector.SparseVector arr
-                  let mtx = SparseMatrix.SparseMatrix tableSome
+                  let vec = SparseVector arr
+                  let mtx = SparseMatrix tableSome
 
-                  let actualResult = (MatrixAlgebra.vecByMtx fPlus fMult vec mtx)
+                  let actualResult = (vecByMtx fPlus fMult vec mtx)
 
                   let expectedResult = BinTree.Leaf(table[0, 0])
 
@@ -517,10 +517,10 @@ module Algebra =
                   let table = getRandomTable 2 1
                   let tableSome = table |> Array2D.map Some
 
-                  let vec = SparseVector.SparseVector arr
-                  let mtx = SparseMatrix.SparseMatrix tableSome
+                  let vec = SparseVector arr
+                  let mtx = SparseMatrix tableSome
 
-                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
+                  let actualResult = vecByMtx fPlus fMult vec mtx
 
                   let expectedResult = BinTrees.Leaf(table[0, 0] + table[1, 0]) |> reduce
 
@@ -538,10 +538,10 @@ module Algebra =
                   let table = getRandomTable 3 2
                   let tableSome = table |> Array2D.map Some
 
-                  let vec = SparseVector.SparseVector arr
-                  let mtx = SparseMatrix.SparseMatrix tableSome
+                  let vec = SparseVector arr
+                  let mtx = SparseMatrix tableSome
 
-                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
+                  let actualResult = vecByMtx fPlus fMult vec mtx
 
                   let expectedResult =
                       BinTree.Node(
@@ -578,17 +578,15 @@ module Algebra =
                   let tableSome = table |> Array2D.map fromZeroToSomeNone
 
                   // Then we make a vector and a matrix using the data and multiply them.
-                  let vec = SparseVector.SparseVector arrSome
-                  let mtx = SparseMatrix.SparseMatrix tableSome
+                  let vec = SparseVector arrSome
+                  let mtx = SparseMatrix tableSome
 
                   // We also calculate the naive approach of multiplying array and a table.
                   // Result from tree*tree and arr*table should match.
                   let expectedResult =
-                      naiveVecByMtx arr table
-                      |> Array.map fromZeroToSomeNone
-                      |> SparseVector.SparseVector
+                      naiveVecByMtx arr table |> Array.map fromZeroToSomeNone |> SparseVector
 
-                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
+                  let actualResult = vecByMtx fPlus fMult vec mtx
 
                   Expect.equal
                       actualResult.Data
@@ -611,17 +609,15 @@ module Algebra =
                   let tableSome = table |> Array2D.map fromZeroToSomeNone
 
                   // Then we make a vector and a matrix using the data and multiply them.
-                  let vec = SparseVector.SparseVector arrSome
-                  let mtx = SparseMatrix.SparseMatrix tableSome
+                  let vec = SparseVector arrSome
+                  let mtx = SparseMatrix tableSome
 
                   // We also calculate the naive approach of multiplying array and a table.
                   // Result from tree*tree and arr*table should match.
                   let expectedResult =
-                      naiveVecByMtx arr table
-                      |> Array.map fromZeroToSomeNone
-                      |> SparseVector.SparseVector
+                      naiveVecByMtx arr table |> Array.map fromZeroToSomeNone |> SparseVector
 
-                  let actualResult = MatrixAlgebra.vecByMtx fPlus fMult vec mtx
+                  let actualResult = vecByMtx fPlus fMult vec mtx
 
                   Expect.equal
                       actualResult.Data
@@ -651,19 +647,18 @@ module Algebra =
                   let tableSome2 = table2 |> Array2D.map fromZeroToSomeNone
 
                   // Then we make a vector and a matrix using the data and multiply them.
-                  let vec = SparseVector.SparseVector arrSome
-                  let mtx1 = SparseMatrix.SparseMatrix tableSome1
-                  let mtx2 = SparseMatrix.SparseMatrix tableSome2
+                  let vec = SparseVector arrSome
+                  let mtx1 = SparseMatrix tableSome1
+                  let mtx2 = SparseMatrix tableSome2
 
                   // We also calculate the naive approach of multiplying array and a table.
                   // Result from tree*tree and arr*table should match.
                   let expectedResult =
                       naiveVecByMtx (naiveVecByMtx arr table1) table2
                       |> Array.map fromZeroToSomeNone
-                      |> SparseVector.SparseVector
+                      |> SparseVector
 
-                  let actualResult =
-                      MatrixAlgebra.vecByMtx fPlus fMult (MatrixAlgebra.vecByMtx fPlus fMult vec mtx1) mtx2
+                  let actualResult = vecByMtx fPlus fMult (vecByMtx fPlus fMult vec mtx1) mtx2
 
                   Expect.equal actualResult.Data expectedResult.Data ""
                   Expect.equal actualResult.Length mtx2.Columns "" ]

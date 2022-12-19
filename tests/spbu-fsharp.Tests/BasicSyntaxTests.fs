@@ -1,7 +1,7 @@
-module Task1Tests
+module BasicSyntaxTests
 
 open Expecto.Flip
-open HomeWork1
+open BasicSyntax
 open Expecto
 open Microsoft.FSharp.Core
 

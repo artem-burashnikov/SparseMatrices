@@ -20,11 +20,13 @@
         <Compile Include="OOPLists.fs" />
         <Compile Include="Trees.fs" />
         <Compile Include="Helper.fs" />
-        <Compile Include="Task1.fs" />
+        <Compile Include="BasicSyntax.fs" />
         <Compile Include="Task2.fs" />
-        <Compile Include="Task3.fs" />
-        <Compile Include="Task4.fs" />
-        <Compile Include="Task5.fs" />
+        <Compile Include="NTreeData.fs" />
+        <Compile Include="SparseVector.fs" />
+        <Compile Include="SparseMatrix.fs" />
+        <Compile Include="MatrixAlgebra.fs" />
+        <Compile Include="BreadthFirstSearch.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>

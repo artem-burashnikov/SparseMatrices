@@ -1,4 +1,4 @@
-module HomeWork1
+module BasicSyntax
 
 // Homework 1 - Task 1.
 // Power function.
