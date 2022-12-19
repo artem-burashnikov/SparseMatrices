@@ -14,43 +14,7 @@ module TestCases =
 
         testList
             "samples"
-            [
-
-              testPropertyWithConfig config "pow: All power functions should return equal results"
-              <| fun (x: int) (y: int) ->
-                  if x <> 0 && y <> 0 then
-                      qPow x y = pown x y
-                  else
-                      skiptest "incorrect arguments"
-
-
-              testProperty "pow: Bigger exponent should result in a greater result"
-              <| fun arg exp1 exp2 ->
-                  if exp1 > exp2 && arg > 1 && exp1 > 1 && exp2 > 1 then
-                      qPow arg exp1 > qPow arg exp2
-                  else
-                      skiptest "incorrect arguments"
-
-              testCase "pow: 0 to the 0th power is not defined"
-              <| fun _ ->
-                  let actualResult = Expect.throws (fun _ -> pow 0 0 |> ignore) "undefined"
-                  actualResult
-
-              testProperty "qPow: All power functions should return equal results"
-              <| fun (x: int) (y: int) ->
-                  if x <> 0 && y <> 0 then
-                      qPow x y = pown x y
-                  else
-                      skiptest "incorrect arguments"
-
-              testProperty "qPow: Bigger exponent should result in a greater result"
-              <| fun arg exp1 exp2 ->
-                  if exp1 > exp2 && arg > 1 && exp1 > 1 && exp2 > 1 then
-                      qPow arg exp1 > qPow arg exp2
-                  else
-                      skiptest "incorrect arguments"
-
-              testCase "qPow: 0 to the 0th power is not defined"
+            [ testCase "qPow: 0 to the 0th power is not defined"
               <| fun _ ->
                   let actualResult = Expect.throws (fun _ -> qPow 0 0 |> ignore) "undefined"
                   actualResult

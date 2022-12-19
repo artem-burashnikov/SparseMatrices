@@ -224,11 +224,11 @@ var assemblies = [
   {
     "name": "spbu-fsharp",
     "classes": [
-      { "name": "CLists", "rp": "spbu_fsharp_CLists.html", "cl": 7, "ucl": 10, "cal": 17, "tl": 41, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 10, "lch": [], "bch": [], "hc": [] },
-      { "name": "Helpers.GeneralFunction", "rp": "spbu_fsharp_GeneralFunction.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "Helpers.ListConverters", "rp": "spbu_fsharp_ListConverters.html", "cl": 18, "ucl": 6, "cal": 24, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 14, "tb": 16, "lch": [], "bch": [], "hc": [] },
-      { "name": "Helpers.Numbers", "rp": "spbu_fsharp_Numbers.html", "cl": 13, "ucl": 2, "cal": 15, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 12, "lch": [], "bch": [], "hc": [] },
-      { "name": "HomeWork1", "rp": "spbu_fsharp_HomeWork1.html", "cl": 23, "ucl": 9, "cal": 32, "tl": 104, "ct": "LineCoverage", "mc": "-", "cb": 20, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "CLists", "rp": "spbu_fsharp_CLists.html", "cl": 7, "ucl": 8, "cal": 15, "tl": 37, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 10, "lch": [], "bch": [], "hc": [] },
+      { "name": "Helpers.GeneralFunction", "rp": "spbu_fsharp_GeneralFunction.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 86, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "Helpers.ListConverters", "rp": "spbu_fsharp_ListConverters.html", "cl": 18, "ucl": 6, "cal": 24, "tl": 86, "ct": "LineCoverage", "mc": "-", "cb": 14, "tb": 16, "lch": [], "bch": [], "hc": [] },
+      { "name": "Helpers.Numbers", "rp": "spbu_fsharp_Numbers.html", "cl": 8, "ucl": 2, "cal": 10, "tl": 86, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 12, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork1", "rp": "spbu_fsharp_HomeWork1.html", "cl": 20, "ucl": 15, "cal": 35, "tl": 107, "ct": "LineCoverage", "mc": "-", "cb": 15, "tb": 34, "lch": [], "bch": [], "hc": [] },
       { "name": "Homework2.AlgList", "rp": "spbu_fsharp_AlgList.html", "cl": 27, "ucl": 1, "cal": 28, "tl": 220, "ct": "LineCoverage", "mc": "-", "cb": 21, "tb": 22, "lch": [], "bch": [], "hc": [] },
       { "name": "Homework2.OOPList", "rp": "spbu_fsharp_OOPList.html", "cl": 33, "ucl": 13, "cal": 46, "tl": 220, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 28, "lch": [], "bch": [], "hc": [] },
       { "name": "HomeWork3.NTrees", "rp": "spbu_fsharp_NTrees.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 31, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
@@ -296,18 +296,25 @@ var riskHotspots = [
       { "value": 56, "exceeded": true },
     ]},
   {
+    "assembly": "spbu-fsharp", "class": "HomeWork1", "reportPath": "spbu_fsharp_HomeWork1.html", "methodName": "System.Double HomeWork1::pow(System.Double,System.Int32)", "methodShortName": "pow(...)", "fileIndex": 0, "line": 10,
+    "metrics": [
+      { "value": 6, "exceeded": false },
+      { "value": 16, "exceeded": false },
+      { "value": 42, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "HomeWork1", "reportPath": "spbu_fsharp_HomeWork1.html", "methodName": "System.Double HomeWork1::qPow(System.Double,System.Int32)", "methodShortName": "qPow(...)", "fileIndex": 0, "line": 32,
+    "metrics": [
+      { "value": 7, "exceeded": false },
+      { "value": 32, "exceeded": false },
+      { "value": 36.69, "exceeded": true },
+    ]},
+  {
     "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Boolean HomeWork4.MatrixData/TableMatrix`1::Equals(HomeWork4.MatrixData/TableMatrix`1<A>)", "methodShortName": "Equals(...)", "fileIndex": 0, "line": 195,
     "metrics": [
       { "value": 5, "exceeded": false },
       { "value": 8, "exceeded": false },
       { "value": 30, "exceeded": true },
-    ]},
-  {
-    "assembly": "spbu-fsharp", "class": "HomeWork1", "reportPath": "spbu_fsharp_HomeWork1.html", "methodName": "System.Double HomeWork1::pow(System.Double,System.Int32)", "methodShortName": "pow(...)", "fileIndex": 0, "line": 10,
-    "metrics": [
-      { "value": 6, "exceeded": false },
-      { "value": 16, "exceeded": false },
-      { "value": 22.94, "exceeded": true },
     ]},
   {
     "assembly": "spbu-fsharp", "class": "CLists", "reportPath": "spbu_fsharp_CLists.html", "methodName": "System.Boolean CLists::checkEqual(CLists/CList`1<a>,CLists/CList`1<a>)", "methodShortName": "checkEqual(...)", "fileIndex": 0, "line": 28,
