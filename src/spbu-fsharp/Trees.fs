@@ -24,6 +24,7 @@ module BinTrees =
         | Leaf of 'Value
         | Node of left: BinTree<'Value> * right: BinTree<'Value>
 
+
 module QuadTrees =
 
     type QuadTree<'Value> =
