@@ -225,20 +225,22 @@ var assemblies = [
     "name": "spbu-fsharp",
     "classes": [
       { "name": "CLists", "rp": "spbu_fsharp_CLists.html", "cl": 7, "ucl": 10, "cal": 17, "tl": 41, "ct": "LineCoverage", "mc": "-", "cb": 4, "tb": 10, "lch": [], "bch": [], "hc": [] },
-      { "name": "Helpers.ListConverters", "rp": "spbu_fsharp_ListConverters.html", "cl": 18, "ucl": 6, "cal": 24, "tl": 79, "ct": "LineCoverage", "mc": "-", "cb": 14, "tb": 16, "lch": [], "bch": [], "hc": [] },
-      { "name": "Helpers.Numbers", "rp": "spbu_fsharp_Numbers.html", "cl": 11, "ucl": 0, "cal": 11, "tl": 79, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 10, "lch": [], "bch": [], "hc": [] },
-      { "name": "HomeWork1", "rp": "spbu_fsharp_HomeWork1.html", "cl": 19, "ucl": 13, "cal": 32, "tl": 104, "ct": "LineCoverage", "mc": "-", "cb": 16, "tb": 34, "lch": [], "bch": [], "hc": [] },
+      { "name": "Helpers.GeneralFunction", "rp": "spbu_fsharp_GeneralFunction.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "Helpers.ListConverters", "rp": "spbu_fsharp_ListConverters.html", "cl": 18, "ucl": 6, "cal": 24, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 14, "tb": 16, "lch": [], "bch": [], "hc": [] },
+      { "name": "Helpers.Numbers", "rp": "spbu_fsharp_Numbers.html", "cl": 13, "ucl": 2, "cal": 15, "tl": 93, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 12, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork1", "rp": "spbu_fsharp_HomeWork1.html", "cl": 28, "ucl": 4, "cal": 32, "tl": 104, "ct": "LineCoverage", "mc": "-", "cb": 25, "tb": 34, "lch": [], "bch": [], "hc": [] },
       { "name": "Homework2.AlgList", "rp": "spbu_fsharp_AlgList.html", "cl": 27, "ucl": 1, "cal": 28, "tl": 220, "ct": "LineCoverage", "mc": "-", "cb": 21, "tb": 22, "lch": [], "bch": [], "hc": [] },
       { "name": "Homework2.OOPList", "rp": "spbu_fsharp_OOPList.html", "cl": 33, "ucl": 13, "cal": 46, "tl": 220, "ct": "LineCoverage", "mc": "-", "cb": 22, "tb": 28, "lch": [], "bch": [], "hc": [] },
       { "name": "HomeWork3.NTrees", "rp": "spbu_fsharp_NTrees.html", "cl": 7, "ucl": 0, "cal": 7, "tl": 31, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "HomeWork4.MatrixAlgebra", "rp": "spbu_fsharp_MatrixAlgebra.html", "cl": 62, "ucl": 7, "cal": 69, "tl": 448, "ct": "LineCoverage", "mc": "-", "cb": 47, "tb": 52, "lch": [], "bch": [], "hc": [] },
-      { "name": "HomeWork4.MatrixData", "rp": "spbu_fsharp_MatrixData.html", "cl": 44, "ucl": 1, "cal": 45, "tl": 448, "ct": "LineCoverage", "mc": "-", "cb": 28, "tb": 67, "lch": [], "bch": [], "hc": [] },
-      { "name": "HomeWork4.SparseMatrix", "rp": "spbu_fsharp_SparseMatrix.html", "cl": 18, "ucl": 1, "cal": 19, "tl": 448, "ct": "LineCoverage", "mc": "-", "cb": 11, "tb": 12, "lch": [], "bch": [], "hc": [] },
-      { "name": "HomeWork4.SparseVector", "rp": "spbu_fsharp_SparseVector.html", "cl": 15, "ucl": 1, "cal": 16, "tl": 448, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 8, "lch": [], "bch": [], "hc": [] },
-      { "name": "HomeWork4.VectorData", "rp": "spbu_fsharp_VectorData.html", "cl": 27, "ucl": 0, "cal": 27, "tl": 448, "ct": "LineCoverage", "mc": "-", "cb": 18, "tb": 37, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork4.MatrixAlgebra", "rp": "spbu_fsharp_MatrixAlgebra.html", "cl": 62, "ucl": 7, "cal": 69, "tl": 594, "ct": "LineCoverage", "mc": "-", "cb": 47, "tb": 52, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork4.MatrixData", "rp": "spbu_fsharp_MatrixData.html", "cl": 85, "ucl": 2, "cal": 87, "tl": 594, "ct": "LineCoverage", "mc": "-", "cb": 48, "tb": 111, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork4.SparseMatrix", "rp": "spbu_fsharp_SparseMatrix.html", "cl": 19, "ucl": 2, "cal": 21, "tl": 594, "ct": "LineCoverage", "mc": "-", "cb": 11, "tb": 12, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork4.SparseVector", "rp": "spbu_fsharp_SparseVector.html", "cl": 17, "ucl": 3, "cal": 20, "tl": 594, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 8, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork4.VectorData", "rp": "spbu_fsharp_VectorData.html", "cl": 54, "ucl": 1, "cal": 55, "tl": 594, "ct": "LineCoverage", "mc": "-", "cb": 31, "tb": 51, "lch": [], "bch": [], "hc": [] },
+      { "name": "HomeWork5.BreadthFirstSearch", "rp": "spbu_fsharp_BreadthFirstSearch.html", "cl": 26, "ucl": 5, "cal": 31, "tl": 72, "ct": "LineCoverage", "mc": "-", "cb": 13, "tb": 20, "lch": [], "bch": [], "hc": [] },
       { "name": "OOPLists", "rp": "spbu_fsharp_OOPLists.html", "cl": 11, "ucl": 24, "cal": 35, "tl": 70, "ct": "LineCoverage", "mc": "-", "cb": 6, "tb": 18, "lch": [], "bch": [], "hc": [] },
-      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 8, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "Trees.NTrees", "rp": "spbu_fsharp_NTrees.2.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 32, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "spbu_fsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 9, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
+      { "name": "Trees.NTrees", "rp": "spbu_fsharp_NTrees.2.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 33, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -252,42 +254,49 @@ var riskHotspotMetrics = [
 
 var riskHotspots = [
   {
-    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Int32 HomeWork4.MatrixData/Matrix`1::CompareTo(HomeWork4.MatrixData/Matrix`1<Value>)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 128,
+    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Int32 HomeWork4.MatrixData/TableMatrix`1::CompareTo(HomeWork4.MatrixData/TableMatrix`1<A>)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 195,
     "metrics": [
       { "value": 13, "exceeded": false },
       { "value": 18, "exceeded": false },
       { "value": 182, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Int32 HomeWork4.MatrixData/Matrix`1::CompareTo(System.Object,System.Collections.IComparer)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 128,
+    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Int32 HomeWork4.MatrixData/TableMatrix`1::CompareTo(System.Object,System.Collections.IComparer)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 195,
     "metrics": [
       { "value": 13, "exceeded": false },
       { "value": 18, "exceeded": false },
       { "value": 182, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "HomeWork4.VectorData", "reportPath": "spbu_fsharp_VectorData.html", "methodName": "System.Int32 HomeWork4.VectorData/Vector`1::CompareTo(HomeWork4.VectorData/Vector`1<Value>)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 11,
+    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Int32 HomeWork4.MatrixData/COOMatrix`1::CompareTo(HomeWork4.MatrixData/COOMatrix`1<A>)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 209,
     "metrics": [
       { "value": 7, "exceeded": false },
       { "value": 10, "exceeded": false },
       { "value": 56, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "HomeWork4.VectorData", "reportPath": "spbu_fsharp_VectorData.html", "methodName": "System.Int32 HomeWork4.VectorData/Vector`1::CompareTo(System.Object,System.Collections.IComparer)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 11,
+    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Int32 HomeWork4.MatrixData/COOMatrix`1::CompareTo(System.Object,System.Collections.IComparer)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 209,
     "metrics": [
       { "value": 7, "exceeded": false },
       { "value": 10, "exceeded": false },
       { "value": 56, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "HomeWork1", "reportPath": "spbu_fsharp_HomeWork1.html", "methodName": "System.Double HomeWork1::qPow(System.Double,System.Int32)", "methodShortName": "qPow(...)", "fileIndex": 0, "line": 32,
+    "assembly": "spbu-fsharp", "class": "HomeWork4.VectorData", "reportPath": "spbu_fsharp_VectorData.html", "methodName": "System.Int32 HomeWork4.VectorData/ArrVector`1::CompareTo(HomeWork4.VectorData/ArrVector`1<A>)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 11,
     "metrics": [
       { "value": 7, "exceeded": false },
-      { "value": 32, "exceeded": false },
-      { "value": 36.69, "exceeded": true },
+      { "value": 10, "exceeded": false },
+      { "value": 56, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Boolean HomeWork4.MatrixData/Matrix`1::Equals(HomeWork4.MatrixData/Matrix`1<Value>)", "methodShortName": "Equals(...)", "fileIndex": 0, "line": 128,
+    "assembly": "spbu-fsharp", "class": "HomeWork4.VectorData", "reportPath": "spbu_fsharp_VectorData.html", "methodName": "System.Int32 HomeWork4.VectorData/ArrVector`1::CompareTo(System.Object,System.Collections.IComparer)", "methodShortName": "CompareTo(...)", "fileIndex": 0, "line": 11,
+    "metrics": [
+      { "value": 7, "exceeded": false },
+      { "value": 10, "exceeded": false },
+      { "value": 56, "exceeded": true },
+    ]},
+  {
+    "assembly": "spbu-fsharp", "class": "HomeWork4.MatrixData", "reportPath": "spbu_fsharp_MatrixData.html", "methodName": "System.Boolean HomeWork4.MatrixData/TableMatrix`1::Equals(HomeWork4.MatrixData/TableMatrix`1<A>)", "methodShortName": "Equals(...)", "fileIndex": 0, "line": 195,
     "metrics": [
       { "value": 5, "exceeded": false },
       { "value": 8, "exceeded": false },
