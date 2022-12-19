@@ -105,7 +105,7 @@ module GeneralFunctions =
                 else
                     // let visited = vertex :: visited
                     addToQueue vertex (iter + 1u)
-                    innerBFS ((vertex, Some iter) :: result) (Set.add vertex visited)
+                    innerBFS ((vertex, iter) :: result) (Set.add vertex visited)
 
         // If the starting queue is empty then return immediately, otherwise traverse the graph.
         if queue.Count = 0 then [] else innerBFS [] Set.empty
@@ -204,8 +204,7 @@ module GeneralFunctions =
                   let actualResult = (BreadthFirstSearch.BFS startV cooMtx).Data
 
                   let expectedResult =
-                      COOVector([ (0u, Some 0u); (1u, Some 0u); (2u, Some 0u); (3u, Some 0u) ], size)
-                      |> cooVecToTree
+                      COOVector([ (0u, 0u); (1u, 0u); (2u, 0u); (3u, 0u) ], size) |> cooVecToTree
 
                   Expect.equal actualResult expectedResult ""
 

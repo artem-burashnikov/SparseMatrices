@@ -37,7 +37,7 @@ module BreadthFirstSearch =
     let fUpdateCount iter a b =
         match a, b with
         | Option.None, Option.None -> Option.None
-        | Option.None, Some _ -> Some(Some iter)
+        | Option.None, Some _ -> Some iter
         | Some x, Option.None -> Some x
         | Some x, Some _ -> Some x
 
@@ -52,7 +52,7 @@ module BreadthFirstSearch =
 
         let frontier = SparseVector(markVertices startV (Some()), length)
 
-        let visited = SparseVector(markVertices startV (Some 0u), length)
+        let visited = SparseVector(markVertices startV 0u, length)
 
         let rec inner (frontier: SparseVector<Option<unit>>) visited counter =
 
