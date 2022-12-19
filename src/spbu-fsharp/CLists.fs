@@ -1,7 +1,7 @@
 module CLists
 
-type CList<'value> =
-    | Cons of head: 'value * tail: CList<'value>
+type CList<'Value> =
+    | Cons of head: 'Value * tail: CList<'Value>
     | Empty
 
 let rec map f lst =
@@ -35,7 +35,7 @@ let rec checkEqual lst1 lst2 : bool =
     | _ -> false
 
 /// Count the number of elements in a list.
-let rec getLength (lst: CList<'value>) : int =
+let rec getLength (lst: CList<'Value>) : int =
     match lst with
     | Empty -> 0
     | Cons (_, tail) -> 1 + getLength tail

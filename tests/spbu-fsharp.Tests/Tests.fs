@@ -1,2 +1,2 @@
-namespace spbu_fsharp.Tests
+namespace SpbuFsharp.Tests
 

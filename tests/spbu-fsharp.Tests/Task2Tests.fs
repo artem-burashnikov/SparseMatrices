@@ -42,7 +42,7 @@ module TestCases =
                       else
                           results[i] <- false
 
-                  let allMatch = Array.forall (fun elem -> elem = true)
+                  let allMatch = Array.forall id
 
                   Expect.equal true (allMatch results) "The results were different"
 

@@ -9,7 +9,7 @@ module AlgList =
     /// Function concatenates two linked lists.
     // Traverse the first list until Empty.
     // Place the second list at Empty.
-    let rec concat (lst1: CList<'value>) (lst2: CList<'value>) : CList<'value> =
+    let rec concat (lst1: CList<'Value>) (lst2: CList<'Value>) : CList<'Value> =
         match lst1 with
         | Cons (head, tail) -> Cons(head, concat tail lst2)
         | Empty -> lst2
@@ -21,12 +21,12 @@ module AlgList =
     // First we calculate the number n of elements in a given list.
     // Then we recursively call the sorting function n times and
     // on each call some element ends up moving to its place .
-    let bubbleSort (lst: CList<'value>) : CList<'value> =
+    let bubbleSort (lst: CList<'Value>) : CList<'Value> =
 
         // Compare two consecutive values and swap them if required.
         // On each complete cycle this function puts a single element
         // on its spot in a sorted list.
-        let rec sort (lst: CList<'value>) : CList<'value> =
+        let rec sort (lst: CList<'Value>) : CList<'Value> =
             match lst with
             | Empty -> Empty
             // A single element is already sorted.
@@ -59,7 +59,7 @@ module AlgList =
     // The second partition has all elements that are bigger than the pivot.
     // We then concatenate all three parts in an appropriate order
     // while recursively sorting the partitions the same way.
-    let qSort (lst: CList<'value>) : CList<'value> =
+    let qSort (lst: CList<'Value>) : CList<'Value> =
         match lst with
         // No need to sort an empty list or a list that has a single element.
         // Return immediately.
@@ -72,7 +72,7 @@ module AlgList =
             // that are less than or equal to the pivot.
             // Second part of the tuple (snd)
             // consists of all elements that greater than the pivot.
-            let rec partition (lst: CList<'value>) (pivot: 'value) : CList<'value> * CList<'value> =
+            let rec partition (lst: CList<'Value>) (pivot: 'Value) : CList<'Value> * CList<'Value> =
                 match lst with
                 | Empty -> Empty, Empty
                 | Cons (head, tail) ->
@@ -85,7 +85,7 @@ module AlgList =
 
             // This is the main sorting sub-function.
             // It sorts two partitions and concatenates them with the pivot.
-            let rec sort (lst: CList<'value>) : CList<'value> =
+            let rec sort (lst: CList<'Value>) : CList<'Value> =
                 match lst with
                 // An empty list or a list that has a single element is already sorted.
                 // Otherwise we concatenate and make a recursive call on partitions.
@@ -107,10 +107,10 @@ module OOPList =
     // Traverse an IList object until the Empty type is reached.
     // Place the second IList at this point.
     // Return a joined IList.
-    let rec concat (lst1: IList<'value>) (lst2: IList<'value>) : IList<'value> =
+    let rec concat (lst1: IList<'Value>) (lst2: IList<'Value>) : IList<'Value> =
         match lst1 with
-        | :? List<'value> as lst -> List(lst.Head, concat lst.Tail lst2)
-        | :? EmptyList<'value> -> lst2
+        | :? List<'Value> as lst -> List(lst.Head, concat lst.Tail lst2)
+        | :? EmptyList<'Value> -> lst2
         | _ ->
             failwith
                 $"Task2.HomeWork2.OOPList.concat: \
@@ -121,17 +121,17 @@ module OOPList =
 
     // Homework 2 - Task 1 - Bubble sort.
     /// Function sorts a linked list using a bubble sorting algorithm.
-    let bubbleSort (lst: IList<'value>) : IList<'value> =
+    let bubbleSort (lst: IList<'Value>) : IList<'Value> =
 
         // This is the main sorting function.
         // It looks at every value in a linked list cell, compares adjacent cell's values
         // and swaps them if necessary.
         // After a complete cycle a single element takes its place in a sorted list.
-        let rec sort (lst: IList<'value>) =
+        let rec sort (lst: IList<'Value>) =
             match lst with
-            | :? EmptyList<'value> -> EmptyList() :> IList<'value>
-            | :? List<'value> as lst ->
-                if lst.Tail :? EmptyList<'value> then
+            | :? EmptyList<'Value> -> EmptyList() :> IList<'Value>
+            | :? List<'Value> as lst ->
+                if lst.Tail :? EmptyList<'Value> then
                     lst
                 else
 
@@ -168,13 +168,13 @@ module OOPList =
     // The second partition has all elements that are bigger than the pivot.
     // We then concatenate all three parts in an appropriate order
     // while recursively sorting the partitions the same way.
-    let qSort (lst: IList<'value>) : IList<'value> =
+    let qSort (lst: IList<'Value>) : IList<'Value> =
         match lst with
         // No need to sort an empty list or a list that has a single element.
         // Return immediately.
-        | :? EmptyList<'value> -> EmptyList() :> IList<'value>
-        | :? List<'value> as lst ->
-            if lst.Tail :? EmptyList<'value> then
+        | :? EmptyList<'Value> -> EmptyList() :> IList<'Value>
+        | :? List<'Value> as lst ->
+            if lst.Tail :? EmptyList<'Value> then
                 lst
             else
 
@@ -183,10 +183,10 @@ module OOPList =
                 // that are less than or equal to the pivot.
                 // Second part of the tuple (snd)
                 // consists of all elements that are greater than the pivot.
-                let rec partition (lst: IList<'value>) (pivot: 'value) =
+                let rec partition (lst: IList<'Value>) (pivot: 'Value) =
                     match lst with
-                    | :? EmptyList<'value> -> EmptyList() :> IList<'value>, EmptyList() :> IList<'value>
-                    | :? List<'value> as lst ->
+                    | :? EmptyList<'Value> -> EmptyList() :> IList<'Value>, EmptyList() :> IList<'Value>
+                    | :? List<'Value> as lst ->
                         let parts = partition lst.Tail pivot
 
                         if lst.Head <= pivot then
@@ -200,13 +200,13 @@ module OOPList =
 
                 // This is the main sorting sub-function.
                 // It sorts two partitions and concatenates them with the pivot.
-                let rec sort (lst: IList<'value>) : IList<'value> =
+                let rec sort (lst: IList<'Value>) : IList<'Value> =
                     match lst with
                     // An empty list or a list that has a single element is already sorted.
                     // Otherwise we concatenate while making recursive calls on partitions.
-                    | :? EmptyList<'value> -> EmptyList() :> IList<'value>
-                    | :? List<'value> as lst ->
-                        if lst.Tail :? EmptyList<'value> then
+                    | :? EmptyList<'Value> -> EmptyList() :> IList<'Value>
+                    | :? List<'Value> as lst ->
+                        if lst.Tail :? EmptyList<'Value> then
                             lst
                         else
                             let parts = partition lst.Tail lst.Head

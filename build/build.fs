@@ -216,6 +216,9 @@ module dotnet =
     let fantomas args =
         DotNet.exec id "fantomas" args
 
+    let fsharplint arg =
+        DotNet.exec id "fsharplint" arg
+
 module FSharpAnalyzers =
     type Arguments =
     | Project of string
@@ -577,6 +580,20 @@ let checkFormatCode _ =
     else
         Trace.logf "Errors while formatting: %A" result.Errors
 
+let linterCode _ =
+    let result = dotnet.fsharplint (sprintf "lint --file-type solution %s" sln)
+    // let fileNames =
+    //     [
+    //         !! srcGlob
+    //         !! testsGlob
+    //     ]
+    //     |> Seq.collect id
+    //
+    // for file in fileNames do
+    //     let result = dotnet.fsharplint (sprintf "lint --file-type project %s" file)
+    if not result.OK then
+        failwith "Some files need Linter, check output for more info"
+
 let initTargets () =
     BuildServer.install [
         GitHubActions.Installer
@@ -610,6 +627,7 @@ let initTargets () =
     Target.create "GitRelease" gitRelease
     Target.create "GitHubRelease" githubRelease
     Target.create "FormatCode" formatCode
+    Target.create "Linter" linterCode
     Target.create "CheckFormatCode" checkFormatCode
     Target.create "Release" ignore
 
@@ -636,6 +654,7 @@ let initTargets () =
 
     "DotnetRestore"
         ==> "CheckFormatCode"
+        ==> "Linter"
         ==> "DotnetBuild"
         // ==> "FSharpAnalyzers"
         ==> "DotnetTest"

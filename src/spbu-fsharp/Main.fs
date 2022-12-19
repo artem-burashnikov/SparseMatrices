@@ -1,4 +1,4 @@
-namespace spbu_fsharp
+namespace SpbuFsharp
 
 open Microsoft.FSharp.Core
 
