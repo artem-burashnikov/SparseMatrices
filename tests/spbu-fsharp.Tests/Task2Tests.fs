@@ -169,9 +169,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = oopToLst <| List(0, EmptyList())
 
-                  let actualResult =
-                      oopToLst << OOPList.bubbleSort
-                      <| List(0, EmptyList())
+                  let actualResult = oopToLst << OOPList.bubbleSort <| List(0, EmptyList())
 
                   Expect.equal expectedResult actualResult "The results were different"
 
@@ -179,9 +177,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = oopToLst <| List(0, List(0, EmptyList()))
 
-                  let actualResult =
-                      oopToLst << OOPList.bubbleSort
-                      <| List(0, List(0, EmptyList()))
+                  let actualResult = oopToLst << OOPList.bubbleSort <| List(0, List(0, EmptyList()))
 
                   Expect.equal expectedResult actualResult "The results were different"
 
@@ -189,9 +185,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = oopToLst <| List(0, List(1, EmptyList()))
 
-                  let actualResult =
-                      oopToLst << OOPList.bubbleSort
-                      <| List(1, List(0, EmptyList()))
+                  let actualResult = oopToLst << OOPList.bubbleSort <| List(1, List(0, EmptyList()))
 
                   Expect.equal expectedResult actualResult "The results were different"
 
@@ -199,9 +193,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = oopToLst <| List(0, List(1, EmptyList()))
 
-                  let actualResult =
-                      oopToLst << OOPList.bubbleSort
-                      <| List(0, List(1, EmptyList()))
+                  let actualResult = oopToLst << OOPList.bubbleSort <| List(0, List(1, EmptyList()))
 
                   Expect.equal expectedResult actualResult "The results were different"
 
@@ -221,9 +213,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = oopToLst <| List(0, List(0, EmptyList()))
 
-                  let actualResult =
-                      oopToLst << OOPList.qSort
-                      <| List(0, List(0, EmptyList()))
+                  let actualResult = oopToLst << OOPList.qSort <| List(0, List(0, EmptyList()))
 
                   Expect.equal expectedResult actualResult "The results were different"
 
@@ -231,9 +221,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = oopToLst <| List(0, List(1, EmptyList()))
 
-                  let actualResult =
-                      oopToLst << OOPList.qSort
-                      <| List(0, List(1, EmptyList()))
+                  let actualResult = oopToLst << OOPList.qSort <| List(0, List(1, EmptyList()))
 
                   Expect.equal expectedResult actualResult "The results were different"
 
@@ -241,9 +229,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = oopToLst <| List(0, List(1, EmptyList()))
 
-                  let actualResult =
-                      oopToLst << OOPList.qSort
-                      <| List(0, List(1, EmptyList()))
+                  let actualResult = oopToLst << OOPList.qSort <| List(0, List(1, EmptyList()))
 
                   Expect.equal expectedResult actualResult "The results were different"
 
@@ -257,9 +243,7 @@ module TestCases =
               <| fun _ ->
                   let expectedResult = []
 
-                  let actualResult =
-                      oopToLst
-                      <| OOPList.concat (EmptyList()) (EmptyList())
+                  let actualResult = oopToLst <| OOPList.concat (EmptyList()) (EmptyList())
 
                   Expect.equal expectedResult actualResult "The result must be empty if both are empty"
 
@@ -267,21 +251,16 @@ module TestCases =
               <| fun myList1 myList2 ->
                   let lengthOfCats = CLists.getLength (AlgList.concat myList1 myList2)
 
-                  let sumOfCats =
-                      (CLists.getLength myList1)
-                      + (CLists.getLength myList2)
+                  let sumOfCats = (CLists.getLength myList1) + (CLists.getLength myList2)
 
                   Expect.equal lengthOfCats sumOfCats "Lengths must match"
 
               testProperty "Resulting length should be the sum of initial lengths (MyOOPList)"
               <| fun lst1 lst2 ->
                   let lengthOfCats =
-                      List.length << oopToLst
-                      <| OOPList.concat (lstToOOP lst1) (lstToOOP lst2)
+                      List.length << oopToLst <| OOPList.concat (lstToOOP lst1) (lstToOOP lst2)
 
-                  let sumOfCats =
-                      (getLength <| lstToOOP lst1)
-                      + (getLength <| lstToOOP lst2)
+                  let sumOfCats = (getLength <| lstToOOP lst1) + (getLength <| lstToOOP lst2)
 
                   Expect.equal lengthOfCats sumOfCats "Lengths must match"
 

@@ -75,10 +75,12 @@ let diff (arr: float array) : float =
             for i = 1 to arr.Length - 1 do
 
                 // Max on the current iteration.
-                if arr[i] > mx then mx <- arr[i]
+                if arr[i] > mx then
+                    mx <- arr[i]
 
                 // Min on the current iteration.
-                if arr[i] < mn then mn <- arr[i]
+                if arr[i] < mn then
+                    mn <- arr[i]
 
             mx - mn // The desired value
 
@@ -99,6 +101,7 @@ let allOdds (num1: int) (num2: int) : int array =
     // Make an array of all odd integers in the specified range
     let result: int array =
         [| for i in (smallerNum + 1) .. (biggerNum - 1) do
-               if abs i % 2 = 1 then yield i |]
+               if abs i % 2 = 1 then
+                   yield i |]
 
     result // Return the array.

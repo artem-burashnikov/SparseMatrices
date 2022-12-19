@@ -1,9 +1,0 @@
-# Ignore script files
-Task1.fs
-Trees.fs
-CLists.fs
-Helper.fs
-Task2.fs
-Task3Tests.fs
-Tests.fs
-Task2Tests.fs

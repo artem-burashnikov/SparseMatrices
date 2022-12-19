@@ -12,7 +12,7 @@ module ListConverters =
     let rec listToOOP list =
         match list with
         | Empty -> EmptyList() :> IList<'Value>
-        | Cons (head, tail) -> List(head, listToOOP tail)
+        | Cons(head, tail) -> List(head, listToOOP tail)
 
     /// Convert OOPList type to List type.
     let rec oopToList (oopList: IList<'Value>) =
@@ -50,7 +50,7 @@ module ListConverters =
     let rec listToLst lst =
         match lst with
         | Empty -> []
-        | Cons (head, tail) -> head :: listToLst tail
+        | Cons(head, tail) -> head :: listToLst tail
 
 module Numbers =
 
@@ -58,10 +58,7 @@ module Numbers =
     let ceilPowTwo x =
 
         let rec looper x acc =
-            if acc >= x then
-                acc
-            else
-                looper x (acc * 2u)
+            if acc >= x then acc else looper x (acc * 2u)
 
         if x = 0u then 1u
         elif x = 1u then 2u
@@ -71,19 +68,15 @@ module Numbers =
     let powTwo x =
 
         let rec looper x acc power =
-            if acc >= x then
-                power
-            else
-                looper x (acc * 2u) (power + 1u)
+            if acc >= x then power else looper x (acc * 2u) (power + 1u)
 
-        if x = 1u then 0u
-        else looper x 1u 0u
+        if x = 1u then 0u else looper x 1u 0u
 
     let toIntConv (unsignedInt: uint) =
         try
             Convert.ToInt32(unsignedInt)
-        with
-            | :? OverflowException -> failwith $"%A{unsignedInt} is outside the range of the Int32 type."
+        with :? OverflowException ->
+            failwith $"%A{unsignedInt} is outside the range of the Int32 type."
 
 
 module GeneralFunction =

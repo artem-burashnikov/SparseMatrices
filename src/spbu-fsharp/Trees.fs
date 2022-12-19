@@ -15,7 +15,7 @@ module NTrees =
 
         match tree with
         | Leaf value -> folder acc value
-        | Node (value, children) -> CLists.fold recurse (folder acc value) children
+        | Node(value, children) -> CLists.fold recurse (folder acc value) children
 
 module BinTrees =
 

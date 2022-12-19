@@ -11,7 +11,7 @@ module AlgList =
     // Place the second list at Empty.
     let rec concat (lst1: CList<'Value>) (lst2: CList<'Value>) : CList<'Value> =
         match lst1 with
-        | Cons (head, tail) -> Cons(head, concat tail lst2)
+        | Cons(head, tail) -> Cons(head, concat tail lst2)
         | Empty -> lst2
 
 
@@ -30,9 +30,9 @@ module AlgList =
             match lst with
             | Empty -> Empty
             // A single element is already sorted.
-            | Cons (head, Empty) -> Cons(head, Empty)
+            | Cons(head, Empty) -> Cons(head, Empty)
             // Swap two consecutive values accordingly.
-            | Cons (head1, Cons (head2, tail)) ->
+            | Cons(head1, Cons(head2, tail)) ->
                 if head1 >= head2 then
                     Cons(head2, sort <| Cons(head1, tail))
                 else
@@ -64,7 +64,7 @@ module AlgList =
         // No need to sort an empty list or a list that has a single element.
         // Return immediately.
         | Empty -> Empty
-        | Cons (head, Empty) -> Cons(head, Empty)
+        | Cons(head, Empty) -> Cons(head, Empty)
         | _ ->
 
             // This sub-function takes a linked list and returns a tuple.
@@ -75,7 +75,7 @@ module AlgList =
             let rec partition (lst: CList<'Value>) (pivot: 'Value) : CList<'Value> * CList<'Value> =
                 match lst with
                 | Empty -> Empty, Empty
-                | Cons (head, tail) ->
+                | Cons(head, tail) ->
                     let parts = partition tail pivot
 
                     if head <= pivot then
@@ -90,8 +90,8 @@ module AlgList =
                 // An empty list or a list that has a single element is already sorted.
                 // Otherwise we concatenate and make a recursive call on partitions.
                 | Empty -> Empty
-                | Cons (head, Empty) -> Cons(head, Empty)
-                | Cons (head, tail) ->
+                | Cons(head, Empty) -> Cons(head, Empty)
+                | Cons(head, tail) ->
                     let parts = partition tail head
                     concat (sort <| fst parts) (Cons(head, sort <| snd parts))
 

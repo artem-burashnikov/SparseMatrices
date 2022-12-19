@@ -104,8 +104,7 @@ module TestCases =
                   let actualResult2 = mkCList input2, countUniques input2
 
                   Expect.equal
-                      (actualResult1 = expectedResult
-                       && actualResult2 = expectedResult)
+                      (actualResult1 = expectedResult && actualResult2 = expectedResult)
                       true
                       "Failed to produce \
                         a correct list that has an empty list as an element."
@@ -152,7 +151,6 @@ module TestCases =
                   let setFromCList = lstUniques <| fst resultFromTree
 
                   Expect.equal
-                      (setFromTree.IsSubsetOf setFromCList
-                       && setFromCList.IsSubsetOf setFromTree)
+                      (setFromTree.IsSubsetOf setFromCList && setFromCList.IsSubsetOf setFromTree)
                       true
                       "Did not produce equal sets." ]
