@@ -582,15 +582,6 @@ let checkFormatCode _ =
 
 let linterCode _ =
     let result = dotnet.fsharplint (sprintf "lint --file-type solution %s" sln)
-    // let fileNames =
-    //     [
-    //         !! srcGlob
-    //         !! testsGlob
-    //     ]
-    //     |> Seq.collect id
-    //
-    // for file in fileNames do
-    //     let result = dotnet.fsharplint (sprintf "lint --file-type project %s" file)
     if not result.OK then
         failwith "Some files need Linter, check output for more info"
 
