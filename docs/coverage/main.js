@@ -226,7 +226,7 @@ var assemblies = [
     "classes": [
       { "name": "BasicSyntax", "rp": "spbu_fsharp_BasicSyntax.html", "cl": 20, "ucl": 15, "cal": 35, "tl": 107, "ct": "LineCoverage", "mc": "-", "cb": 15, "tb": 34, "lch": [], "bch": [], "hc": [] },
       { "name": "BreadthFirstSearch.BFS", "rp": "spbu_fsharp_BFS.html", "cl": 26, "ucl": 5, "cal": 31, "tl": 72, "ct": "LineCoverage", "mc": "-", "cb": 13, "tb": 20, "lch": [], "bch": [], "hc": [] },
-      { "name": "CLists", "rp": "spbu_fsharp_CLists.html", "cl": 34, "ucl": 7, "cal": 41, "tl": 115, "ct": "LineCoverage", "mc": "-", "cb": 25, "tb": 32, "lch": [], "bch": [], "hc": [] },
+      { "name": "CLists", "rp": "spbu_fsharp_CLists.html", "cl": 33, "ucl": 7, "cal": 40, "tl": 114, "ct": "LineCoverage", "mc": "-", "cb": 25, "tb": 32, "lch": [], "bch": [], "hc": [] },
       { "name": "Helpers.GeneralFunction", "rp": "spbu_fsharp_GeneralFunction.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 86, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
       { "name": "Helpers.ListConverters", "rp": "spbu_fsharp_ListConverters.html", "cl": 18, "ucl": 6, "cal": 24, "tl": 86, "ct": "LineCoverage", "mc": "-", "cb": 14, "tb": 16, "lch": [], "bch": [], "hc": [] },
       { "name": "Helpers.Numbers", "rp": "spbu_fsharp_Numbers.html", "cl": 8, "ucl": 2, "cal": 10, "tl": 86, "ct": "LineCoverage", "mc": "-", "cb": 10, "tb": 12, "lch": [], "bch": [], "hc": [] },
@@ -238,7 +238,7 @@ var assemblies = [
       { "name": "SparseVector.SparseVector", "rp": "spbu_fsharp_SparseVector.html", "cl": 17, "ucl": 3, "cal": 20, "tl": 185, "ct": "LineCoverage", "mc": "-", "cb": 7, "tb": 8, "lch": [], "bch": [], "hc": [] },
       { "name": "SparseVector.VectorData", "rp": "spbu_fsharp_VectorData.html", "cl": 54, "ucl": 1, "cal": 55, "tl": 185, "ct": "LineCoverage", "mc": "-", "cb": 31, "tb": 51, "lch": [], "bch": [], "hc": [] },
       { "name": "SpbuFsharp.Main", "rp": "spbu_fsharp_Main.html", "cl": 0, "ucl": 1, "cal": 1, "tl": 9, "ct": "LineCoverage", "mc": "-", "cb": 0, "tb": 0, "lch": [], "bch": [], "hc": [] },
-      { "name": "Trees.NTrees", "rp": "spbu_fsharp_NTrees.html", "cl": 4, "ucl": 0, "cal": 4, "tl": 33, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
+      { "name": "Trees.NTrees", "rp": "spbu_fsharp_NTrees.html", "cl": 3, "ucl": 0, "cal": 3, "tl": 32, "ct": "LineCoverage", "mc": "-", "cb": 2, "tb": 2, "lch": [], "bch": [], "hc": [] },
     ]},
 ];
 
@@ -315,7 +315,7 @@ var riskHotspots = [
       { "value": 30, "exceeded": true },
     ]},
   {
-    "assembly": "spbu-fsharp", "class": "CLists", "reportPath": "spbu_fsharp_CLists.html", "methodName": "System.Boolean CLists::checkEqual(CLists/CList`1<a>,CLists/CList`1<a>)", "methodShortName": "checkEqual(...)", "fileIndex": 0, "line": 29,
+    "assembly": "spbu-fsharp", "class": "CLists", "reportPath": "spbu_fsharp_CLists.html", "methodName": "System.Boolean CLists::checkEqual(CLists/CList`1<a>,CLists/CList`1<a>)", "methodShortName": "checkEqual(...)", "fileIndex": 0, "line": 28,
     "metrics": [
       { "value": 4, "exceeded": false },
       { "value": 4, "exceeded": false },
