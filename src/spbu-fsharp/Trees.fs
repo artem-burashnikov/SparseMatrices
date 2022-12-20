@@ -11,11 +11,10 @@ module NTrees =
 
     /// General n-ary tree folding function.
     let rec fold folder acc (tree: NTree<'Value>) =
-        let recurse = fold folder
 
         match tree with
         | Leaf value -> folder acc value
-        | Node(value, children) -> CLists.fold recurse (folder acc value) children
+        | Node(value, children) -> CLists.fold (fold folder) (folder acc value) children
 
 module BinTrees =
 

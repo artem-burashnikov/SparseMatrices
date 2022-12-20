@@ -10,11 +10,10 @@ let rec map f lst =
     | Cons(hd, tl) -> Cons(f hd, map f tl)
 
 let rec fold folder acc lst =
-    let recurse = fold folder
 
     match lst with
     | Empty -> acc
-    | Cons(head, tail) -> recurse (folder acc head) tail
+    | Cons(head, tail) -> fold folder (folder acc head) tail
 
 let rec concat (lst1: CList<'Value>) (lst2: CList<'Value>) : CList<'Value> =
     match lst1 with
