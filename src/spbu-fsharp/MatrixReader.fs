@@ -7,7 +7,7 @@ open SparseMatrix.SparseMatrix
 let readMatrixToSparse (filePath: string) =
 
     // Read the first line which contains general information about a given file in a MM format.
-    let reader = StreamReader(filePath)
+    use reader = new StreamReader(filePath)
 
     let header = reader.ReadLine().Split(" ")
     let object = header[1]
