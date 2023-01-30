@@ -26,6 +26,7 @@
         <Compile Include="SparseMatrix.fs" />
         <Compile Include="MatrixAlgebra.fs" />
         <Compile Include="BreadthFirstSearch.fs" />
+        <Compile Include="MatrixReader.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
