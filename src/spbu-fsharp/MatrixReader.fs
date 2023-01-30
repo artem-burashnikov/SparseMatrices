@@ -6,34 +6,37 @@ open SparseMatrix.SparseMatrix
 
 let readMatrixToSparse (filePath: string) =
 
-    // Read the first line which contains general information about a given file in a MM format.
-    // fsharplint:disable-next-line
-    use reader = new StreamReader(filePath)
+    let lines = File.ReadAllLines filePath
 
-    let header = reader.ReadLine().Split(" ")
+    // The first line which contains general information about a given file in a MM format.
+    let header = lines[0].Split(" ")
     let object = header[1]
     let format = header[2]
     let field = header[3]
     let symmetry = header[4]
 
-    // Skip comments section.
-    while reader.Peek() = int '%' do
-        reader.ReadLine() |> ignore
+    // Calculate at which line the data starts, then read matrix parameters and corresponding data.
+    let mutable dataLineIndex = 1
 
-    // Read matrix parameters.
-    let size = reader.ReadLine().Split(" ") |> Array.map uint
+    while lines[dataLineIndex][0] = '%' do
+        dataLineIndex <- dataLineIndex + 1
 
+    let size = lines[dataLineIndex].Split(" ") |> Array.map int
     let rows = size[0]
     let columns = size[1]
     let entries = size[2]
 
-    // Read matrix data.
-    let rec readData lst =
-        if reader.Peek() >= 0 then
-            let line = reader.ReadLine().Split(" ")
-            readData ((uint line[0], uint line[1], float line[2] |> Some) :: lst)
-        else
-            lst
+    let maxDataIndex = entries + dataLineIndex
 
-    // Construct the result.
-    COOMatrix(readData [], rows, columns) |> SparseMatrix
+    let rec readDataToList list currLineIndex =
+        if currLineIndex > maxDataIndex then
+            list
+        else
+            let row, column, value =
+                let currentLine = lines[currLineIndex].Split(" ")
+                uint currentLine[0], uint currentLine[1], float currentLine[2] |> Some
+
+            readDataToList ((row, column, value) :: list) (currLineIndex + 1)
+
+    COOMatrix(readDataToList [] dataLineIndex, uint rows, uint columns)
+    |> SparseMatrix
