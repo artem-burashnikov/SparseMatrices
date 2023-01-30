@@ -7,7 +7,9 @@ open Microsoft.FSharp.Core
 
 module TestCases =
 
-    let config = { FsCheckConfig.defaultConfig with maxTest = 10000 }
+    let config =
+        { FsCheckConfig.defaultConfig with
+            maxTest = 10000 }
 
     [<Tests>]
     let tests =

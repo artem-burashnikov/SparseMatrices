@@ -10,7 +10,9 @@ open Expecto
 open Microsoft.FSharp.Core
 open Trees.BinTrees
 
-let config = { FsCheckConfig.defaultConfig with maxTest = 10000 }
+let config =
+    { FsCheckConfig.defaultConfig with
+        maxTest = 10000 }
 
 module GeneralFunctions =
 

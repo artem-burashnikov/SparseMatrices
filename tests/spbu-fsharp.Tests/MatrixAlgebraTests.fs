@@ -14,7 +14,9 @@ open Trees
 open Expecto
 open Microsoft.FSharp.Core
 
-let config = { FsCheckConfig.defaultConfig with maxTest = 10000 }
+let config =
+    { FsCheckConfig.defaultConfig with
+        maxTest = 10000 }
 
 module GeneralFunctions =
 
