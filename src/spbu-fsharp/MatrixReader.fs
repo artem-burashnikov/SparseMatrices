@@ -24,12 +24,9 @@ let readMatrixToSparse (filePath: string) =
     let size = lines[dataLineIndex].Split(" ") |> Array.map int
     let rows = size[0]
     let columns = size[1]
-    let entries = size[2]
-
-    let maxDataIndex = entries + dataLineIndex
 
     let rec readDataToList list currLineIndex =
-        if currLineIndex > maxDataIndex then
+        if currLineIndex > lines.Length - 1 then
             list
         else
             let row, column, value =
