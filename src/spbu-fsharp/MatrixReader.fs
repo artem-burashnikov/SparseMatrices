@@ -8,22 +8,22 @@ let readMatrixToSparse (filePath: string) =
 
     let lines = File.ReadAllLines filePath
 
-    // The first line which contains general information about a given file in a MM format.
-    let header = lines[0].Split(" ")
-    let object = header[1]
-    let format = header[2]
-    let field = header[3]
-    let symmetry = header[4]
+    // The first line contains general information about a given file in a MM format.
+    let metaData = lines[0].Split(" ")
+    let object = metaData[1]
+    let format = metaData[2]
+    let field = metaData[3]
+    let symmetry = metaData[4]
 
-    // Calculate at which line the data starts, then read matrix parameters and corresponding data.
+    // Skip all comments and read matrix parameters and data.
     let mutable dataLineIndex = 1
 
     while lines[dataLineIndex][0] = '%' do
         dataLineIndex <- dataLineIndex + 1
 
-    let size = lines[dataLineIndex].Split(" ") |> Array.map int
-    let rows = size[0]
-    let columns = size[1]
+    let size = lines[dataLineIndex].Split(" ")
+    let rows = int size[0]
+    let columns = int size[1]
 
     let rec readDataToList list currLineIndex =
         if currLineIndex > lines.Length - 1 then
@@ -35,5 +35,6 @@ let readMatrixToSparse (filePath: string) =
 
             readDataToList ((row, column, value) :: list) (currLineIndex + 1)
 
+    // Construct the resulting SparseMatrix.
     COOMatrix(readDataToList [] dataLineIndex, uint rows, uint columns)
     |> SparseMatrix
