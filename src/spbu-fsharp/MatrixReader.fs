@@ -38,7 +38,7 @@ type MMField =
 type MMSymmetry =
     | General
 
-    static member FieldFromStr str =
+    static member SymmetryFromStr str =
         match str with
         | "general" -> General
         | _ -> failwith "Unsupported symmetry type"
@@ -95,7 +95,7 @@ type MMFile(filePath: string) =
     member this.Object = MMObject.ObjectFromStr object
     member this.Format = MMFormat.FormatFromStr format
     member this.Field = MMField.FieldFromStr field
-    member this.Symmetry = MMSymmetry.FieldFromStr symmetry
+    member this.Symmetry = MMSymmetry.SymmetryFromStr symmetry
     member this.Rows = rows
     member this.Columns = columns
     member this.Entries = entries
