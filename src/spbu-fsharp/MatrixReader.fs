@@ -48,30 +48,49 @@ type MMFile(filePath: string) =
 
     let readMetaData (str: string) =
         let metaData = str.Split(" ")
-        let object = metaData[1]
-        let format = metaData[2]
-        let field = metaData[3]
-        let symmetry = metaData[4]
-        object, format, field, symmetry
+
+        if metaData.Length < 5 then
+            failwith "MatrixReader.MMFile: readMetaData: Incorrect line."
+        else
+            let object = metaData[1]
+            let format = metaData[2]
+            let field = metaData[3]
+            let symmetry = metaData[4]
+            object, format, field, symmetry
 
     let readSize (str: string) =
         let size = str.Split(" ")
-        let rows = uint size[0]
-        let columns = uint size[1]
-        let entries = uint size[2]
-        rows, columns, entries
 
-    // TODO Check that file exists
-    let allLines = File.ReadAllLines filePath
+        if size.Length < 3 then
+            failwith "MatrixReader.MMFile: readSize: Incorrect line."
+        else
+            let rows = uint size[0]
+            let columns = uint size[1]
+            let entries = uint size[2]
+            rows, columns, entries
 
-    // TODO Check that file is not empty and consecutive steps are possible.
+    let allLines =
+        if File.Exists filePath then
+            File.ReadAllLines filePath
+        else
+            failwith "MatrixReader.MMFile: No file was found at the specified path."
+
     // The first line in a file contains metadata.
-    let object, format, field, symmetry = readMetaData (allLines[0].ToLower())
+    let object, format, field, symmetry =
+        if allLines.Length > 0 then
+            readMetaData (allLines[0].ToLower())
+        else
+            failwith "MatrixReader.MMFile: The file was empty."
 
     // Convert to sequence and skip all lines with comments.
     // The first line after the last comment contains parameters of the matrix.
     let sq = Array.toSeq allLines |> Seq.skipWhile (fun line -> line[0] = '%')
-    let rows, columns, entries = readSize (Seq.head sq)
+
+    let rows, columns, entries =
+        if Seq.length sq > 0 then
+            readSize (Seq.head sq)
+        else
+            failwith "MatrixReader.MMFile: No size information was found inside the file."
 
     member this.Object = MMObject.ObjectFromStr object
     member this.Format = MMFormat.FormatFromStr format
@@ -83,7 +102,7 @@ type MMFile(filePath: string) =
     member this.Data = Seq.removeAt 0 sq
 
 
-type MatrixReader(filePath, object: string, field: string) =
+type MatrixReader(filePath: string, object: string, field: string) =
     let file = MMFile filePath
     let givenObject = MMObject.ObjectFromStr(object.ToLower())
     let givenField = MMField.FieldFromStr(field.ToLower())
