@@ -16,12 +16,12 @@ jobs:
       with:
         dotnet-version: '6.0.x'
     - name: Use .NET Core 6.0.x SDK
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
       with:
         dotnet-version: '6.0.x'
     # Not specifying a version will attempt to install via global.json
     - name: Use .NET Core global.json
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v3
 
     - name: Build
       if: runner.os != 'Windows'
