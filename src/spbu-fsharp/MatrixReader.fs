@@ -127,6 +127,18 @@ type MatrixReader(filePath: string) =
         if file.Format <> Coordinate then
             failwith $"Format specified in a file %s{(string file.Format).ToLower()} is not supported"
 
+    // Sine symmetric data only contains coordinates in a lower triangle, we need to mirror it to the upper triangle of the matrix.
+    /// Function makes a new sequence without (i, i) coordinates, then maps (i,j) to (j,i) and appends this new sequence to the initial.
+    let mirrorBySymmetry sq =
+        let mapping triplet =
+            let i, j, v = triplet
+            (j, i, v)
+
+        Seq.skipWhile (fun (i, j, _) -> i = j) sq
+        |> Seq.map mapping
+        |> Seq.append sq
+        |> Seq.toList
+
     // The following methods are used for reading actual data from the file.
     // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
     // The result is a SparseMatrix.
@@ -134,31 +146,55 @@ type MatrixReader(filePath: string) =
         if file.Field <> Real then
             failwith "Given matrix does not have real values"
 
-        let mapSomeFloat (str: string) =
+        let mapFloat (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, float result[2]
 
-        let data = Seq.map mapSomeFloat file.Data |> Seq.toList
+        let data =
+            let sq = Seq.map mapFloat file.Data
+
+            match file.Symmetry with
+            | General -> sq |> Seq.toList
+            | Symmetric -> mirrorBySymmetry sq
+            | Hermitian -> failwith "Hermitian symmetry type is not supported"
+            | SkewSymmetric -> failwith "Skew-Symmetric type is not supported"
+
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
     member this.Integer =
         if file.Field <> Integer then
             failwith "Given matrix does not have integer values"
 
-        let mapSomeInt (str: string) =
+        let mapInt (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, int result[2]
 
-        let data = Seq.map mapSomeInt file.Data |> Seq.toList
+        let data =
+            let sq = Seq.map mapInt file.Data
+
+            match file.Symmetry with
+            | General -> sq |> Seq.toList
+            | Symmetric -> mirrorBySymmetry sq
+            | Hermitian -> failwith "Hermitian symmetry type is not supported"
+            | SkewSymmetric -> failwith "Skew-Symmetric type is not supported"
+
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
     member this.Pattern =
         if file.Field <> Pattern then
             failwith "Given matrix does not have binary values"
 
-        let mapSomeBool (str: string) =
+        let mapBool (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, true
 
-        let data = Seq.map mapSomeBool file.Data |> Seq.toList
+        let data =
+            let sq = Seq.map mapBool file.Data
+
+            match file.Symmetry with
+            | General -> sq |> Seq.toList
+            | Symmetric -> mirrorBySymmetry sq
+            | Hermitian -> failwith "Hermitian symmetry type is not supported"
+            | SkewSymmetric -> failwith "Skew-Symmetric type is not supported"
+
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
