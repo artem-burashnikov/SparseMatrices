@@ -121,32 +121,44 @@ type MatrixReader(filePath: string) =
     let file = MMFile filePath
 
     do
-        if file.Object <> Matrix then failwith $"Object specified in a file: %s{(string file.Object).ToLower()} is not supported"
-        if file.Format <> Coordinate then failwith $"Format specified in a file %s{(string file.Format).ToLower()} is not supported"
+        if file.Object <> Matrix then
+            failwith $"Object specified in a file: %s{(string file.Object).ToLower()} is not supported"
+
+        if file.Format <> Coordinate then
+            failwith $"Format specified in a file %s{(string file.Format).ToLower()} is not supported"
 
     // The following methods are used for reading actual data from the file.
     // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
     // The result is a SparseMatrix.
     member this.Real =
-        if file.Field <> Real then failwith "Given matrix does not have real values"
+        if file.Field <> Real then
+            failwith "Given matrix does not have real values"
+
         let mapSomeFloat (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, float result[2]
+
         let data = Seq.map mapSomeFloat file.Data |> Seq.toList
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
     member this.Integer =
-        if file.Field <> Integer then failwith "Given matrix does not have integer values"
+        if file.Field <> Integer then
+            failwith "Given matrix does not have integer values"
+
         let mapSomeInt (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, int result[2]
+
         let data = Seq.map mapSomeInt file.Data |> Seq.toList
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
     member this.Pattern =
-        if file.Field <> Pattern then failwith "Given matrix does not have binary values"
+        if file.Field <> Pattern then
+            failwith "Given matrix does not have binary values"
+
         let mapSomeBool (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, true
+
         let data = Seq.map mapSomeBool file.Data |> Seq.toList
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
