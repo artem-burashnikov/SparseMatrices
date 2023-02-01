@@ -4,6 +4,7 @@ open System.IO
 open SparseMatrix.MatrixData
 open SparseMatrix.SparseMatrix
 
+/// This type represents Matrix Market objects that MatrixReader is able to read.
 type MMObject =
     | Matrix
 
@@ -13,6 +14,7 @@ type MMObject =
         | _ -> failwith "Unsupported object type"
 
 
+/// This type represents Matrix Market formats that MatrixReader is able to read.
 type MMFormat =
     | Coordinate
 
@@ -22,28 +24,38 @@ type MMFormat =
         | _ -> failwith "Unsupported format type"
 
 
+/// This type represents Matrix Market fields that MatrixReader is able to read.
 type MMField =
     | Real
     | Integer
-    | Boolean
+    | Pattern
 
     static member FieldFromStr str =
         match str with
         | "real" -> Real
         | "integer" -> Integer
-        | "boolean" -> Boolean
+        | "pattern" -> Pattern
         | _ -> failwith "Unsupported field type"
 
 
+/// This type represents Matrix Market symmetry variants that MatrixReader is able to read.
 type MMSymmetry =
     | General
+    | Symmetric
+    | Hermitian
+    | SkewSymmetric
 
     static member SymmetryFromStr str =
         match str with
         | "general" -> General
+        | "symmetric" -> Symmetric
+        | "hermitian" -> Hermitian
+        | "skew-symmetric" -> SkewSymmetric
         | _ -> failwith "Unsupported symmetry type"
 
 
+/// This type is used by MatrixReader to read a header, general parameters
+/// and an unformatted data (represented as a sequence of strings) of an MM object from the file.
 type MMFile(filePath: string) =
 
     let readMetaData (str: string) =
@@ -102,9 +114,39 @@ type MMFile(filePath: string) =
     member this.Data = Seq.removeAt 0 sq
 
 
-type MatrixReader(filePath: string, object: string, field: string) =
-    let file = MMFile filePath
-    let givenObject = MMObject.ObjectFromStr(object.ToLower())
-    let givenField = MMField.FieldFromStr(field.ToLower())
+/// Read Matrix Market file.
+type MatrixReader(filePath: string) =
 
-// TODO Everything else.
+    // Make MMFile object and assert correct data specification.
+    let file = MMFile filePath
+
+    do
+        if file.Object <> Matrix then failwith $"Object specified in a file: %s{(string file.Object).ToLower()} is not supported"
+        if file.Format <> Coordinate then failwith $"Format specified in a file %s{(string file.Format).ToLower()} is not supported"
+
+    // The following methods are used for reading actual data from the file.
+    // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
+    // The result is a SparseMatrix.
+    member this.Real =
+        if file.Field <> Real then failwith "Given matrix does not have real values"
+        let mapSomeFloat (str: string) =
+            let result = str.Split(" ")
+            uint result[0] - 1u, uint result[1] - 1u, float result[2]
+        let data = Seq.map mapSomeFloat file.Data |> Seq.toList
+        COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
+
+    member this.Integer =
+        if file.Field <> Integer then failwith "Given matrix does not have integer values"
+        let mapSomeInt (str: string) =
+            let result = str.Split(" ")
+            uint result[0] - 1u, uint result[1] - 1u, int result[2]
+        let data = Seq.map mapSomeInt file.Data |> Seq.toList
+        COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
+
+    member this.Pattern =
+        if file.Field <> Pattern then failwith "Given matrix does not have binary values"
+        let mapSomeBool (str: string) =
+            let result = str.Split(" ")
+            uint result[0] - 1u, uint result[1] - 1u, true
+        let data = Seq.map mapSomeBool file.Data |> Seq.toList
+        COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
