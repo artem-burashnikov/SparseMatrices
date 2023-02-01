@@ -42,15 +42,11 @@ type MMField =
 type MMSymmetry =
     | General
     | Symmetric
-    | Hermitian
-    | SkewSymmetric
 
     static member SymmetryFromStr str =
         match str with
         | "general" -> General
         | "symmetric" -> Symmetric
-        | "hermitian" -> Hermitian
-        | "skew-symmetric" -> SkewSymmetric
         | _ -> failwith "Unsupported symmetry type"
 
 
@@ -153,8 +149,6 @@ type MatrixReader(filePath: string) =
             match file.Symmetry with
             | General -> sq |> Seq.toList
             | Symmetric -> mirrorBySymmetry sq |> Seq.toList
-            | Hermitian -> failwith "Real: Hermitian symmetry type is not supported"
-            | SkewSymmetric -> failwith "Real: Skew-Symmetric type is not supported"
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
@@ -172,8 +166,6 @@ type MatrixReader(filePath: string) =
             match file.Symmetry with
             | General -> sq |> Seq.toList
             | Symmetric -> mirrorBySymmetry sq |> Seq.toList
-            | Hermitian -> failwith "Integer: Hermitian symmetry type is not supported"
-            | SkewSymmetric -> failwith "Integer: Skew-Symmetric type is not supported"
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
@@ -191,7 +183,5 @@ type MatrixReader(filePath: string) =
             match file.Symmetry with
             | General -> sq |> Seq.toList
             | Symmetric -> mirrorBySymmetry sq |> Seq.toList
-            | Hermitian -> failwith "Pattern: Hermitian symmetry type is not supported"
-            | SkewSymmetric -> failwith "Pattern: Skew-Symmetric type is not supported"
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
