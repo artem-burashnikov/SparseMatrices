@@ -134,10 +134,7 @@ type MatrixReader(filePath: string) =
             let i, j, v = triplet
             (j, i, v)
 
-        Seq.skipWhile (fun (i, j, _) -> i = j) sq
-        |> Seq.map mapping
-        |> Seq.append sq
-        |> Seq.toList
+        Seq.skipWhile (fun (i, j, _) -> i = j) sq |> Seq.map mapping |> Seq.append sq
 
     // The following methods are used for reading actual data from the file.
     // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
@@ -155,7 +152,7 @@ type MatrixReader(filePath: string) =
 
             match file.Symmetry with
             | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq
+            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
             | Hermitian -> failwith "Hermitian symmetry type is not supported"
             | SkewSymmetric -> failwith "Skew-Symmetric type is not supported"
 
@@ -174,7 +171,7 @@ type MatrixReader(filePath: string) =
 
             match file.Symmetry with
             | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq
+            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
             | Hermitian -> failwith "Hermitian symmetry type is not supported"
             | SkewSymmetric -> failwith "Skew-Symmetric type is not supported"
 
@@ -193,7 +190,7 @@ type MatrixReader(filePath: string) =
 
             match file.Symmetry with
             | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq
+            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
             | Hermitian -> failwith "Hermitian symmetry type is not supported"
             | SkewSymmetric -> failwith "Skew-Symmetric type is not supported"
 
