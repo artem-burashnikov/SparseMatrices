@@ -58,7 +58,7 @@ type MMFile(filePath: string) =
         let metaData = str.Split(" ")
 
         if metaData.Length < 5 then
-            failwith "MatrixReader.MMFile: readMetaData: Incorrect line."
+            failwith "MatrixReader.MMFile: readMetaData: Incorrect line"
         else
             let object = metaData[1]
             let format = metaData[2]
@@ -70,7 +70,7 @@ type MMFile(filePath: string) =
         let size = str.Split(" ")
 
         if size.Length < 3 then
-            failwith "MatrixReader.MMFile: readSize: Incorrect line."
+            failwith "MatrixReader.MMFile: readSize: Incorrect line"
         else
             let rows = uint size[0]
             let columns = uint size[1]
@@ -81,14 +81,14 @@ type MMFile(filePath: string) =
         if File.Exists filePath then
             File.ReadAllLines filePath
         else
-            failwith "MatrixReader.MMFile: No file was found at the specified path."
+            failwith "MatrixReader.MMFile: No file was found at the specified path"
 
     // The first line in a file contains metadata.
     let object, format, field, symmetry =
         if allLines.Length > 0 then
             readMetaData (allLines[0].ToLower())
         else
-            failwith "MatrixReader.MMFile: The file was empty."
+            failwith "MatrixReader.MMFile: The file was empty"
 
     // Convert to sequence and skip all lines with comments.
     // The first line after the last comment contains parameters of the matrix.
@@ -98,7 +98,7 @@ type MMFile(filePath: string) =
         if Seq.length sq > 0 then
             readSize (Seq.head sq)
         else
-            failwith "MatrixReader.MMFile: No size information was found inside the file."
+            failwith "MatrixReader.MMFile: No size information was found inside the file"
 
     member this.Object = MMObject.ObjectFromStr object
     member this.Format = MMFormat.FormatFromStr format
@@ -173,12 +173,12 @@ type MatrixReader(filePath: string) =
         if file.Field <> Pattern then
             failwith "Given matrix does not have binary values"
 
-        let mapBool (str: string) =
+        let mapPatter (str: string) =
             let result = str.Split(" ")
-            uint result[0] - 1u, uint result[1] - 1u, true
+            uint result[0] - 1u, uint result[1] - 1u, ()
 
         let data =
-            let sq = Seq.map mapBool file.Data
+            let sq = Seq.map mapPatter file.Data
 
             match file.Symmetry with
             | General -> sq |> Seq.toList
