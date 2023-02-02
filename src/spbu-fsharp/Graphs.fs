@@ -4,9 +4,9 @@ open SparseMatrix.SparseMatrix
 
 type Vertex<'A> = 'A
 
-type Edge<'A> = Vertex<'A> * Vertex<'A>
+type Edge<'A when 'A: comparison> = Map<Vertex<'A>, Vertex<'A>>
 
-type Graph<'A, 'B when 'B: equality> =
-    val vertices: seq<Vertex<'A>>
-    val edges: seq<Edge<'A>>
+type Graph<'A, 'B when 'A: comparison and 'B: equality> =
+    val vertices: Set<Vertex<'A>>
+    val edges: Set<Edge<'A>>
     val adjMtx: SparseMatrix<'B>
