@@ -5,8 +5,7 @@ open Helpers.Numbers
 
 type Vertex<'A> = 'A
 
-type Edge<'A> = 'A * 'A
-
+type UndirectedEdge<'A when 'A: comparison> = Set<'A>
 
 type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
 
@@ -18,7 +17,7 @@ type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
             }
         )
 
-    let edgesOfMtx (mtx: SparseMatrix<'A>) : Set<Edge<uint>> =
+    let edgesOfMtx (mtx: SparseMatrix<'A>) : Set<UndirectedEdge<uint>> =
         Set.ofSeq (
             seq {
                 for i = 1 to toIntConv mtx.Rows do
@@ -26,7 +25,7 @@ type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
                         let value = mtx[uint i, uint j]
 
                         if value <> Option.None then
-                            yield (uint i - 1u, uint j - 1u)
+                            yield (Set.ofList [ uint i - 1u; uint j - 1u ])
             }
         )
 
