@@ -132,6 +132,11 @@ type MatrixReader(filePath: string) =
 
         Seq.skipWhile (fun (i, j, _) -> i = j) sq |> Seq.map mapping |> Seq.append sq
 
+    let useSymmetry symmetry sq =
+        match symmetry with
+        | General -> sq |> Seq.toList
+        | Symmetric -> mirrorBySymmetry sq |> Seq.toList
+
     // The following methods are used for reading actual data from the file.
     // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
     // The result is a SparseMatrix.
@@ -145,10 +150,7 @@ type MatrixReader(filePath: string) =
 
         let data =
             let sq = Seq.map mapFloat file.Data
-
-            match file.Symmetry with
-            | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
+            useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
@@ -162,10 +164,7 @@ type MatrixReader(filePath: string) =
 
         let data =
             let sq = Seq.map mapInt file.Data
-
-            match file.Symmetry with
-            | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
+            useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
@@ -179,9 +178,6 @@ type MatrixReader(filePath: string) =
 
         let data =
             let sq = Seq.map mapPatter file.Data
-
-            match file.Symmetry with
-            | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
+            useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
