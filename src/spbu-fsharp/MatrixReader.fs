@@ -172,12 +172,12 @@ type MatrixReader(filePath: string) =
         if file.Field <> Pattern then
             failwith "Given matrix does not have binary values"
 
-        let mapPatter (str: string) =
+        let mapPattern (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, ()
 
         let data =
-            let sq = Seq.map mapPatter file.Data
+            let sq = Seq.map mapPattern file.Data
             useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix

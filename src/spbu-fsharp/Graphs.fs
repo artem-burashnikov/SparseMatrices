@@ -29,12 +29,8 @@ type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
             }
         )
 
-    let vertices = verticesOfMtx adjMtx
+    member this.Vertices = verticesOfMtx adjMtx
 
-    let edges = edgesOfMtx adjMtx
-
-    member this.Vertices = vertices
-
-    member this.Edges = edges
+    member this.Edges = edgesOfMtx adjMtx
 
     member this.AdjMtx = adjMtx
