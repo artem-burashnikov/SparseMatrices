@@ -50,7 +50,7 @@ module MatrixAlgebra =
                 BinTree.Node(inner a1 b1, inner a2 b2) |> SparseVector.VectorData.reduce
 
         if vec1.Length <> vec2.Length then
-            failwith "Dimensions of objects don't match."
+            failwith "elementwiseVecVec: Dimensions of objects don't match."
         else
             SparseVector(inner vec1.Data vec2.Data, vec1.Length)
 
@@ -147,7 +147,7 @@ module MatrixAlgebra =
                     asyncCompute innerP parallelLevel a1 a2 b1 b2
 
         if vec1.Length <> vec2.Length then
-            failwith "Dimensions of objects don't match."
+            failwith "parallelElementwiseVecVec: Dimensions of objects don't match."
         else
             SparseVector(innerP computationLevel vec1.Data vec2.Data, vec1.Length)
 
@@ -180,9 +180,9 @@ module MatrixAlgebra =
         // Multiplication.
         let rec mult bTree qTree depth : BinTree<'C> =
 
-            let fDo a1 a2 qt1 qt2 depth =
-                let vec1 = SparseVector((mult a1 qt1 (depth + 1u)), mtx.Columns)
-                let vec2 = SparseVector(mult a2 qt2 (depth + 1u), mtx.Columns)
+            let fDo bTree1 bTree2 qTree1 qTree2 depth =
+                let vec1 = SparseVector((mult bTree1 qTree1 (depth + 1u)), mtx.Columns)
+                let vec2 = SparseVector(mult bTree2 qTree2 (depth + 1u), mtx.Columns)
                 let result = elementwiseVecVec fAdd vec1 vec2
                 result.Data
 
@@ -303,9 +303,9 @@ module MatrixAlgebra =
         /// Non-parallel multiplication workflow.
         let rec innerN bTree qTree depth : BinTree<'C> =
 
-            let fDo a1 a2 qt1 qt2 depth =
-                let vec1 = SparseVector((innerN a1 qt1 (depth + 1u)), mtx.Columns)
-                let vec2 = SparseVector(innerN a2 qt2 (depth + 1u), mtx.Columns)
+            let fDo bTree1 bTree2 qTree1 qTree2 depth =
+                let vec1 = SparseVector((innerN bTree1 qTree1 (depth + 1u)), mtx.Columns)
+                let vec2 = SparseVector(innerN bTree2 qTree2 (depth + 1u), mtx.Columns)
                 let result = elementwiseVecVec fAdd vec1 vec2
                 result.Data
 
@@ -346,16 +346,16 @@ module MatrixAlgebra =
         /// Parallel multiplication workflow.
         let rec innerP parallelLevel bTree qTree depth : BinTree<'C> =
 
-            let fDo parallelLevel a1 a2 qt1 qt2 depth =
+            let fDo parallelLevel bTree1 bTree2 qTree1 qTree2 depth =
                 if parallelLevel = 0 then
-                    let vec1 = SparseVector((innerN a1 qt1 (depth + 1u)), mtx.Columns)
-                    let vec2 = SparseVector(innerN a2 qt2 (depth + 1u), mtx.Columns)
+                    let vec1 = SparseVector((innerN bTree1 qTree1 (depth + 1u)), mtx.Columns)
+                    let vec2 = SparseVector(innerN bTree2 qTree2 (depth + 1u), mtx.Columns)
                     let result = elementwiseVecVec fAdd vec1 vec2
                     result.Data
                 else
                     let tasks =
-                        [| async { return SparseVector((innerP parallelLevel a1 qt1 (depth + 1u)), mtx.Columns) }
-                           async { return SparseVector(innerP parallelLevel a2 qt2 (depth + 1u), mtx.Columns) } |]
+                        [| async { return SparseVector((innerP parallelLevel bTree1 qTree1 (depth + 1u)), mtx.Columns) }
+                           async { return SparseVector(innerP parallelLevel bTree2 qTree2 (depth + 1u), mtx.Columns) } |]
 
                     let vectors = tasks |> Async.Parallel |> Async.RunSynchronously
                     let result = parallelElementwiseVecVec parallelLevel fAdd vectors[0] vectors[1]
