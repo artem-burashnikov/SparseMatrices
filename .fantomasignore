@@ -1,2 +1,0 @@
-# This rule is for fantomas git hook, which for some reason tries to look at this file.
-/src/spbu-fsharp/spbu-fsharp.fsproj

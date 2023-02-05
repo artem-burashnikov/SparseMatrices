@@ -77,11 +77,8 @@ type MMFile(filePath: string) =
             let entries = uint size[2]
             rows, columns, entries
 
-    let allLines =
-        if File.Exists filePath then
-            File.ReadAllLines filePath
-        else
-            failwith "MatrixReader.MMFile: No file was found at the specified path"
+    // Method ReadAllLines automatically checks whether the file exists, so we don't need to do it manually.
+    let allLines = File.ReadAllLines filePath
 
     // The first line in a file contains metadata.
     let object, format, field, symmetry =
