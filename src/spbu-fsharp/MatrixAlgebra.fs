@@ -20,41 +20,6 @@ module MatrixAlgebra =
         | Option.None -> BinTree.None
         | _ -> BinTree.Leaf(value |> getValue)
 
-    (*
-    /// Adds two Sparse vectors together.
-    let elementwiseVecVec fDo (vec1: SparseVector<'A>) (vec2: SparseVector<'B>) : SparseVector<'C> =
-
-        let rec inner bTree1 bTree2 =
-            match bTree1, bTree2 with
-            | BinTree.None, BinTree.None -> fDo Option.None Option.None |> convertResult
-
-            | BinTree.None, BinTree.Leaf b -> fDo Option.None (Some b) |> convertResult
-
-            | BinTree.None, BinTree.Node(b1, b2) ->
-                BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> SparseVector.VectorData.reduce
-
-            | BinTree.Leaf a, BinTree.None -> fDo (Some a) Option.None |> convertResult
-
-            | BinTree.Node(a1, a2), BinTree.None ->
-                BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> SparseVector.VectorData.reduce
-
-            | BinTree.Leaf a, BinTree.Leaf b -> fDo (Some a) (Some b) |> convertResult
-
-            | BinTree.Leaf _, BinTree.Node(b1, b2) ->
-                BinTree.Node(inner bTree1 b1, inner bTree1 b2) |> SparseVector.VectorData.reduce
-
-            | BinTree.Node(a1, a2), BinTree.Leaf _ ->
-                BinTree.Node(inner a1 bTree2, inner a2 bTree2) |> SparseVector.VectorData.reduce
-
-            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
-                BinTree.Node(inner a1 b1, inner a2 b2) |> SparseVector.VectorData.reduce
-
-        if vec1.Length <> vec2.Length then
-            failwith "elementwiseVecVec: Dimensions of objects don't match."
-        else
-            SparseVector(inner vec1.Data vec2.Data, vec1.Length)
-    *)
-
     /// Adds two Sparse vectors together utilizing parallel computations.
     let vectorMap2 computationLevel mapping (vec1: SparseVector<'A>) (vec2: SparseVector<'B>) : SparseVector<'C> =
 
