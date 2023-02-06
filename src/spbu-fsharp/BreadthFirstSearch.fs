@@ -45,7 +45,7 @@ module BFS =
     let markVertices lst value = List.map (fun x -> x, value) lst
 
 
-    let BFS (startV: List<uint>) (gMtx: COOMatrix<'A>) =
+    let BFS computationLevel (startV: List<uint>) (gMtx: COOMatrix<'A>) =
 
         let mtx = SparseMatrix gMtx
         let length = mtx.Rows
@@ -61,11 +61,11 @@ module BFS =
             else
 
                 let newFrontier =
-                    MatrixAlgebra.vecByMtx fAdd fMult frontier mtx
-                    |> MatrixAlgebra.elementwiseVecVec fMask visited
+                    MatrixAlgebra.VecByMtx computationLevel fAdd fMult frontier mtx
+                    |> MatrixAlgebra.vectorMap2 computationLevel fMask visited
 
                 let newVisited =
-                    MatrixAlgebra.elementwiseVecVec (fUpdateCount counter) visited newFrontier
+                    MatrixAlgebra.vectorMap2 computationLevel (fUpdateCount counter) visited newFrontier
 
                 inner newFrontier newVisited (counter + 1u)
 

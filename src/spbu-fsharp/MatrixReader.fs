@@ -82,8 +82,10 @@ type MMFile(filePath: string) =
 
     // The first line in a file contains metadata.
     let object, format, field, symmetry =
-        if allLines.Length > 0 then
-            readMetaData (allLines[0].ToLower())
+        let head = Array.tryHead allLines
+
+        if head <> None then
+            readMetaData (head.Value.ToLower())
         else
             failwith "MatrixReader.MMFile: The file was empty"
 
@@ -92,8 +94,10 @@ type MMFile(filePath: string) =
     let sq = Array.toSeq allLines |> Seq.skipWhile (fun line -> line[0] = '%')
 
     let rows, columns, entries =
-        if Seq.length sq > 0 then
-            readSize (Seq.head sq)
+        let head = Seq.tryHead sq
+
+        if head <> None then
+            readSize head.Value
         else
             failwith "MatrixReader.MMFile: No size information was found inside the file"
 
@@ -120,7 +124,7 @@ type MatrixReader(filePath: string) =
         if file.Format <> Coordinate then
             failwith $"Format specified in a file %s{(string file.Format).ToLower()} is not supported"
 
-    // Sine symmetric data only contains coordinates in a lower triangle, we need to mirror it to the upper triangle of the matrix.
+    // Since symmetric data only contains coordinates in a lower triangle, we need to mirror it to the upper triangle of the matrix.
     /// Function makes a new sequence without (i, i) coordinates, then maps (i,j) to (j,i) and appends this new sequence to the initial.
     let mirrorBySymmetry sq =
         let mapping triplet =
@@ -166,9 +170,6 @@ type MatrixReader(filePath: string) =
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
     member this.Pattern =
-        if file.Field <> Pattern then
-            failwith "Given matrix does not have binary values"
-
         let mapPattern (str: string) =
             let result = str.Split(" ")
             uint result[0] - 1u, uint result[1] - 1u, ()
