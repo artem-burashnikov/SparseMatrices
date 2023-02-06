@@ -489,7 +489,7 @@ module Algebra =
                   let arr = getRandomSomeNoneVector l
 
                   let vec = SparseVector arr
-                  let result = vectorMap2 0 fMinus vec vec
+                  let result = vectorMap2 3 fMinus vec vec
                   Expect.equal result.Data BinTrees.None ""
 
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"

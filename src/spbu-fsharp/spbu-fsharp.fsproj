@@ -28,6 +28,7 @@
         <Compile Include="BreadthFirstSearch.fs" />
         <Compile Include="MatrixReader.fs" />
         <Compile Include="Graphs.fs" />
+        <Compile Include="Benchmarks.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
