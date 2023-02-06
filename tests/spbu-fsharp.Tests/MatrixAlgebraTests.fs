@@ -501,7 +501,7 @@ module Algebra =
                   let vec = SparseVector arr
                   let mtx = SparseMatrix tableSome
 
-                  let actualResult = (VecByMtx 0 fPlus fMult vec mtx)
+                  let actualResult = (vecByMtx 0 fPlus fMult vec mtx)
 
                   let expectedResult = BinTree.Leaf(table[0, 0])
 
@@ -522,7 +522,7 @@ module Algebra =
                   let vec = SparseVector arr
                   let mtx = SparseMatrix tableSome
 
-                  let actualResult = VecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
 
                   let expectedResult = BinTrees.Leaf(table[0, 0] + table[1, 0]) |> reduce
 
@@ -543,7 +543,7 @@ module Algebra =
                   let vec = SparseVector arr
                   let mtx = SparseMatrix tableSome
 
-                  let actualResult = VecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
 
                   let expectedResult =
                       BinTree.Node(
@@ -588,7 +588,7 @@ module Algebra =
                   let expectedResult =
                       naiveVecByMtx arr table |> Array.map fromZeroToSomeNone |> SparseVector
 
-                  let actualResult = VecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
 
                   Expect.equal
                       actualResult.Data
@@ -619,7 +619,7 @@ module Algebra =
                   let expectedResult =
                       naiveVecByMtx arr table |> Array.map fromZeroToSomeNone |> SparseVector
 
-                  let actualResult = VecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
 
                   Expect.equal
                       actualResult.Data
@@ -660,7 +660,7 @@ module Algebra =
                       |> Array.map fromZeroToSomeNone
                       |> SparseVector
 
-                  let actualResult = VecByMtx 0 fPlus fMult (VecByMtx 0 fPlus fMult vec mtx1) mtx2
+                  let actualResult = vecByMtx 0 fPlus fMult (vecByMtx 0 fPlus fMult vec mtx1) mtx2
 
                   Expect.equal actualResult.Data expectedResult.Data ""
                   Expect.equal actualResult.Length mtx2.Columns "" ]

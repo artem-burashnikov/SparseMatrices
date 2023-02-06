@@ -61,7 +61,7 @@ module BFS =
             else
 
                 let newFrontier =
-                    MatrixAlgebra.VecByMtx computationLevel fAdd fMult frontier mtx
+                    MatrixAlgebra.vecByMtx computationLevel fAdd fMult frontier mtx
                     |> MatrixAlgebra.vectorMap2 computationLevel fMask visited
 
                 let newVisited =

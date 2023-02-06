@@ -82,7 +82,7 @@ module MatrixAlgebra =
 
 
     /// Vector by Matrix multiplication utilizing parallel computations.
-    let VecByMtx
+    let vecByMtx
         computationLevel
         fAdd
         (fMult: Option<'A> -> Option<'B> -> Option<'C>)
