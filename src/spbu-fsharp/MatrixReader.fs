@@ -147,7 +147,7 @@ type MatrixReader(filePath: string) =
             failwith "Given matrix does not have real values"
 
         let mapFloat (str: string) =
-            let result = str.Split(" ")
+            let result = str.Split()
             uint result[0] - 1u, uint result[1] - 1u, parseFloat result[2]
 
         let data =
@@ -161,7 +161,7 @@ type MatrixReader(filePath: string) =
             failwith "Given matrix does not have integer values"
 
         let mapInt (str: string) =
-            let result = str.Split(" ")
+            let result = str.Split()
             uint result[0] - 1u, uint result[1] - 1u, parseInt result[2]
 
         let data =
@@ -172,7 +172,7 @@ type MatrixReader(filePath: string) =
 
     member this.Pattern =
         let mapPattern (str: string) =
-            let result = str.Split(" ")
+            let result = str.Split()
             uint result[0] - 1u, uint result[1] - 1u, ()
 
         let data =

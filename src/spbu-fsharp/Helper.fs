@@ -80,7 +80,7 @@ module Numbers =
 
     let parseFloat (input: string) =
         try
-            Decimal.Parse(input, System.Globalization.NumberStyles.Float)
+            Double.Parse(input, System.Globalization.NumberStyles.Float)
         with _ ->
             failwith "parseFloat: Invalid input"
 
