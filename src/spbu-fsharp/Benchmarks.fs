@@ -11,7 +11,7 @@ module MatrixAlgebraBenchmarks =
     type MyBench() =
 
         let r = System.Random()
-        
+
         let fPlus a b =
             match a, b with
             | Option.None, Option.None -> Option.None
@@ -29,8 +29,13 @@ module MatrixAlgebraBenchmarks =
             | _ -> Option.None
 
         [<GlobalSetup>]
-        let mtx = Array2D.init 5_000 5_000 (fun i j -> if (i + j) % 3 = 0 then Some (r.Next(1,10)) else Option.None) |> SparseMatrix
-        let vec =  Array.init 5_000 (fun i -> if i % 3 = 0 then Some(r.Next(1,10)) else Option.None)|> SparseVector
+        let mtx =
+            Array2D.init 5_000 5_000 (fun i j -> if (i + j) % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
+            |> SparseMatrix
+
+        let vec =
+            Array.init 5_000 (fun i -> if i % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
+            |> SparseVector
 
         [<Benchmark(Baseline = true)>]
         member this.Base() = vecByMtx 0 fPlus fMult vec mtx
