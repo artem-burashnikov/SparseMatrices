@@ -13,6 +13,7 @@
         <Compile Include="NTreeDataTests.fs" />
         <Compile Include="MatrixAlgebraTests.fs" />
         <Compile Include="BreadthFirstSearchTests.fs" />
+        <Compile Include="MatrixReaderTests.fs" />
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
