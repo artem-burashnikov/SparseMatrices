@@ -3,6 +3,7 @@ module MatrixReader
 open System.IO
 open SparseMatrix.MatrixData
 open SparseMatrix.SparseMatrix
+open Helpers.Numbers
 
 /// This type represents Matrix Market objects that MatrixReader is able to read.
 type MMObject =
@@ -147,7 +148,7 @@ type MatrixReader(filePath: string) =
 
         let mapFloat (str: string) =
             let result = str.Split(" ")
-            uint result[0] - 1u, uint result[1] - 1u, float result[2]
+            uint result[0] - 1u, uint result[1] - 1u, parseFloat result[2]
 
         let data =
             let sq = Seq.map mapFloat file.Data
@@ -161,7 +162,7 @@ type MatrixReader(filePath: string) =
 
         let mapInt (str: string) =
             let result = str.Split(" ")
-            uint result[0] - 1u, uint result[1] - 1u, int result[2]
+            uint result[0] - 1u, uint result[1] - 1u, parseInt result[2]
 
         let data =
             let sq = Seq.map mapInt file.Data

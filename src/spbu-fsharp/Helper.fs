@@ -78,6 +78,17 @@ module Numbers =
         with :? OverflowException ->
             failwith $"%A{unsignedInt} is outside the range of the Int32 type."
 
+    let parseFloat (input: string) =
+        try
+            Decimal.Parse(input, System.Globalization.NumberStyles.Float)
+        with _ ->
+            failwith "parseFloat: Invalid input"
+
+    let parseInt (input: string) =
+        try
+            Int32.Parse input
+        with _ ->
+            failwith "parseInt: Invalid input"
 
 module GeneralFunction =
 
