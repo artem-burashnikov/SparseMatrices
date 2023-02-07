@@ -17,11 +17,11 @@ module MatrixAlgebraBenchmarks =
             | Some x, Option.None -> Some x
 
         let vec =
-            Array.init 1000000 (fun i -> Some(i + 1))
+            Array.init 10000000 (fun i -> if i % 2 = 0 then Some(i + 1) else Option.None)
             |> SparseVector.SparseVector.SparseVector
 
         [<Benchmark(Baseline = true)>]
         member this.NormalAlgebra() = vectorMap2 0 fPlus vec vec
 
         [<Benchmark>]
-        member this.ParallelAlgebra() = vectorMap2 6 fPlus vec vec
+        member this.ParallelAlgebra() = vectorMap2 3 fPlus vec vec

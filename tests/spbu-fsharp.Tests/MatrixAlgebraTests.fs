@@ -427,8 +427,8 @@ module Algebra =
                   let arrOnes = Array.init l (fun _ -> Some 1)
                   let vec = SparseVector arr
                   let vecOnes = SparseVector arrOnes
-                  let plusOne = vectorMap2 0 fPlus vec vecOnes
-                  let plusMinusOne = vectorMap2 0 fMinus plusOne vecOnes
+                  let plusOne = vectorMap2 2 fPlus vec vecOnes
+                  let plusMinusOne = vectorMap2 2 fMinus plusOne vecOnes
 
                   Expect.equal
                       plusMinusOne.Data
@@ -444,8 +444,8 @@ module Algebra =
                   let zeroes = Array.init l (fun _ -> Option.None)
                   let vec = SparseVector arr
                   let vecZeroes = SparseVector zeroes
-                  let plusZero = vectorMap2 0 fPlus vec vecZeroes
-                  let minusZero = vectorMap2 0 fMinus plusZero vecZeroes
+                  let plusZero = vectorMap2 2 fPlus vec vecZeroes
+                  let minusZero = vectorMap2 2 fMinus plusZero vecZeroes
                   Expect.equal minusZero.Data vec.Data ""
 
               testProperty "Commutative property should hold."
@@ -458,8 +458,8 @@ module Algebra =
 
                   let vec1 = SparseVector arr1
                   let vec2 = SparseVector arr2
-                  let result1 = vectorMap2 0 fPlus vec1 vec2
-                  let result2 = vectorMap2 0 fPlus vec2 vec1
+                  let result1 = vectorMap2 2 fPlus vec1 vec2
+                  let result2 = vectorMap2 2 fPlus vec2 vec1
                   Expect.equal result1.Data result2.Data ""
 
               testProperty "Associative property should hold."
@@ -476,9 +476,9 @@ module Algebra =
                   let vec2 = SparseVector arr2
                   let vec3 = SparseVector arr3
 
-                  let result1 = vectorMap2 0 fPlus (vectorMap2 0 fPlus vec1 vec2) vec3
+                  let result1 = vectorMap2 2 fPlus (vectorMap2 2 fPlus vec1 vec2) vec3
 
-                  let result2 = vectorMap2 0 fPlus (vectorMap2 0 fPlus vec2 vec3) vec1
+                  let result2 = vectorMap2 2 fPlus (vectorMap2 2 fPlus vec2 vec3) vec1
 
                   Expect.equal result1.Data result2.Data ""
 
@@ -489,7 +489,7 @@ module Algebra =
                   let arr = getRandomSomeNoneVector l
 
                   let vec = SparseVector arr
-                  let result = vectorMap2 3 fMinus vec vec
+                  let result = vectorMap2 2 fMinus vec vec
                   Expect.equal result.Data BinTrees.None ""
 
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"

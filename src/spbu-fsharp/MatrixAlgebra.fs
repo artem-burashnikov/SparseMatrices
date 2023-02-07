@@ -23,17 +23,20 @@ module MatrixAlgebra =
     /// Adds two Sparse vectors together utilizing parallel computations.
     let vectorMap2 computationLevel mapping (vec1: SparseVector<'A>) (vec2: SparseVector<'B>) : SparseVector<'C> =
 
-        let asyncCompute func parallelLevel a1 a2 b1 b2 =
-            async {
-                let tasks =
-                    [| async { return func (parallelLevel - 1) a1 b1 }
-                       async { return func (parallelLevel - 1) a2 b2 } |]
 
-                let! results = tasks |> Async.Parallel
-                return BinTree.Node(results[0], results[1]) |> SparseVector.VectorData.reduce
-            }
 
         let rec inner parallelLevel bTree1 bTree2 =
+
+            let asyncCompute parallelLevel a1 a2 b1 b2 =
+                async {
+                    let computations =
+                        [| async { return inner (parallelLevel - 1) a1 b1 }
+                           async { return inner (parallelLevel - 1) a2 b2 } |]
+                    let! nodes = Async.Parallel computations
+                    return BinTree.Node(nodes[0], nodes[1]) |> SparseVector.VectorData.reduce
+                }
+                |> Async.RunSynchronously
+
             match bTree1, bTree2 with
             | BinTree.None, BinTree.None -> mapping Option.None Option.None |> convertResult
 
@@ -48,34 +51,34 @@ module MatrixAlgebra =
                     BinTree.Node(inner 0 bTree1 b1, inner 0 bTree1 b2)
                     |> SparseVector.VectorData.reduce
                 else
-                    asyncCompute inner parallelLevel bTree1 bTree1 b1 b2 |> Async.RunSynchronously
+                    asyncCompute parallelLevel bTree1 bTree1 b1 b2
 
             | BinTree.Node(a1, a2), BinTree.None ->
                 if parallelLevel = 0 then
                     BinTree.Node(inner 0 a1 bTree2, inner 0 a2 bTree2)
                     |> SparseVector.VectorData.reduce
                 else
-                    asyncCompute inner parallelLevel a1 a2 bTree2 bTree2 |> Async.RunSynchronously
+                    asyncCompute parallelLevel a1 a2 bTree2 bTree2
 
             | BinTree.Leaf _, BinTree.Node(b1, b2) ->
                 if parallelLevel = 0 then
                     BinTree.Node(inner 0 bTree1 b1, inner 0 bTree1 b2)
                     |> SparseVector.VectorData.reduce
                 else
-                    asyncCompute inner parallelLevel bTree1 bTree1 b1 b2 |> Async.RunSynchronously
+                    asyncCompute parallelLevel bTree1 bTree1 b1 b2
 
             | BinTree.Node(a1, a2), BinTree.Leaf _ ->
                 if parallelLevel = 0 then
                     BinTree.Node(inner 0 a1 bTree2, inner 0 a2 bTree2)
                     |> SparseVector.VectorData.reduce
                 else
-                    asyncCompute inner parallelLevel a1 a2 bTree2 bTree2 |> Async.RunSynchronously
+                    asyncCompute parallelLevel a1 a2 bTree2 bTree2
 
             | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
                 if parallelLevel = 0 then
                     BinTree.Node(inner 0 a1 b1, inner 0 a2 b2) |> SparseVector.VectorData.reduce
                 else
-                    asyncCompute inner parallelLevel a1 a2 b1 b2 |> Async.RunSynchronously
+                    asyncCompute parallelLevel a1 a2 b1 b2
 
         if vec1.Length <> vec2.Length then
             failwith "parallelElementwiseVecVec: Dimensions of objects don't match."
