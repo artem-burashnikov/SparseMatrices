@@ -32,6 +32,7 @@ module MatrixAlgebra =
                     let computations =
                         [| async { return inner (parallelLevel - 1) a1 b1 }
                            async { return inner (parallelLevel - 1) a2 b2 } |]
+
                     let! nodes = Async.Parallel computations
                     return BinTree.Node(nodes[0], nodes[1]) |> SparseVector.VectorData.reduce
                 }
