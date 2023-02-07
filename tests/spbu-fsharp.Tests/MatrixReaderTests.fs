@@ -14,15 +14,12 @@ module FileReading =
             "File reading cases"
             [ testCase "Empty file"
               <| fun _ ->
-                  let fp =
-                      "/home/dxd/2022-Programming-Technologies-F-sharp-course/src/spbu-fsharp/external-data/empty-file"
-
+                  let fp = __SOURCE_DIRECTORY__ + "external-data/empty-file"
                   Expect.throws (fun _ -> MatrixReader(fp) |> ignore) "Empty file was given"
 
 
               testCase "File is not empty, but is not a matrix market file"
               <| fun _ ->
-                  let fp =
-                      "/home/dxd/2022-Programming-Technologies-F-sharp-course/src/spbu-fsharp/external-data/incorrect-file-type"
+                  let fp = __SOURCE_DIRECTORY__ + "/external-data/incorrect-file-type"
 
                   Expect.throws (fun _ -> MatrixReader(fp) |> ignore) "Not a matrix market file" ]
