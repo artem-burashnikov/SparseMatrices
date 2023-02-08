@@ -9,13 +9,13 @@ module MatrixAlgebraBenchmarks =
     let r = System.Random()
 
     let fPlus a b =
-            match a, b with
-            | Option.None, Option.None -> Option.None
-            | Some x, Some y ->
-                let result = x + y
-                if x = -y then Option.None else Some result
-            | Option.None, Some y -> Some y
-            | Some x, Option.None -> Some x
+        match a, b with
+        | Option.None, Option.None -> Option.None
+        | Some x, Some y ->
+            let result = x + y
+            if x = -y then Option.None else Some result
+        | Option.None, Some y -> Some y
+        | Some x, Option.None -> Some x
 
     let fMult a b =
         match a, b with
@@ -46,16 +46,16 @@ module MatrixAlgebraBenchmarks =
 
     type MyAddBench() =
 
-            [<GlobalSetup>]
-            let vec =
-                Array.init 4_000_000 (fun i -> if i % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
-                |> SparseVector
+        [<GlobalSetup>]
+        let vec =
+            Array.init 4_000_000 (fun i -> if i % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
+            |> SparseVector
 
-            [<Benchmark(Baseline = true)>]
-            member this.Base() = vectorMap2 0 fPlus vec vec
+        [<Benchmark(Baseline = true)>]
+        member this.Base() = vectorMap2 0 fPlus vec vec
 
-            [<Benchmark>]
-            member this.Level2() = vectorMap2 2 fPlus vec vec
+        [<Benchmark>]
+        member this.Level2() = vectorMap2 2 fPlus vec vec
 
-            [<Benchmark>]
-            member this.Level4() = vectorMap2 4 fPlus vec vec
+        [<Benchmark>]
+        member this.Level4() = vectorMap2 4 fPlus vec vec
