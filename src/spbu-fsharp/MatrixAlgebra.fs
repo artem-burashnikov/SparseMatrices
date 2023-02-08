@@ -30,7 +30,7 @@ module MatrixAlgebra =
                     [| async { return inner (parallelLevel - 1) a1 b1 }
                        async { return inner (parallelLevel - 1) a2 b2 } |]
 
-                let nodes = Async.Parallel computations |> Async.RunSynchronously
+                let nodes = computations |> Async.Parallel |> Async.RunSynchronously
                 BinTree.Node(nodes[0], nodes[1]) |> SparseVector.VectorData.reduce
 
             match bTree1, bTree2 with
@@ -121,11 +121,11 @@ module MatrixAlgebra =
                     let vec = vectorMap2 0 fAdd vec1 vec2
                     vec.Data
                 else
-                    let tasks =
+                    let computations =
                         [| async { return SparseVector((inner parallelLevel bTree1 qTree1 (depth + 1u)), mtx.Columns) }
                            async { return SparseVector(inner parallelLevel bTree2 qTree2 (depth + 1u), mtx.Columns) } |]
 
-                    let vectors = tasks |> Async.Parallel |> Async.RunSynchronously
+                    let vectors = computations |> Async.Parallel |> Async.RunSynchronously
                     let vec = vectorMap2 parallelLevel fAdd vectors[0] vectors[1]
                     vec.Data
 
