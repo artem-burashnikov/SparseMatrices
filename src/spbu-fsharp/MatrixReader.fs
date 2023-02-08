@@ -3,6 +3,7 @@ module MatrixReader
 open System.IO
 open SparseMatrix.MatrixData
 open SparseMatrix.SparseMatrix
+open Helpers.Numbers
 
 /// This type represents Matrix Market objects that MatrixReader is able to read.
 type MMObject =
@@ -58,7 +59,7 @@ type MMFile(filePath: string) =
         let metaData = str.Split(" ")
 
         if metaData.Length < 5 then
-            failwith "MatrixReader.MMFile: readMetaData: Incorrect line."
+            failwith "MatrixReader.MMFile: readMetaData: Incorrect line"
         else
             let object = metaData[1]
             let format = metaData[2]
@@ -70,35 +71,36 @@ type MMFile(filePath: string) =
         let size = str.Split(" ")
 
         if size.Length < 3 then
-            failwith "MatrixReader.MMFile: readSize: Incorrect line."
+            failwith "MatrixReader.MMFile: readSize: Incorrect line"
         else
             let rows = uint size[0]
             let columns = uint size[1]
             let entries = uint size[2]
             rows, columns, entries
 
-    let allLines =
-        if File.Exists filePath then
-            File.ReadAllLines filePath
-        else
-            failwith "MatrixReader.MMFile: No file was found at the specified path."
+    // Method ReadAllLines automatically checks whether the file exists, so we don't need to do it manually.
+    let allLines = File.ReadAllLines filePath
 
     // The first line in a file contains metadata.
     let object, format, field, symmetry =
-        if allLines.Length > 0 then
-            readMetaData (allLines[0].ToLower())
+        let head = Array.tryHead allLines
+
+        if head <> None then
+            readMetaData (head.Value.ToLower())
         else
-            failwith "MatrixReader.MMFile: The file was empty."
+            failwith "MatrixReader.MMFile: The file was empty"
 
     // Convert to sequence and skip all lines with comments.
     // The first line after the last comment contains parameters of the matrix.
     let sq = Array.toSeq allLines |> Seq.skipWhile (fun line -> line[0] = '%')
 
     let rows, columns, entries =
-        if Seq.length sq > 0 then
-            readSize (Seq.head sq)
+        let head = Seq.tryHead sq
+
+        if head <> None then
+            readSize head.Value
         else
-            failwith "MatrixReader.MMFile: No size information was found inside the file."
+            failwith "MatrixReader.MMFile: No size information was found inside the file"
 
     member this.Object = MMObject.ObjectFromStr object
     member this.Format = MMFormat.FormatFromStr format
@@ -123,7 +125,7 @@ type MatrixReader(filePath: string) =
         if file.Format <> Coordinate then
             failwith $"Format specified in a file %s{(string file.Format).ToLower()} is not supported"
 
-    // Sine symmetric data only contains coordinates in a lower triangle, we need to mirror it to the upper triangle of the matrix.
+    // Since symmetric data only contains coordinates in a lower triangle, we need to mirror it to the upper triangle of the matrix.
     /// Function makes a new sequence without (i, i) coordinates, then maps (i,j) to (j,i) and appends this new sequence to the initial.
     let mirrorBySymmetry sq =
         let mapping triplet =
@@ -131,6 +133,11 @@ type MatrixReader(filePath: string) =
             (j, i, v)
 
         Seq.skipWhile (fun (i, j, _) -> i = j) sq |> Seq.map mapping |> Seq.append sq
+
+    let useSymmetry symmetry sq =
+        match symmetry with
+        | General -> sq |> Seq.toList
+        | Symmetric -> mirrorBySymmetry sq |> Seq.toList
 
     // The following methods are used for reading actual data from the file.
     // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
@@ -140,15 +147,12 @@ type MatrixReader(filePath: string) =
             failwith "Given matrix does not have real values"
 
         let mapFloat (str: string) =
-            let result = str.Split(" ")
-            uint result[0] - 1u, uint result[1] - 1u, float result[2]
+            let result = str.Split()
+            uint result[0] - 1u, uint result[1] - 1u, parseFloat result[2]
 
         let data =
             let sq = Seq.map mapFloat file.Data
-
-            match file.Symmetry with
-            | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
+            useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
@@ -157,31 +161,22 @@ type MatrixReader(filePath: string) =
             failwith "Given matrix does not have integer values"
 
         let mapInt (str: string) =
-            let result = str.Split(" ")
-            uint result[0] - 1u, uint result[1] - 1u, int result[2]
+            let result = str.Split()
+            uint result[0] - 1u, uint result[1] - 1u, parseInt result[2]
 
         let data =
             let sq = Seq.map mapInt file.Data
-
-            match file.Symmetry with
-            | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
+            useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
 
     member this.Pattern =
-        if file.Field <> Pattern then
-            failwith "Given matrix does not have binary values"
-
-        let mapBool (str: string) =
-            let result = str.Split(" ")
-            uint result[0] - 1u, uint result[1] - 1u, true
+        let mapPattern (str: string) =
+            let result = str.Split()
+            uint result[0] - 1u, uint result[1] - 1u, ()
 
         let data =
-            let sq = Seq.map mapBool file.Data
-
-            match file.Symmetry with
-            | General -> sq |> Seq.toList
-            | Symmetric -> mirrorBySymmetry sq |> Seq.toList
+            let sq = Seq.map mapPattern file.Data
+            useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
