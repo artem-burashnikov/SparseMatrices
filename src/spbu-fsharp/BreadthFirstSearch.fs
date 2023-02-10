@@ -62,10 +62,10 @@ module BFS =
 
                 let newFrontier =
                     MatrixAlgebra.vecByMtx computationLevel fAdd fMult frontier mtx
-                    |> MatrixAlgebra.vectorMap2 computationLevel fMask visited
+                    |> SparseVector.Map2 computationLevel fMask visited
 
                 let newVisited =
-                    MatrixAlgebra.vectorMap2 computationLevel (fUpdateCount counter) visited newFrontier
+                    SparseVector.Map2 computationLevel (fUpdateCount counter) visited newFrontier
 
                 inner newFrontier newVisited (counter + 1u)
 

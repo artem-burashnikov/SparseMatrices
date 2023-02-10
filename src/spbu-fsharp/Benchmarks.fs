@@ -36,26 +36,26 @@ module MatrixAlgebraBenchmarks =
             |> SparseVector
 
         [<Benchmark(Baseline = true)>]
-        member this.Base() = vecByMtx 0 fPlus fMult vec mtx
+        member this.BaseMult() = vecByMtx 0 fPlus fMult vec mtx
 
         [<Benchmark>]
-        member this.Level2() = vecByMtx 2 fPlus fMult vec mtx
+        member this.Level2Mult() = vecByMtx 2 fPlus fMult vec mtx
 
         [<Benchmark>]
-        member this.Level12() = vecByMtx 12 fPlus fMult vec mtx
+        member this.Level4Mult() = vecByMtx 4 fPlus fMult vec mtx
 
     type MyAddBench() =
 
         [<GlobalSetup>]
         let vec =
-            Array.init 4_000_000 (fun i -> if i % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
+            Array.init 8_000_000 (fun i -> if i % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
             |> SparseVector
 
         [<Benchmark(Baseline = true)>]
-        member this.Base() = vectorMap2 0 fPlus vec vec
+        member this.BaseAdd() = SparseVector.Map2 0 fPlus vec vec
 
         [<Benchmark>]
-        member this.Level2() = vectorMap2 2 fPlus vec vec
+        member this.Level2Add() = SparseVector.Map2 2 fPlus vec vec
 
         [<Benchmark>]
-        member this.Level4() = vectorMap2 4 fPlus vec vec
+        member this.Level4Add() = SparseVector.Map2 4 fPlus vec vec

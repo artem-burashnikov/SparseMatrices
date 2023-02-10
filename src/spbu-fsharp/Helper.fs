@@ -80,13 +80,13 @@ module Numbers =
 
     let parseFloat (input: string) =
         try
-            Double.Parse(input, System.Globalization.NumberStyles.Float)
+            float input
         with _ ->
             failwith "parseFloat: Invalid input"
 
     let parseInt (input: string) =
         try
-            Int32.Parse input
+            int input
         with _ ->
             failwith "parseInt: Invalid input"
 
