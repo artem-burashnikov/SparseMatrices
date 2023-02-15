@@ -82,13 +82,13 @@ module Numbers =
         try
             float input
         with _ ->
-            failwith "parseFloat: Invalid input"
+            failwith $"parseFloat: Invalid input: {input}"
 
     let parseInt (input: string) =
         try
             int input
         with _ ->
-            failwith "parseInt: Invalid input"
+            failwith $"parseInt: Invalid input: {input}"
 
 module GeneralFunction =
 
