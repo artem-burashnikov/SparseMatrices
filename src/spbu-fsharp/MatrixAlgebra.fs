@@ -12,7 +12,7 @@ module MatrixAlgebra =
 
     /// Vector by Matrix multiplication utilizing parallel computations.
     let vecByMtx
-        computationLevel
+        (parallelLevel: uint)
         fAdd
         (fMult: Option<'A> -> Option<'B> -> Option<'C>)
         (vec: SparseVector<'A>)
@@ -38,10 +38,10 @@ module MatrixAlgebra =
         let rec inner parallelLevel bTree qTree depth : BinTree<'C> =
 
             let fDo parallelLevel bTree1 bTree2 qTree1 qTree2 depth =
-                if parallelLevel = 0 then
-                    let vec1 = SparseVector((inner 0 bTree1 qTree1 (depth + 1u)), mtx.Columns)
-                    let vec2 = SparseVector(inner 0 bTree2 qTree2 (depth + 1u), mtx.Columns)
-                    let vec = SparseVector.Map2 0 fAdd vec1 vec2
+                if parallelLevel = 0u then
+                    let vec1 = SparseVector((inner 0u bTree1 qTree1 (depth + 1u)), mtx.Columns)
+                    let vec2 = SparseVector(inner 0u bTree2 qTree2 (depth + 1u), mtx.Columns)
+                    let vec = SparseVector.Map2 0u fAdd vec1 vec2
                     vec.Data
                 else
                     let computations =
@@ -54,8 +54,8 @@ module MatrixAlgebra =
 
             let asyncCompute parallelLevel a1 a2 nw ne sw se depth =
                 let computations =
-                    [| async { return fDo (parallelLevel - 1) a1 a2 nw sw depth }
-                       async { return fDo (parallelLevel - 1) a1 a2 ne se depth } |]
+                    [| async { return fDo (parallelLevel - 1u) a1 a2 nw sw depth }
+                       async { return fDo (parallelLevel - 1u) a1 a2 ne se depth } |]
 
                 let nodes = computations |> Async.Parallel |> Async.RunSynchronously
                 BinTree.Node(nodes[0], nodes[1]) |> reduce
@@ -80,8 +80,8 @@ module MatrixAlgebra =
                     | _ -> BinTree.Leaf(multMult result (maxDepth - depth) |> getValue)
 
             | BinTree.Leaf _, QuadTree.Node(nw, ne, sw, se) ->
-                if parallelLevel = 0 then
-                    BinTree.Node(fDo 0 bTree bTree nw sw depth, fDo 0 bTree bTree ne se depth)
+                if parallelLevel = 0u then
+                    BinTree.Node(fDo 0u bTree bTree nw sw depth, fDo 0u bTree bTree ne se depth)
                     |> reduce
                 else
                     asyncCompute parallelLevel bTree bTree nw ne sw se depth
@@ -91,8 +91,8 @@ module MatrixAlgebra =
                 BinTree.Node(result, result) |> reduce
 
             | BinTree.Node(a1, a2), QuadTree.Node(nw, ne, sw, se) ->
-                if parallelLevel = 0 then
-                    BinTree.Node(fDo 0 a1 a2 nw sw depth, fDo 0 a1 a2 ne se depth) |> reduce
+                if parallelLevel = 0u then
+                    BinTree.Node(fDo 0u a1 a2 nw sw depth, fDo 0u a1 a2 ne se depth) |> reduce
                 else
                     asyncCompute parallelLevel a1 a2 nw ne sw se depth
 
@@ -135,14 +135,14 @@ module MatrixAlgebra =
 
         // In this case we would have to pad the vector's length before multiplication.
         elif mtxRowPower < mtxColumnPower then
-            let tree = inner computationLevel (powerUp 0u diff vec.Data) mtx.Data 0u
+            let tree = inner parallelLevel (powerUp 0u diff vec.Data) mtx.Data 0u
             SparseVector(tree, mtx.Columns)
 
         // When sizes match no additional action is needed.
         elif mtxRowPower = mtxColumnPower then
-            let tree = inner computationLevel vec.Data mtx.Data 0u
+            let tree = inner parallelLevel vec.Data mtx.Data 0u
             SparseVector(tree, mtx.Columns)
         else
             // Otherwise we need to clean up the result by chopping.
-            let tree = inner computationLevel vec.Data mtx.Data 0u |> chopChop 0u diff
+            let tree = inner parallelLevel vec.Data mtx.Data 0u |> chopChop 0u diff
             SparseVector(tree, mtx.Columns)
