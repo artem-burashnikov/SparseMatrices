@@ -5,7 +5,7 @@ open Helpers.Numbers
 
 type Vertex<'A> = 'A
 
-type UndirectedEdge<'A when 'A: comparison> = Set<'A>
+type UndirectedEdge<'PairOfVertices when 'PairOfVertices: comparison> = Set<'PairOfVertices>
 
 type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
 
