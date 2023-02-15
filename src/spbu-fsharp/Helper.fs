@@ -95,3 +95,30 @@ module GeneralFunction =
     let takeFirst (a, _, _) = a
     let takeSecond (_, a, _) = a
     let takeThird (_, _, a) = a
+
+module Initializers =
+
+    // initArrayWithDensity and init2DArrayWithDensity accept density parameter which values have to range from 0 to 100
+    // Won't work otherwise
+    let initArrayWithDensity (density: int) length =
+        let arr = Array.create length Option.None
+
+        for i in 0 .. length - 1 do
+            let cellDensity = (float (i + 1) / float length) * 100.0
+
+            if cellDensity <= density then
+                arr[i] <- Some(i + 1)
+
+        arr
+
+    let init2DArrayWithDensity (density: int) rows columns =
+        let table = Array2D.create rows columns Option.None
+
+        for i in 0 .. rows - 1 do
+            for j in 0 .. columns - 1 do
+                let cellDensity = (float (i * columns + j + 1) / float (rows * columns)) * 100.0
+
+                if cellDensity <= density then
+                    table[i, j] <- Some(i + j + 1)
+
+        table

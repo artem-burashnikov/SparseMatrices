@@ -3,23 +3,11 @@ module GraphsTests
 open SparseMatrix.SparseMatrix
 open Graphs
 open Helpers.Numbers
+open Helpers.Initializers
 open Expecto
 open Microsoft.FSharp.Core
 
 module TestCases =
-
-
-    let init2DArrayWithDensity (density: int) rows columns =
-        let table = Array2D.create rows columns Option.None
-
-        for i in 0 .. rows - 1 do
-            for j in 0 .. columns - 1 do
-                let cellDensity = (float (i * columns + j + 1) / float (rows * columns)) * 100.0
-
-                if cellDensity <= density then
-                    table[i, j] <- Some(i + j + 1)
-
-        table
 
     let naiveEdgesOfMtx (table: int option[,]) : Set<UndirectedEdge<uint>> =
         Set.ofSeq (
