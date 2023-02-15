@@ -28,7 +28,7 @@ module MatrixAlgebraBenchmarks =
 
         let mutable vec = SparseVector([| Some 0 |])
 
-        [<Params(100_000, 1_000_000, 3_000_000, 5_000_000, 7_000_000)>]
+        [<Params(5_000_000, 10_000_000)>]
         member val Length = 0 with get, set
 
         [<Params(1u, 2u, 3u, 4u)>]
@@ -53,8 +53,11 @@ module MatrixAlgebraBenchmarks =
         let mutable vec = SparseVector([| Some 0 |])
         let mutable mtx = SparseMatrix(array2D [| [| Some 0 |] |])
 
-        [<Params(100_000, 1_000_000, 3_000_000, 5_000_000, 7_000_000)>]
-        member val Length = 0 with get, set
+        [<Params(1_000, 3_000, 5_000)>]
+        member val Rows = 0 with get, set
+
+        [<Params(1_000, 3_000, 5_000)>]
+        member val Columns = 0 with get, set
 
         [<Params(1u, 2u, 3u, 4u)>]
         member val ParallelLevel = 0u with get, set
@@ -64,8 +67,8 @@ module MatrixAlgebraBenchmarks =
 
         [<GlobalSetup>]
         member this.SetUpVectorAndMatrix() =
-            vec <- SparseVector(initArrayWithDensity this.Density this.Length)
-            mtx <- SparseMatrix(init2DArrayWithDensity this.Density this.Length this.Length)
+            vec <- SparseVector(initArrayWithDensity this.Density this.Rows)
+            mtx <- SparseMatrix(init2DArrayWithDensity this.Density this.Rows this.Columns)
 
         [<Benchmark(Baseline = true)>]
         member this.BaseMult() = vecByMtx 0u fPlus fMult vec mtx
