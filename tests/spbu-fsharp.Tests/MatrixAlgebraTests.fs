@@ -416,9 +416,7 @@ module Algebra =
 
         testList
             "Algebra"
-            [
-
-              testProperty "Adding 1 and then subtracting 1 should output the initial data."
+            [ testProperty "Adding 1 and then subtracting 1 should output the initial data."
               <| fun (length: uint) ->
                   let l = toIntConv length
 
@@ -427,8 +425,8 @@ module Algebra =
                   let arrOnes = Array.init l (fun _ -> Some 1)
                   let vec = SparseVector arr
                   let vecOnes = SparseVector arrOnes
-                  let plusOne = SparseVector.Map2 0 fPlus vec vecOnes
-                  let plusMinusOne = SparseVector.Map2 0 fMinus plusOne vecOnes
+                  let plusOne = SparseVector.Map2 0u fPlus vec vecOnes
+                  let plusMinusOne = SparseVector.Map2 0u fMinus plusOne vecOnes
 
                   Expect.equal
                       plusMinusOne.Data
@@ -444,8 +442,8 @@ module Algebra =
                   let zeroes = Array.init l (fun _ -> Option.None)
                   let vec = SparseVector arr
                   let vecZeroes = SparseVector zeroes
-                  let plusZero = SparseVector.Map2 0 fPlus vec vecZeroes
-                  let minusZero = SparseVector.Map2 0 fMinus plusZero vecZeroes
+                  let plusZero = SparseVector.Map2 0u fPlus vec vecZeroes
+                  let minusZero = SparseVector.Map2 0u fMinus plusZero vecZeroes
                   Expect.equal minusZero.Data vec.Data ""
 
               testProperty "Commutative property should hold."
@@ -458,8 +456,8 @@ module Algebra =
 
                   let vec1 = SparseVector arr1
                   let vec2 = SparseVector arr2
-                  let result1 = SparseVector.Map2 0 fPlus vec1 vec2
-                  let result2 = SparseVector.Map2 0 fPlus vec2 vec1
+                  let result1 = SparseVector.Map2 0u fPlus vec1 vec2
+                  let result2 = SparseVector.Map2 0u fPlus vec2 vec1
                   Expect.equal result1.Data result2.Data ""
 
               testProperty "Associative property should hold."
@@ -476,9 +474,9 @@ module Algebra =
                   let vec2 = SparseVector arr2
                   let vec3 = SparseVector arr3
 
-                  let result1 = SparseVector.Map2 0 fPlus (SparseVector.Map2 0 fPlus vec1 vec2) vec3
+                  let result1 = SparseVector.Map2 0u fPlus (SparseVector.Map2 0u fPlus vec1 vec2) vec3
 
-                  let result2 = SparseVector.Map2 0 fPlus (SparseVector.Map2 0 fPlus vec2 vec3) vec1
+                  let result2 = SparseVector.Map2 0u fPlus (SparseVector.Map2 0u fPlus vec2 vec3) vec1
 
                   Expect.equal result1.Data result2.Data ""
 
@@ -489,7 +487,7 @@ module Algebra =
                   let arr = getRandomSomeNoneVector l
 
                   let vec = SparseVector arr
-                  let result = SparseVector.Map2 0 fMinus vec vec
+                  let result = SparseVector.Map2 0u fMinus vec vec
                   Expect.equal result.Data BinTrees.None ""
 
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
@@ -501,7 +499,7 @@ module Algebra =
                   let vec = SparseVector arr
                   let mtx = SparseMatrix tableSome
 
-                  let actualResult = (vecByMtx 0 fPlus fMult vec mtx)
+                  let actualResult = (vecByMtx 0u fPlus fMult vec mtx)
 
                   let expectedResult = BinTree.Leaf(table[0, 0])
 
@@ -522,7 +520,7 @@ module Algebra =
                   let vec = SparseVector arr
                   let mtx = SparseMatrix tableSome
 
-                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0u fPlus fMult vec mtx
 
                   let expectedResult = BinTrees.Leaf(table[0, 0] + table[1, 0]) |> reduce
 
@@ -543,7 +541,7 @@ module Algebra =
                   let vec = SparseVector arr
                   let mtx = SparseMatrix tableSome
 
-                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0u fPlus fMult vec mtx
 
                   let expectedResult =
                       BinTree.Node(
@@ -588,7 +586,7 @@ module Algebra =
                   let expectedResult =
                       naiveVecByMtx arr table |> Array.map fromZeroToSomeNone |> SparseVector
 
-                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0u fPlus fMult vec mtx
 
                   Expect.equal
                       actualResult.Data
@@ -619,7 +617,7 @@ module Algebra =
                   let expectedResult =
                       naiveVecByMtx arr table |> Array.map fromZeroToSomeNone |> SparseVector
 
-                  let actualResult = vecByMtx 0 fPlus fMult vec mtx
+                  let actualResult = vecByMtx 0u fPlus fMult vec mtx
 
                   Expect.equal
                       actualResult.Data
@@ -660,7 +658,42 @@ module Algebra =
                       |> Array.map fromZeroToSomeNone
                       |> SparseVector
 
-                  let actualResult = vecByMtx 0 fPlus fMult (vecByMtx 0 fPlus fMult vec mtx1) mtx2
+                  let actualResult = vecByMtx 0u fPlus fMult (vecByMtx 0u fPlus fMult vec mtx1) mtx2
 
                   Expect.equal actualResult.Data expectedResult.Data ""
-                  Expect.equal actualResult.Length mtx2.Columns "" ]
+                  Expect.equal actualResult.Length mtx2.Columns ""
+
+              testCase "Parallel parameter SparseVector.Map2"
+              <| fun _ ->
+                  let vec = getRandomSomeNoneVector 100 |> SparseVector
+
+                  let results =
+                      [| SparseVector.Map2 1u fPlus vec vec
+                         SparseVector.Map2 2u fPlus vec vec
+                         SparseVector.Map2 3u fPlus vec vec
+                         SparseVector.Map2 4u fPlus vec vec |]
+
+                  let expectedResult = SparseVector.Map2 0u fPlus vec vec
+
+                  Expect.equal
+                      (Array.forall (fun (v: SparseVector<int>) -> v.Data = expectedResult.Data) results)
+                      true
+                      "Parallel parameter caused an error"
+
+              testCase "Parallel parameter vecByMtx"
+              <| fun _ ->
+                  let vec = getRandomSomeNoneVector 100 |> SparseVector
+                  let mtx = getRandomSomeNoneTable 100 100 |> SparseMatrix
+
+                  let results =
+                      [| vecByMtx 1u fPlus fMult vec mtx
+                         vecByMtx 2u fPlus fMult vec mtx
+                         vecByMtx 3u fPlus fMult vec mtx
+                         vecByMtx 4u fPlus fMult vec mtx |]
+
+                  let expectedResult = vecByMtx 0u fPlus fMult vec mtx
+
+                  Expect.equal
+                      (Array.forall (fun (v: SparseVector<int>) -> v.Data = expectedResult.Data) results)
+                      true
+                      "Parallel parameter caused an error" ]
