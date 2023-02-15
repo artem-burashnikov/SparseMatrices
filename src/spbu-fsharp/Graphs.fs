@@ -2,6 +2,7 @@ module Graphs
 
 open SparseMatrix.SparseMatrix
 open Helpers.Numbers
+open Trees.QuadTrees
 
 type Vertex<'A> = 'A
 
@@ -18,16 +19,21 @@ type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
         )
 
     let edgesOfMtx (mtx: SparseMatrix<'A>) : Set<UndirectedEdge<uint>> =
-        Set.ofSeq (
-            seq {
-                for i = 1 to toIntConv mtx.Rows do
-                    for j = 1 to toIntConv mtx.Columns do
-                        let value = mtx[uint i, uint j]
+        let mutable edges = Set.empty
 
-                        if value <> Option.None then
-                            yield (Set.ofList [ uint i - 1u; uint j - 1u ])
-            }
-        )
+        let rec inner (tree, i: uint, j: uint, size: uint) =
+            match tree with
+            | QuadTree.None -> ()
+            | QuadTree.Leaf _ -> edges <- edges.Add(Set.ofList [ i; j ])
+            | QuadTree.Node(nw, ne, sw, se) ->
+                let half = size / 2u
+                inner (nw, i, j, half)
+                inner (ne, i, j + half, half)
+                inner (sw, i + half, j, half)
+                inner (se, i + half, j + half, half)
+
+        inner (mtx.Data, 0u, 0u, ceilPowTwo (max mtx.Rows mtx.Columns))
+        edges
 
     member this.Vertices = verticesOfMtx adjMtx
 
