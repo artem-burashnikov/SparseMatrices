@@ -9,14 +9,14 @@ open Microsoft.FSharp.Core
 
 module TestCases =
 
-    let naiveEdgesOfMtx (table: int option[,]) : Set<UndirectedEdge<uint>> =
+    let naiveEdgesOfMtx (table: int option[,]) =
         Set.ofSeq (
             seq {
                 for i = 0 to Array2D.length1 table - 1 do
                     for j = 0 to Array2D.length2 table - 1 do
                         let value = table[i, j]
 
-                        if value <> Option.None then
+                        if value.IsSome then
                             yield (Set.ofList [ uint i; uint j ])
             }
         )
