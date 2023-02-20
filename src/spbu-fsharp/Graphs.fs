@@ -4,13 +4,9 @@ open SparseMatrix.SparseMatrix
 open Helpers.Numbers
 open Trees.QuadTrees
 
-type Vertex<'A> = 'A
-
-type UndirectedEdge<'PairOfVertices when 'PairOfVertices: comparison> = Set<'PairOfVertices>
-
 type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
 
-    let verticesOfMtx (mtx: SparseMatrix<'A>) : Set<Vertex<uint>> =
+    let verticesOfMtx (mtx: SparseMatrix<'A>) =
         Set.ofSeq (
             seq {
                 for i = 1 to (toIntConv mtx.Rows) do
@@ -18,22 +14,22 @@ type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
             }
         )
 
-    let edgesOfMtx (mtx: SparseMatrix<'A>) : Set<UndirectedEdge<uint>> =
-        let mutable edges = Set.empty
+    let edgesOfMtx (mtx: SparseMatrix<'A>) =
 
-        let rec inner (tree, i: uint, j: uint, size: uint) =
+        let rec inner collector tree result i j size =
             match tree with
-            | QuadTree.None -> ()
-            | QuadTree.Leaf _ -> edges <- edges.Add(Set.ofList [ i; j ])
+            | QuadTree.None -> result
+            | QuadTree.Leaf _ -> collector i j result
             | QuadTree.Node(nw, ne, sw, se) ->
                 let half = size / 2u
-                inner (nw, i, j, half)
-                inner (ne, i, j + half, half)
-                inner (sw, i + half, j, half)
-                inner (se, i + half, j + half, half)
+                let resultFromNW = inner collector nw result i j half
+                let resultFromNE = inner collector ne resultFromNW i (j + half) half
+                let resultFromSW = inner collector sw resultFromNE (i + half) j half
+                inner collector se resultFromSW (i + half) (j + half) half
 
-        inner (mtx.Data, 0u, 0u, ceilPowTwo (max mtx.Rows mtx.Columns))
-        edges
+        let collector i j set = Set.add (Set.ofList [ i; j ]) set
+        let size = ceilPowTwo (max mtx.Rows mtx.Columns)
+        inner collector mtx.Data Set.empty 0u 0u size
 
     member this.Vertices = verticesOfMtx adjMtx
 
