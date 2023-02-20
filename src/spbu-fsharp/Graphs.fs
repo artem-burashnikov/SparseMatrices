@@ -15,7 +15,7 @@ type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
 
     let edgesOfMtx (mtx: SparseMatrix<'A>) =
 
-        let folder i j set = Set.add (Set.ofList [ i; j ]) set
+        let folder i j _ set = Set.add (Set.ofList [ i; j ]) set
         SparseMatrix.Fold folder Set.empty mtx
 
     member this.Vertices = verticesOfMtx adjMtx

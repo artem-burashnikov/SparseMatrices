@@ -233,13 +233,13 @@ module SparseMatrix =
 
         static member Fold folder state (mtx: SparseMatrix<'A>) =
 
-            let rec inner folder i j result size qTree =
+            let rec inner folder i j state size qTree =
                 match qTree with
-                | QuadTree.None -> result
-                | QuadTree.Leaf _ -> folder i j result
+                | QuadTree.None -> state
+                | QuadTree.Leaf value -> folder i j value state
                 | QuadTree.Node(nw, ne, sw, se) ->
                     let half = size / 2u
-                    let resultFromNW = inner folder i j result half nw
+                    let resultFromNW = inner folder i j state half nw
                     let resultFromNE = inner folder i (j + half) resultFromNW half ne
                     let resultFromSW = inner folder (i + half) j resultFromNE half sw
                     inner folder (i + half) (j + half) resultFromSW half se
