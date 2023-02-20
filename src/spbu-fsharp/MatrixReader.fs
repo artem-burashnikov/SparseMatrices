@@ -77,7 +77,7 @@ type MMFile(filePath: string) =
             let entries = uint size[2]
             rows, columns, entries
 
-    let allLines = File.ReadLines filePath |> Seq.cast<string>
+    let allLines = File.ReadLines filePath
 
     // The first line in a file contains metadata.
     let object, format, field, symmetry =
