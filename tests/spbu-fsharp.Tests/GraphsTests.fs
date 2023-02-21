@@ -10,16 +10,15 @@ open Microsoft.FSharp.Core
 module TestCases =
 
     let naiveEdgesOfMtx (table: int option[,]) =
-        Set.ofSeq (
-            seq {
-                for i = 0 to Array2D.length1 table - 1 do
-                    for j = 0 to Array2D.length2 table - 1 do
-                        let value = table[i, j]
+        seq {
+            for i = 0 to Array2D.length1 table - 1 do
+                for j = 0 to Array2D.length2 table - 1 do
+                    let value = table[i, j]
 
-                        if value.IsSome then
-                            yield (Set.ofList [ uint i; uint j ])
-            }
-        )
+                    if value.IsSome then
+                        yield (uint i, uint j, value)
+        }
+        |> Set.ofSeq
 
     [<Tests>]
     let tests =
@@ -33,12 +32,12 @@ module TestCases =
                       init2DArrayWithDensity (toIntConv (rows + 2u)) (toIntConv (columns + 2u)) 50
 
                   let graph = SparseMatrix table |> Graph
-                  let set1 = graph.Edges
-                  let set2 = naiveEdgesOfMtx table
+                  let actualResult = graph.Edges
+                  let expectedResult = naiveEdgesOfMtx table
 
                   Expect.equal
-                      (Set.isSubset set1 set2)
-                      (Set.isSubset set2 set1)
-                      $"The results were different set1: %A{set1}\n set2: %A{set2}\n %A{table}"
+                      (Set.isSubset actualResult expectedResult)
+                      (Set.isSubset expectedResult actualResult)
+                      $"The results were different actual result: %A{actualResult}\n expected result: %A{expectedResult}\n %A{table}"
 
               ]
