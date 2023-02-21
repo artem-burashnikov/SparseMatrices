@@ -1,12 +1,12 @@
-namespace MyBenchmarks
+namespace Benchmarks
 
 open BenchmarkDotNet.Attributes
-open MatrixAlgebra.MatrixAlgebra
-open SparseMatrix.SparseMatrix
 open SparseVector.SparseVector
+open SparseMatrix.SparseMatrix
+open MatrixAlgebra.MatrixAlgebra
+open Helpers.Initializers
 
 module MatrixAlgebraBenchmarks =
-    let r = System.Random()
 
     let fPlus a b =
         match a, b with
@@ -24,38 +24,55 @@ module MatrixAlgebraBenchmarks =
             if result = 0 then Option.None else Some result
         | _ -> Option.None
 
-    type MyMultBench() =
-
-        [<GlobalSetup>]
-        let mtx =
-            Array2D.init 8_000 8_000 (fun i j -> if (i + j) % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
-            |> SparseMatrix
-
-        let vec =
-            Array.init 8_000 (fun i -> if i % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
-            |> SparseVector
-
-        [<Benchmark(Baseline = true)>]
-        member this.Base() = vecByMtx 0 fPlus fMult vec mtx
-
-        [<Benchmark>]
-        member this.Level2() = vecByMtx 2 fPlus fMult vec mtx
-
-        [<Benchmark>]
-        member this.Level12() = vecByMtx 12 fPlus fMult vec mtx
-
     type MyAddBench() =
 
+        let mutable vec = SparseVector([| Some 0 |])
+
+        [<Params(5_000_000, 10_000_000)>]
+        member val Length = 0 with get, set
+
+        [<Params(1u, 2u, 3u, 4u)>]
+        member val ParallelLevel = 0u with get, set
+
+        [<Params(10, 50, 90)>]
+        member val Density = 0 with get, set
+
         [<GlobalSetup>]
-        let vec =
-            Array.init 4_000_000 (fun i -> if i % 3 = 0 then Some(r.Next(1, 10)) else Option.None)
-            |> SparseVector
+        member this.SetVector() =
+            vec <- SparseVector(initArrayWithDensity this.Density this.Length)
 
         [<Benchmark(Baseline = true)>]
-        member this.Base() = vectorMap2 0 fPlus vec vec
+        member this.BaseAdd() = SparseVector.Map2 0u fPlus vec vec
 
         [<Benchmark>]
-        member this.Level2() = vectorMap2 2 fPlus vec vec
+        member this.ParallelAdd() =
+            SparseVector.Map2 this.ParallelLevel fPlus vec vec
+
+    type MyMultBench() =
+
+        let mutable vec = SparseVector([| Some 0 |])
+        let mutable mtx = SparseMatrix(array2D [| [| Some 0 |] |])
+
+        [<Params(1_000, 3_000, 5_000)>]
+        member val Rows = 0 with get, set
+
+        [<Params(1_000, 3_000, 5_000)>]
+        member val Columns = 0 with get, set
+
+        [<Params(1u, 2u, 3u, 4u)>]
+        member val ParallelLevel = 0u with get, set
+
+        [<Params(10, 50, 90)>]
+        member val Density = 0 with get, set
+
+        [<GlobalSetup>]
+        member this.SetUpVectorAndMatrix() =
+            vec <- SparseVector(initArrayWithDensity this.Density this.Rows)
+            mtx <- SparseMatrix(init2DArrayWithDensity this.Density this.Rows this.Columns)
+
+        [<Benchmark(Baseline = true)>]
+        member this.BaseMult() = vecByMtx 0u fPlus fMult vec mtx
 
         [<Benchmark>]
-        member this.Level4() = vectorMap2 4 fPlus vec vec
+        member this.ParallelMult() =
+            vecByMtx this.ParallelLevel fPlus fMult vec mtx

@@ -3,13 +3,9 @@ module Graphs
 open SparseMatrix.SparseMatrix
 open Helpers.Numbers
 
-type Vertex<'A> = 'A
+type Graph<'A when 'A: equality and 'A: comparison>(adjMtx: SparseMatrix<'A>) =
 
-type UndirectedEdge<'A when 'A: comparison> = Set<'A>
-
-type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
-
-    let verticesOfMtx (mtx: SparseMatrix<'A>) : Set<Vertex<uint>> =
+    let verticesOfMtx (mtx: SparseMatrix<'A>) =
         Set.ofSeq (
             seq {
                 for i = 1 to (toIntConv mtx.Rows) do
@@ -17,17 +13,10 @@ type Graph<'A when 'A: equality>(adjMtx: SparseMatrix<'A>) =
             }
         )
 
-    let edgesOfMtx (mtx: SparseMatrix<'A>) : Set<UndirectedEdge<uint>> =
-        Set.ofSeq (
-            seq {
-                for i = 1 to toIntConv mtx.Rows do
-                    for j = 1 to toIntConv mtx.Columns do
-                        let value = mtx[uint i, uint j]
+    let edgesOfMtx (mtx: SparseMatrix<'A>) =
 
-                        if value <> Option.None then
-                            yield (Set.ofList [ uint i - 1u; uint j - 1u ])
-            }
-        )
+        let folder i j value set = Set.add (i, j, Some value) set
+        SparseMatrix.Fold folder Set.empty mtx
 
     member this.Vertices = verticesOfMtx adjMtx
 

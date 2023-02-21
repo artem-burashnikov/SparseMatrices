@@ -68,6 +68,18 @@ module VectorData =
         | Option.None -> BinTree.None
 
 
+    let getValue x =
+        match x with
+        | Some a -> a
+        | _ -> failwith "Only accepts Some value"
+
+
+    let convertResult value =
+        match value with
+        | Option.None -> BinTree.None
+        | _ -> BinTree.Leaf(value |> getValue)
+
+
     /// Converts an array to Vector.
     let arrVecToTree (arr: array<Option<'A>>) =
         let rec maker (vec: ArrVector<'A>) =
@@ -183,3 +195,64 @@ module SparseVector =
                 getValue i
 
         member this.IsEmpty = this.Data = BinTree.None
+
+        static member Map2
+            (parallelLevel: uint)
+            mapping
+            (vec1: SparseVector<'A>)
+            (vec2: SparseVector<'B>)
+            : SparseVector<'C> =
+
+            let rec inner parallelLevel bTree1 bTree2 =
+
+                let asyncCompute parallelLevel a1 a2 b1 b2 =
+                    let computations =
+                        [| async { return inner (parallelLevel - 1u) a1 b1 }
+                           async { return inner (parallelLevel - 1u) a2 b2 } |]
+
+                    let nodes = computations |> Async.Parallel |> Async.RunSynchronously
+                    BinTree.Node(nodes[0], nodes[1]) |> reduce
+
+                match bTree1, bTree2 with
+                | BinTree.None, BinTree.None -> mapping Option.None Option.None |> convertResult
+
+                | BinTree.None, BinTree.Leaf b -> mapping Option.None (Some b) |> convertResult
+
+                | BinTree.Leaf a, BinTree.None -> mapping (Some a) Option.None |> convertResult
+
+                | BinTree.Leaf a, BinTree.Leaf b -> mapping (Some a) (Some b) |> convertResult
+
+                | BinTree.None, BinTree.Node(b1, b2) ->
+                    if parallelLevel = 0u then
+                        BinTree.Node(inner 0u bTree1 b1, inner 0u bTree1 b2) |> reduce
+                    else
+                        asyncCompute parallelLevel bTree1 bTree1 b1 b2
+
+                | BinTree.Node(a1, a2), BinTree.None ->
+                    if parallelLevel = 0u then
+                        BinTree.Node(inner 0u a1 bTree2, inner 0u a2 bTree2) |> reduce
+                    else
+                        asyncCompute parallelLevel a1 a2 bTree2 bTree2
+
+                | BinTree.Leaf _, BinTree.Node(b1, b2) ->
+                    if parallelLevel = 0u then
+                        BinTree.Node(inner 0u bTree1 b1, inner 0u bTree1 b2) |> reduce
+                    else
+                        asyncCompute parallelLevel bTree1 bTree1 b1 b2
+
+                | BinTree.Node(a1, a2), BinTree.Leaf _ ->
+                    if parallelLevel = 0u then
+                        BinTree.Node(inner 0u a1 bTree2, inner 0u a2 bTree2) |> reduce
+                    else
+                        asyncCompute parallelLevel a1 a2 bTree2 bTree2
+
+                | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
+                    if parallelLevel = 0u then
+                        BinTree.Node(inner 0u a1 b1, inner 0u a2 b2) |> reduce
+                    else
+                        asyncCompute parallelLevel a1 a2 b1 b2
+
+            if vec1.Length <> vec2.Length then
+                failwith "parallelElementwiseVecVec: Dimensions of objects don't match."
+            else
+                SparseVector(inner parallelLevel vec1.Data vec2.Data, vec1.Length)

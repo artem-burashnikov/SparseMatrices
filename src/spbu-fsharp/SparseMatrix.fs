@@ -1,5 +1,8 @@
 namespace SparseMatrix
 
+open Microsoft.Diagnostics.Tracing.Parsers.Clr
+open Microsoft.Diagnostics.Tracing.Parsers.Kernel
+open Trees
 open Trees.QuadTrees
 open Helpers
 
@@ -227,3 +230,19 @@ module SparseMatrix =
                 getValue i j
 
         member this.IsEmpty = this.Data = QuadTree.None
+
+        static member Fold folder state (mtx: SparseMatrix<'A>) =
+
+            let rec inner folder i j state size qTree =
+                match qTree with
+                | QuadTree.None -> state
+                | QuadTree.Leaf value -> folder i j value state
+                | QuadTree.Node(nw, ne, sw, se) ->
+                    let half = size / 2u
+                    let resultFromNW = inner folder i j state half nw
+                    let resultFromNE = inner folder i (j + half) resultFromNW half ne
+                    let resultFromSW = inner folder (i + half) j resultFromNE half sw
+                    inner folder (i + half) (j + half) resultFromSW half se
+
+            let size = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
+            inner folder 0u 0u state size mtx.Data

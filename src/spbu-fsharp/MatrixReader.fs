@@ -3,7 +3,6 @@ module MatrixReader
 open System.IO
 open SparseMatrix.MatrixData
 open SparseMatrix.SparseMatrix
-open Helpers.Numbers
 
 /// This type represents Matrix Market objects that MatrixReader is able to read.
 type MMObject =
@@ -12,7 +11,7 @@ type MMObject =
     static member ObjectFromStr str =
         match str with
         | "matrix" -> Matrix
-        | _ -> failwith "Unsupported object type"
+        | _ -> failwith $"Unsupported object type: {str}"
 
 
 /// This type represents Matrix Market formats that MatrixReader is able to read.
@@ -22,7 +21,7 @@ type MMFormat =
     static member FormatFromStr str =
         match str with
         | "coordinate" -> Coordinate
-        | _ -> failwith "Unsupported format type"
+        | _ -> failwith $"Unsupported format type {str}"
 
 
 /// This type represents Matrix Market fields that MatrixReader is able to read.
@@ -36,7 +35,7 @@ type MMField =
         | "real" -> Real
         | "integer" -> Integer
         | "pattern" -> Pattern
-        | _ -> failwith "Unsupported field type"
+        | _ -> failwith $"Unsupported field type: {str}"
 
 
 /// This type represents Matrix Market symmetry variants that MatrixReader is able to read.
@@ -48,7 +47,7 @@ type MMSymmetry =
         match str with
         | "general" -> General
         | "symmetric" -> Symmetric
-        | _ -> failwith "Unsupported symmetry type"
+        | _ -> failwith $"Unsupported symmetry type: {str}"
 
 
 /// This type is used by MatrixReader to read a header, general parameters
@@ -78,21 +77,20 @@ type MMFile(filePath: string) =
             let entries = uint size[2]
             rows, columns, entries
 
-    // Method ReadAllLines automatically checks whether the file exists, so we don't need to do it manually.
-    let allLines = File.ReadAllLines filePath
+    let allLines = File.ReadLines filePath
 
     // The first line in a file contains metadata.
     let object, format, field, symmetry =
-        let head = Array.tryHead allLines
+        let head = Seq.tryHead allLines
 
         if head <> None then
             readMetaData (head.Value.ToLower())
         else
             failwith "MatrixReader.MMFile: The file was empty"
 
-    // Convert to sequence and skip all lines with comments.
+    // Skip all sequential lines with comments.
     // The first line after the last comment contains parameters of the matrix.
-    let sq = Array.toSeq allLines |> Seq.skipWhile (fun line -> line[0] = '%')
+    let sq = Seq.skipWhile (fun (x: string) -> x[0] = '%') allLines
 
     let rows, columns, entries =
         let head = Seq.tryHead sq
@@ -125,58 +123,34 @@ type MatrixReader(filePath: string) =
         if file.Format <> Coordinate then
             failwith $"Format specified in a file %s{(string file.Format).ToLower()} is not supported"
 
+        if file.Field <> Integer && file.Field <> Real && file.Field <> Pattern then
+            failwith $"Field specified in a file %s{(string file.Field).ToLower()} is not supported"
+
     // Since symmetric data only contains coordinates in a lower triangle, we need to mirror it to the upper triangle of the matrix.
     /// Function makes a new sequence without (i, i) coordinates, then maps (i,j) to (j,i) and appends this new sequence to the initial.
-    let mirrorBySymmetry sq =
-        let mapping triplet =
-            let i, j, v = triplet
-            (j, i, v)
-
-        Seq.skipWhile (fun (i, j, _) -> i = j) sq |> Seq.map mapping |> Seq.append sq
-
     let useSymmetry symmetry sq =
+        let mirrorBySymmetry sq =
+            let mapping triplet =
+                let i, j, v = triplet
+                (j, i, v)
+
+            Seq.filter (fun (i, j, _) -> i <> j) sq |> Seq.map mapping |> Seq.append sq
+
         match symmetry with
         | General -> sq |> Seq.toList
         | Symmetric -> mirrorBySymmetry sq |> Seq.toList
 
-    // The following methods are used for reading actual data from the file.
+    // The following method is used for reading actual data from the file.
     // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
     // The result is a SparseMatrix.
-    member this.Real =
-        if file.Field <> Real then
-            failwith "Given matrix does not have real values"
+    member this.Read(converter: string -> 'A) =
 
-        let mapFloat (str: string) =
+        let mapping (str: string) =
             let result = str.Split()
-            uint result[0] - 1u, uint result[1] - 1u, parseFloat result[2]
+            uint result[0] - 1u, uint result[1] - 1u, converter result[2]
 
         let data =
-            let sq = Seq.map mapFloat file.Data
-            useSymmetry file.Symmetry sq
-
-        COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
-
-    member this.Integer =
-        if file.Field <> Integer then
-            failwith "Given matrix does not have integer values"
-
-        let mapInt (str: string) =
-            let result = str.Split()
-            uint result[0] - 1u, uint result[1] - 1u, parseInt result[2]
-
-        let data =
-            let sq = Seq.map mapInt file.Data
-            useSymmetry file.Symmetry sq
-
-        COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
-
-    member this.Pattern =
-        let mapPattern (str: string) =
-            let result = str.Split()
-            uint result[0] - 1u, uint result[1] - 1u, ()
-
-        let data =
-            let sq = Seq.map mapPattern file.Data
+            let sq = Seq.map mapping file.Data
             useSymmetry file.Symmetry sq
 
         COOMatrix(data, file.Rows, file.Columns) |> SparseMatrix
