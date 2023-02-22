@@ -16,7 +16,7 @@ module TestCases =
                     let value = table[i, j]
 
                     if value.IsSome then
-                        yield (uint i, uint j, value)
+                        yield (uint i, uint j, value.Value)
         }
         |> Set.ofSeq
 
