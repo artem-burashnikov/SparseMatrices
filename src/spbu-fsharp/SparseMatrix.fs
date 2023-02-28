@@ -233,16 +233,29 @@ module SparseMatrix =
 
         static member Fold folder state (mtx: SparseMatrix<'A>) =
 
-            let rec inner folder i j state size qTree =
+            let powerSize = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
+            let maxDepth = Numbers.powTwo powerSize
+
+            let rec inner folder i j state size depth qTree =
                 match qTree with
                 | QuadTree.None -> state
-                | QuadTree.Leaf value -> folder i j value state
+                | QuadTree.Leaf value ->
+                    if depth = maxDepth then
+                        folder i j value state
+                    else
+                        let mutable res = state
+
+                        for m = Numbers.toIntConv i to Numbers.toIntConv mtx.Rows - 1 do
+                            for n = Numbers.toIntConv j to Numbers.toIntConv mtx.Columns - 1 do
+                                res <- folder (uint m) (uint n) value res
+
+                        res
+
                 | QuadTree.Node(nw, ne, sw, se) ->
                     let half = size / 2u
-                    let resultFromNW = inner folder i j state half nw
-                    let resultFromNE = inner folder i (j + half) resultFromNW half ne
-                    let resultFromSW = inner folder (i + half) j resultFromNE half sw
-                    inner folder (i + half) (j + half) resultFromSW half se
+                    let resultFromNW = inner folder i j state half (depth + 1u) nw
+                    let resultFromNE = inner folder i (j + half) resultFromNW half (depth + 1u) ne
+                    let resultFromSW = inner folder (i + half) j resultFromNE half (depth + 1u) sw
+                    inner folder (i + half) (j + half) resultFromSW half (depth + 1u) se
 
-            let size = Numbers.ceilPowTwo (max mtx.Rows mtx.Columns)
-            inner folder 0u 0u state size mtx.Data
+            inner folder 0u 0u state powerSize 0u mtx.Data

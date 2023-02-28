@@ -40,4 +40,14 @@ module TestCases =
                       (Set.isSubset expectedResult actualResult)
                       $"The results were different actual result: %A{actualResult}\n expected result: %A{expectedResult}\n %A{table}"
 
-              ]
+              testProperty "Getting Edges from 'collapsed' SparseMatrix"
+              <| fun (rows: uint) (columns: uint) (value: int option) ->
+                  let table = Array2D.create (toIntConv (rows + 2u)) (toIntConv (columns + 2u)) value
+                  let graph = SparseMatrix table |> Graph
+                  let actualResult = graph.Edges
+                  let expectedResult = naiveEdgesOfMtx table
+
+                  Expect.equal
+                      (Set.isSubset actualResult expectedResult)
+                      (Set.isSubset expectedResult actualResult)
+                      $"The results were different actual result: %A{actualResult}\n expected result: %A{expectedResult}\n %A{table}" ]
