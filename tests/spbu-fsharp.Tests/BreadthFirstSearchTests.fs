@@ -16,8 +16,10 @@ let config =
 
 module GeneralFunctions =
 
-    let r = Random()
+    open SparseMatrix.SparseMatrix
+    open Graphs
 
+    let r = Random()
 
     /// Generates random weight to a tuple. Returns a triplet.
     let func (i, j) =
@@ -161,11 +163,11 @@ module GeneralFunctions =
 
                   let inputList = makeCOOTriplets tupleLst size
 
-                  let cooMtx = COOMatrix(inputList, size, size)
+                  let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
                   let inputTable = cooTriplesToTable inputList size
 
-                  let actualResult = (BFS.BFS 0u startV cooMtx).Data
+                  let actualResult = (BFS.BFS 0u startV graph).Data
 
                   let expectedResult = COOVector(naiveBFS startV inputTable, size) |> cooVecToTree
 
@@ -183,9 +185,9 @@ module GeneralFunctions =
 
                   let inputList = makeCOOTriplets tuplesList size
 
-                  let cooMtx = COOMatrix(inputList, size, size)
+                  let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV cooMtx).Data
+                  let actualResult = (BFS.BFS 0u startV graph).Data
 
                   Expect.equal actualResult BinTree.None ""
 
@@ -201,9 +203,9 @@ module GeneralFunctions =
 
                   let inputList = makeCOOTriplets tuplesList size
 
-                  let cooMtx = COOMatrix(inputList, size, size)
+                  let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV cooMtx).Data
+                  let actualResult = (BFS.BFS 0u startV graph).Data
 
                   let expectedResult =
                       COOVector([ (0u, 0u); (1u, 0u); (2u, 0u); (3u, 0u) ], size) |> cooVecToTree
@@ -222,9 +224,9 @@ module GeneralFunctions =
 
                   let inputList = makeCOOTriplets tuplesList size
 
-                  let cooMtx = COOMatrix(inputList, size, size)
+                  let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV cooMtx).Data
+                  let actualResult = (BFS.BFS 0u startV graph).Data
 
                   let expectedResult = COOVector([], size) |> cooVecToTree
 
@@ -242,9 +244,9 @@ module GeneralFunctions =
 
                   let inputList = makeCOOTriplets tuplesList size
 
-                  let cooMtx = COOMatrix(inputList, size, size)
+                  let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV cooMtx).Data
+                  let actualResult = (BFS.BFS 0u startV graph).Data
 
                   let expectedResult = COOVector([], size) |> cooVecToTree
 

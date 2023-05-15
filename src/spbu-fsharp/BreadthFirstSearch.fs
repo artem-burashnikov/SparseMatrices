@@ -4,8 +4,7 @@ open Microsoft.FSharp.Core
 
 open MatrixAlgebra
 open SparseVector.SparseVector
-open SparseMatrix.SparseMatrix
-open SparseMatrix.MatrixData
+open Graphs
 
 module BFS =
 
@@ -45,14 +44,13 @@ module BFS =
     let markVertices lst value = List.map (fun x -> x, value) lst
 
 
-    let BFS parallelLevel (startV: List<uint>) (gMtx: COOMatrix<'A>) =
+    let BFS parallelLevel startingVertices (graph: Graph<'A>) =
 
-        let mtx = SparseMatrix gMtx
-        let length = mtx.Rows
+        let numVertices = graph.AdjMtx.Rows
 
-        let frontier = SparseVector(markVertices startV (Some()), length)
+        let frontier = SparseVector(markVertices startingVertices (Some()), numVertices)
 
-        let visited = SparseVector(markVertices startV 0u, length)
+        let visited = SparseVector(markVertices startingVertices 0u, numVertices)
 
         let rec inner (frontier: SparseVector<Option<unit>>) visited counter =
 
@@ -61,7 +59,7 @@ module BFS =
             else
 
                 let newFrontier =
-                    MatrixAlgebra.vecByMtx parallelLevel fAdd fMult frontier mtx
+                    MatrixAlgebra.vecByMtx parallelLevel fAdd fMult frontier graph.AdjMtx
                     |> SparseVector.Map2 parallelLevel fMask visited
 
                 let newVisited =
