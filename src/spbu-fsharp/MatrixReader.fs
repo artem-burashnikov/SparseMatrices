@@ -147,7 +147,11 @@ type MatrixReader(filePath: string) =
 
         let mapping (str: string) =
             let result = str.Split()
-            uint result[0] - 1u, uint result[1] - 1u, converter result[2]
+
+            if file.Field <> Pattern then
+                uint result[0] - 1u, uint result[1] - 1u, converter result[2]
+            else
+                uint result[0] - 1u, uint result[1] - 1u, converter ""
 
         let data =
             let sq = Seq.map mapping file.Data

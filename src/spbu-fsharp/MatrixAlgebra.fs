@@ -49,7 +49,7 @@ module MatrixAlgebra =
                            async { return SparseVector(inner parallelLevel bTree2 qTree2 (depth + 1u), mtx.Columns) } |]
 
                     let vectors = computations |> Async.Parallel |> Async.RunSynchronously
-                    let vec = SparseVector.Map2 parallelLevel fAdd vectors[0] vectors[1]
+                    let vec = SparseVector.Map2 0u fAdd vectors[0] vectors[1]
                     vec.Data
 
             let asyncCompute parallelLevel a1 a2 nw ne sw se depth =
