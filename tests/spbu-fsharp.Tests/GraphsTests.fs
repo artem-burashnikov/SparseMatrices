@@ -16,7 +16,7 @@ module TestCases =
                     let value = table[i, j]
 
                     if value.IsSome then
-                        yield Edge(Vertex(uint i), Vertex(uint j), value.Value)
+                        yield uint i, uint j
         }
         |> Set.ofSeq
 
