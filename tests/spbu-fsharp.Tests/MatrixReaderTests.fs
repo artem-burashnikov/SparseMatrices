@@ -4,6 +4,7 @@ open Expecto
 open Microsoft.FSharp.Core
 open MatrixReader
 open Helpers.Numbers
+open Helpers.Converters
 open SparseMatrix.MatrixData
 open SparseMatrix.SparseMatrix
 
@@ -31,7 +32,7 @@ module FileReading =
               testCase "General float value matrix"
               <| fun _ ->
                   let fp = System.IO.Path.Combine [| src; folder; "general-real.mtx" |]
-                  let actualResult = MatrixReader(fp).Read(parseFloat)
+                  let actualResult = MatrixReader(fp).Read(real)
 
                   let expectedResult =
                       let data =
@@ -48,8 +49,7 @@ module FileReading =
               testCase "General pattern value matrix"
               <| fun _ ->
                   let fp = System.IO.Path.Combine [| src; folder; "general-real.mtx" |]
-                  let unitMapping _ = () // If i pass an anonymous function such as (fun _ -> ()) then Linter will cause an error
-                  let actualResult = MatrixReader(fp).Read(unitMapping)
+                  let actualResult = MatrixReader(fp).Read(pattern)
 
                   let expectedResult =
                       let data = [ (0u, 0u, ()); (4u, 0u, ()); (5u, 0u, ()); (6u, 0u, ()); (7u, 0u, ()) ]
@@ -60,7 +60,7 @@ module FileReading =
               testCase "General integer value matrix"
               <| fun _ ->
                   let fp = System.IO.Path.Combine [| src; folder; "general-integer.mtx" |]
-                  let actualResult = MatrixReader(fp).Read(parseInt)
+                  let actualResult = MatrixReader(fp).Read(integer)
 
                   let expectedResult =
                       let data = [ (0u, 0u, 2); (4u, 0u, 1); (5u, 0u, 20); (6u, 0u, -3); (7u, 0u, 1) ]
