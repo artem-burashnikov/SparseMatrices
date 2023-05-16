@@ -143,15 +143,11 @@ type MatrixReader(filePath: string) =
     // The following method is used for reading actual data from the file.
     // Indices are offset by -1 since coordinates in the data start at (1,1) and we use (0,0) for vertices.
     // The result is a SparseMatrix.
-    member this.Read(converter: string -> 'A) =
+    member this.Read converter =
 
         let mapping (str: string) =
             let result = str.Split()
-
-            if file.Field <> Pattern then
-                uint result[0] - 1u, uint result[1] - 1u, converter result[2]
-            else
-                uint result[0] - 1u, uint result[1] - 1u, converter ""
+            uint result[0] - 1u, uint result[1] - 1u, converter result
 
         let data =
             let sq = Seq.map mapping file.Data

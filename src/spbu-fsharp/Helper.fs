@@ -122,3 +122,8 @@ module Initializers =
                     table[i, j] <- Some(i + j + 1)
 
         table
+
+module Converters =
+    let real (arr: array<string>) = float arr[2]
+    let integer (arr: array<string>) = int arr[2]
+    let pattern _ = ()
