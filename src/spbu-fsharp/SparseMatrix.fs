@@ -1,11 +1,7 @@
 namespace SparseMatrix
 
-open Microsoft.Diagnostics.Tracing.Parsers.Clr
-open Microsoft.Diagnostics.Tracing.Parsers.Kernel
-open Trees
 open Trees.QuadTrees
 open Helpers
-
 
 module MatrixData =
 
