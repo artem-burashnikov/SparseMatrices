@@ -19,13 +19,10 @@ type Graph<'A when 'A: equality and 'A: comparison>(adjMtx: SparseMatrix<'A>) =
 
         SparseMatrix.Fold folder Set.empty mtx
 
-    let setOfVertices = verticesOfMtx adjMtx
-    let setOfEdges = edgesOfMtx adjMtx
-
-    member this.Vertices = setOfVertices
+    member this.Vertices = verticesOfMtx adjMtx
     member this.VerticesCount = this.Vertices.Count
 
-    member this.Edges = setOfEdges
+    member this.Edges = edgesOfMtx adjMtx
     member this.EdgesCount = this.Edges.Count
 
     member this.Density =

@@ -6,9 +6,8 @@ open Benchmarks.MatrixAlgebraBenchmarks
 module Main =
 
     [<EntryPoint>]
-    let main _ =
+    let main (args: string[]) =
 
-        let addSummary = BenchmarkRunner.Run<MyAddBench>()
-        let multSummary = BenchmarkRunner.Run<MyMultBench>()
+        BenchmarkSwitcher.FromTypes([| typeof<BenchSparse> |]).Run(args) |> ignore
 
         0
