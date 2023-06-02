@@ -11,6 +11,7 @@ This repository contains homework tasks from The Saint Petersburg State Universi
 Make sure the following **requirements** are installed on your system:
 
 - [dotnet SDK](https://dotnet.microsoft.com/en-us/download/dotnet/7.0) 7.0 or higher
+- [Mono](http://www.mono-project.com/) if you're on Linux
 
 
 ### Building
