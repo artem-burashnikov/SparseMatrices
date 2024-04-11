@@ -1,8 +1,7 @@
-module MatrixReader
+module SparseMatrices.MatrixReader
 
 open System.IO
-open SparseMatrix.MatrixData
-open SparseMatrix.SparseMatrix
+open SparseMatrices.SparseMatrix
 
 /// This type represents Matrix Market objects that MatrixReader is able to read.
 type MMObject =

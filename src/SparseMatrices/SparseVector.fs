@@ -1,258 +1,242 @@
-namespace SparseVector
+module SparseMatrices.SparseVector
 
-open Trees.BinTrees
+open SparseMatrices.Trees.BinTrees
 open System
-open Helpers
+open SparseMatrices.Helpers
 
-module VectorData =
-
-    type ArrVector<'A>(arr: array<Option<'A>>, head: uint, length: uint) =
-        struct
-            member this.Memory = arr
-            member this.Head = head
-            member this.Length = length
-            member this.DataMaxIndex = arr.Length - 1 |> uint
-        end
-
-
-    type COOVector<'A>(list: List<uint * 'A>, length: uint) =
-        member this.Data = list
+type ArrVector<'A>(arr: array<Option<'A>>, head: uint, length: uint) =
+    struct
+        member this.Memory = arr
+        member this.Head = head
         member this.Length = length
+        member this.DataMaxIndex = arr.Length - 1 |> uint
+    end
 
+type COOVector<'A>(list: List<uint * 'A>, length: uint) =
+    member this.Data = list
+    member this.Length = length
 
-    /// Splits a given Vector in half.
-    let arrVecPartition (vec: ArrVector<'A>) =
-        let newLength = vec.Length / 2u
-        ArrVector(vec.Memory, vec.Head, newLength), ArrVector(vec.Memory, vec.Head + newLength, newLength)
+/// Splits a given Vector in half.
+let arrVecPartition (vec: ArrVector<'A>) =
+    let newLength = vec.Length / 2u
+    ArrVector(vec.Memory, vec.Head, newLength), ArrVector(vec.Memory, vec.Head + newLength, newLength)
 
+/// Divide a given COOVector into 2 parts.
+/// Returns two vectors.
+let cooVecPartition (vec: COOVector<'A>) =
+    // For an empty vector just return the data immediately.
+    // Otherwise filter coordinates.
+    if vec.Length = 0u then
+        vec, vec
+    else
+        // Calculate middle point and filter coordinates by comparing
+        // them to the middle point.
+        let half = vec.Length / 2u
 
-    /// Divide a given COOVector into 2 parts.
-    /// Returns two vectors.
-    let cooVecPartition (vec: COOVector<'A>) =
-        // For an empty vector just return the data immediately.
-        // Otherwise filter coordinates.
-        if vec.Length = 0u then
-            vec, vec
-        else
-            // Calculate middle point and filter coordinates by comparing
-            // them to the middle point.
-            let half = vec.Length / 2u
+        let rec inner lst leftPart rightPart =
+            match lst with
+            | [] -> leftPart, rightPart
+            | (i, value) :: tl ->
+                if i < half then
+                    inner tl ((i, value) :: leftPart) rightPart
+                else
+                    inner tl leftPart ((i - half, value) :: rightPart)
 
-            let rec inner lst leftPart rightPart =
-                match lst with
-                | [] -> leftPart, rightPart
-                | (i, value) :: tl ->
-                    if i < half then
-                        inner tl ((i, value) :: leftPart) rightPart
-                    else
-                        inner tl leftPart ((i - half, value) :: rightPart)
+        // Construct and return the result.
+        let leftPart, rightPart = inner vec.Data [] []
 
-            // Construct and return the result.
-            let leftPart, rightPart = inner vec.Data [] []
+        COOVector(leftPart, half), COOVector(rightPart, half)
 
-            COOVector(leftPart, half), COOVector(rightPart, half)
+/// Reduces identical data in a node of a binary tree to save space.
+let reduce binTreeNode =
+    match binTreeNode with
+    | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
+    | BinTree.Node(BinTree.Leaf a1, BinTree.Leaf a2) when a1 = a2 -> BinTree.Leaf a1
+    | _ -> binTreeNode
 
+/// Stores a value (if anything) in a binary tree's branch.
+let store =
+    function
+    | Some value -> BinTree.Leaf value
+    | Option.None -> BinTree.None
 
-    /// Reduces identical data in a node of a binary tree to save space.
-    let reduce binTreeNode =
-        match binTreeNode with
-        | BinTree.Node(BinTree.None, BinTree.None) -> BinTree.None
-        | BinTree.Node(BinTree.Leaf a1, BinTree.Leaf a2) when a1 = a2 -> BinTree.Leaf a1
-        | _ -> binTreeNode
+let getValue x =
+    match x with
+    | Some a -> a
+    | _ -> failwith "Only accepts Some value"
 
+let convertResult value =
+    match value with
+    | Option.None -> BinTree.None
+    | _ -> BinTree.Leaf(value |> getValue)
 
-    /// Stores a value (if anything) in a binary tree's branch.
-    let store =
-        function
-        | Some value -> BinTree.Leaf value
-        | Option.None -> BinTree.None
-
-
-    let getValue x =
-        match x with
-        | Some a -> a
-        | _ -> failwith "Only accepts Some value"
-
-
-    let convertResult value =
-        match value with
-        | Option.None -> BinTree.None
-        | _ -> BinTree.Leaf(value |> getValue)
-
-
-    /// Converts an array to Vector.
-    let arrVecToTree (arr: array<Option<'A>>) =
-        let rec maker (vec: ArrVector<'A>) =
-            // If a given vector's starting index is outside of bounds of "memory",
-            // then there is no need to store anything in a binary tree.
-            if vec.Head > vec.DataMaxIndex then
-                BinTree.None
-            // If we find a 1x1 cell that is within the bounds of the vector's "memory".
-            // Then look at data in that cell and store it accordingly.
-            elif vec.Length = 1u then
-                let index = Convert.ToInt32 vec.Head
-                vec.Memory[index] |> store
-            // Otherwise split the vector in half
-            // and recursively call the maker function on the resulting halves.
-            else
-                let leftPart, rightPart = arrVecPartition vec
-
-                BinTree.Node(maker leftPart, maker rightPart) |> reduce
-
-        let vec = ArrVector(arr, 0u, arr.Length |> uint)
-
-        // Special cases to save space in a resulting binary tree.
-        // i.e. BinTree.Leaf('a) instead of BinTree.Node(BinTree.Leaf('a), BinTree.None)
-        if vec.Length = 0u then
+/// Converts an array to Vector.
+let arrVecToTree (arr: array<Option<'A>>) =
+    let rec maker (vec: ArrVector<'A>) =
+        // If a given vector's starting index is outside of bounds of "memory",
+        // then there is no need to store anything in a binary tree.
+        if vec.Head > vec.DataMaxIndex then
             BinTree.None
-        elif (vec.Length = 1u) then
+        // If we find a 1x1 cell that is within the bounds of the vector's "memory".
+        // Then look at data in that cell and store it accordingly.
+        elif vec.Length = 1u then
             let index = Convert.ToInt32 vec.Head
             vec.Memory[index] |> store
+        // Otherwise split the vector in half
+        // and recursively call the maker function on the resulting halves.
         else
-            // In general case we upsize a given vector's length to a power of 2 so that the data correctly gets split in half on each recursive call.
-            // Result is a healthy binary tree.
-            let powerSize = Numbers.ceilPowTwo (arr.Length |> uint)
+            let leftPart, rightPart = arrVecPartition vec
 
-            let vec = ArrVector(arr, 0u, powerSize)
-            maker vec
+            BinTree.Node(maker leftPart, maker rightPart) |> reduce
 
+    let vec = ArrVector(arr, 0u, arr.Length |> uint)
 
-    let cooVecToTree (vec: COOVector<'A>) =
+    // Special cases to save space in a resulting binary tree.
+    // i.e. BinTree.Leaf('a) instead of BinTree.Node(BinTree.Leaf('a), BinTree.None)
+    if vec.Length = 0u then
+        BinTree.None
+    elif (vec.Length = 1u) then
+        let index = Convert.ToInt32 vec.Head
+        vec.Memory[index] |> store
+    else
+        // In general case we upsize a given vector's length to a power of 2 so that the data correctly gets split in half on each recursive call.
+        // Result is a healthy binary tree.
+        let powerSize = ceilPowTwo (arr.Length |> uint)
 
-        let maxDataIndex = vec.Length - 1u
+        let vec = ArrVector(arr, 0u, powerSize)
+        maker vec
 
-        let rec maker (vec: COOVector<'A>) =
+let cooVecToTree (vec: COOVector<'A>) =
 
-            if vec.Length = 1u && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
-                BinTree.Leaf(snd vec.Data.Head)
-            elif vec.Data.Length < 1 then
-                BinTree.None
-            else
-                let leftPart, rightPart = cooVecPartition vec
+    let maxDataIndex = vec.Length - 1u
 
-                BinTree.Node(maker leftPart, maker rightPart) |> reduce
+    let rec maker (vec: COOVector<'A>) =
 
-        if vec.Length = 0u then
-            BinTree.None
-        elif vec.Length = 1u && vec.Data.Length <> 0 then
+        if vec.Length = 1u && vec.Data.Length = 1 && (fst vec.Data.Head) <= maxDataIndex then
             BinTree.Leaf(snd vec.Data.Head)
+        elif vec.Data.Length < 1 then
+            BinTree.None
         else
-            let powerSize = Numbers.ceilPowTwo vec.Length
-            COOVector(vec.Data, powerSize) |> maker
+            let leftPart, rightPart = cooVecPartition vec
 
+            BinTree.Node(maker leftPart, maker rightPart) |> reduce
 
-open VectorData
+    if vec.Length = 0u then
+        BinTree.None
+    elif vec.Length = 1u && vec.Data.Length <> 0 then
+        BinTree.Leaf(snd vec.Data.Head)
+    else
+        let powerSize = ceilPowTwo vec.Length
+        COOVector(vec.Data, powerSize) |> maker
 
-module SparseVector =
+type SparseVector<'A when 'A: equality> =
+    val Data: BinTree<'A>
+    val Length: uint
 
-    type SparseVector<'A when 'A: equality> =
-        val Data: BinTree<'A>
-        val Length: uint
+    new(tree, length) = { Data = tree; Length = length }
 
-        new(tree, length) = { Data = tree; Length = length }
+    new(arr) =
+        { Data = arrVecToTree arr
+          Length = arr.Length |> uint }
 
-        new(arr) =
-            { Data = arrVecToTree arr
-              Length = arr.Length |> uint }
+    new(cooVec) =
+        { Data = cooVecToTree cooVec
+          Length = cooVec.Length }
 
-        new(cooVec) =
-            { Data = cooVecToTree cooVec
-              Length = cooVec.Length }
+    new(cooList, length) =
+        { Data = COOVector(cooList, length) |> cooVecToTree
+          Length = length }
 
-        new(cooList, length) =
-            { Data = COOVector(cooList, length) |> cooVecToTree
-              Length = length }
+    member this.Item
+        with get i =
 
-        member this.Item
-            with get i =
+            // Given an index i (starts at 1) we want to find a corresponding data in a tree.
+            // By recalling how the tree was constructed we recursively call each node's child according to
+            // which part the i would fall into. Basically a binary search algorithm.
+            //
+            //     i      middle
+            // ------------||------------
+            //
+            let rec search i size tree =
+                match tree with
+                | BinTree.Leaf value -> Some value
+                | BinTree.None -> Option.None
+                | BinTree.Node(leftChild, rightChild) ->
+                    let middle = size / 2u
 
-                // Given an index i (starts at 1) we want to find a corresponding data in a tree.
-                // By recalling how the tree was constructed we recursively call each node's child according to
-                // which part the i would fall into. Basically a binary search algorithm.
-                //
-                //     i      middle
-                // ------------||------------
-                //
-                let rec search i size tree =
-                    match tree with
-                    | BinTree.Leaf value -> Some value
-                    | BinTree.None -> Option.None
-                    | BinTree.Node(leftChild, rightChild) ->
-                        let middle = size / 2u
-
-                        if i < middle then
-                            search i middle leftChild
-                        else
-                            search (i - middle) middle rightChild
-
-                let getValue i =
-                    if i >= this.Length then
-                        failwith $"SparseVector.Item with get(i): Index %A{i} is out of range."
+                    if i < middle then
+                        search i middle leftChild
                     else
-                        let powerSize = Numbers.ceilPowTwo this.Length
-                        search i powerSize this.Data
+                        search (i - middle) middle rightChild
 
-                getValue i
+            let getValue i =
+                if i >= this.Length then
+                    failwith $"SparseVector.Item with get(i): Index %A{i} is out of range."
+                else
+                    let powerSize = ceilPowTwo this.Length
+                    search i powerSize this.Data
 
-        member this.IsEmpty = this.Data = BinTree.None
+            getValue i
 
-        static member Map2
-            (parallelLevel: uint)
-            mapping
-            (vec1: SparseVector<'A>)
-            (vec2: SparseVector<'B>)
-            : SparseVector<'C> =
+    member this.IsEmpty = this.Data = BinTree.None
 
-            let rec inner parallelLevel bTree1 bTree2 =
+    static member Map2
+        (parallelLevel: uint)
+        mapping
+        (vec1: SparseVector<'A>)
+        (vec2: SparseVector<'B>)
+        : SparseVector<'C> =
 
-                let asyncCompute parallelLevel a1 a2 b1 b2 =
-                    let computations =
-                        [| async { return inner (parallelLevel - 1u) a1 b1 }
-                           async { return inner (parallelLevel - 1u) a2 b2 } |]
+        let rec inner parallelLevel bTree1 bTree2 =
 
-                    let nodes = computations |> Async.Parallel |> Async.RunSynchronously
-                    BinTree.Node(nodes[0], nodes[1]) |> reduce
+            let asyncCompute parallelLevel a1 a2 b1 b2 =
+                let computations =
+                    [| async { return inner (parallelLevel - 1u) a1 b1 }
+                       async { return inner (parallelLevel - 1u) a2 b2 } |]
 
-                match bTree1, bTree2 with
-                | BinTree.None, BinTree.None -> mapping Option.None Option.None |> convertResult
+                let nodes = computations |> Async.Parallel |> Async.RunSynchronously
+                BinTree.Node(nodes[0], nodes[1]) |> reduce
 
-                | BinTree.None, BinTree.Leaf b -> mapping Option.None (Some b) |> convertResult
+            match bTree1, bTree2 with
+            | BinTree.None, BinTree.None -> mapping Option.None Option.None |> convertResult
 
-                | BinTree.Leaf a, BinTree.None -> mapping (Some a) Option.None |> convertResult
+            | BinTree.None, BinTree.Leaf b -> mapping Option.None (Some b) |> convertResult
 
-                | BinTree.Leaf a, BinTree.Leaf b -> mapping (Some a) (Some b) |> convertResult
+            | BinTree.Leaf a, BinTree.None -> mapping (Some a) Option.None |> convertResult
 
-                | BinTree.None, BinTree.Node(b1, b2) ->
-                    if parallelLevel = 0u then
-                        BinTree.Node(inner 0u bTree1 b1, inner 0u bTree1 b2) |> reduce
-                    else
-                        asyncCompute parallelLevel bTree1 bTree1 b1 b2
+            | BinTree.Leaf a, BinTree.Leaf b -> mapping (Some a) (Some b) |> convertResult
 
-                | BinTree.Node(a1, a2), BinTree.None ->
-                    if parallelLevel = 0u then
-                        BinTree.Node(inner 0u a1 bTree2, inner 0u a2 bTree2) |> reduce
-                    else
-                        asyncCompute parallelLevel a1 a2 bTree2 bTree2
+            | BinTree.None, BinTree.Node(b1, b2) ->
+                if parallelLevel = 0u then
+                    BinTree.Node(inner 0u bTree1 b1, inner 0u bTree1 b2) |> reduce
+                else
+                    asyncCompute parallelLevel bTree1 bTree1 b1 b2
 
-                | BinTree.Leaf _, BinTree.Node(b1, b2) ->
-                    if parallelLevel = 0u then
-                        BinTree.Node(inner 0u bTree1 b1, inner 0u bTree1 b2) |> reduce
-                    else
-                        asyncCompute parallelLevel bTree1 bTree1 b1 b2
+            | BinTree.Node(a1, a2), BinTree.None ->
+                if parallelLevel = 0u then
+                    BinTree.Node(inner 0u a1 bTree2, inner 0u a2 bTree2) |> reduce
+                else
+                    asyncCompute parallelLevel a1 a2 bTree2 bTree2
 
-                | BinTree.Node(a1, a2), BinTree.Leaf _ ->
-                    if parallelLevel = 0u then
-                        BinTree.Node(inner 0u a1 bTree2, inner 0u a2 bTree2) |> reduce
-                    else
-                        asyncCompute parallelLevel a1 a2 bTree2 bTree2
+            | BinTree.Leaf _, BinTree.Node(b1, b2) ->
+                if parallelLevel = 0u then
+                    BinTree.Node(inner 0u bTree1 b1, inner 0u bTree1 b2) |> reduce
+                else
+                    asyncCompute parallelLevel bTree1 bTree1 b1 b2
 
-                | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
-                    if parallelLevel = 0u then
-                        BinTree.Node(inner 0u a1 b1, inner 0u a2 b2) |> reduce
-                    else
-                        asyncCompute parallelLevel a1 a2 b1 b2
+            | BinTree.Node(a1, a2), BinTree.Leaf _ ->
+                if parallelLevel = 0u then
+                    BinTree.Node(inner 0u a1 bTree2, inner 0u a2 bTree2) |> reduce
+                else
+                    asyncCompute parallelLevel a1 a2 bTree2 bTree2
 
-            if vec1.Length <> vec2.Length then
-                failwith "parallelElementwiseVecVec: Dimensions of objects don't match."
-            else
-                SparseVector(inner parallelLevel vec1.Data vec2.Data, vec1.Length)
+            | BinTree.Node(a1, a2), BinTree.Node(b1, b2) ->
+                if parallelLevel = 0u then
+                    BinTree.Node(inner 0u a1 b1, inner 0u a2 b2) |> reduce
+                else
+                    asyncCompute parallelLevel a1 a2 b1 b2
+
+        if vec1.Length <> vec2.Length then
+            failwith "parallelElementwiseVecVec: Dimensions of objects don't match."
+        else
+            SparseVector(inner parallelLevel vec1.Data vec2.Data, vec1.Length)

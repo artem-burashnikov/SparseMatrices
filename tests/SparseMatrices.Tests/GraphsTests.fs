@@ -1,9 +1,8 @@
-module GraphsTests
+module SparseMatrices.Graphs.Tests
 
-open SparseMatrix.SparseMatrix
-open Graphs
-open Helpers.Numbers
-open Helpers.Initializers
+open SparseMatrices.SparseMatrix
+open SparseMatrices.Graphs
+open SparseMatrices.Helpers
 open Expecto
 open Microsoft.FSharp.Core
 

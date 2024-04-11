@@ -1,7 +1,7 @@
 namespace SparseMatrices
 
 open BenchmarkDotNet.Running
-open Benchmarks.MatrixAlgebraBenchmarks
+open Benchmarks
 
 module Main =
 

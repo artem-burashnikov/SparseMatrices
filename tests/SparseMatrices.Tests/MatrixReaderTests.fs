@@ -1,13 +1,10 @@
-namespace MatrixReaderTests
+namespace SparseMatrices.MatrixReader.Tests
 
 open Expecto
 open Microsoft.FSharp.Core
-open MatrixReader
-open Helpers.Numbers
-open Helpers.Converters
-open SparseMatrix.MatrixData
-open SparseMatrix.SparseMatrix
-
+open SparseMatrices.MatrixReader
+open SparseMatrices.Helpers
+open SparseMatrices.SparseMatrix
 
 module FileReading =
 

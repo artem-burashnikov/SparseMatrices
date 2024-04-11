@@ -1,4 +1,4 @@
-namespace Trees
+module SparseMatrices.Trees
 
 module BinTrees =
 
@@ -6,7 +6,6 @@ module BinTrees =
         | None
         | Leaf of 'Value
         | Node of left: BinTree<'Value> * right: BinTree<'Value>
-
 
 module QuadTrees =
 

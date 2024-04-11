@@ -8,11 +8,8 @@
     <ItemGroup>
         <Compile Include="AssemblyInfo.fs" />
         <Compile Include="Tests.fs" />
-        <Compile Include="BasicSyntaxTests.fs" />
-        <Compile Include="ListSortingTests.fs" />
-        <Compile Include="NTreeDataTests.fs" />
         <Compile Include="MatrixAlgebraTests.fs" />
-        <Compile Include="BreadthFirstSearchTests.fs" />
+        <Compile Include="BFSTests.fs" />
         <Compile Include="MatrixReaderTests.fs" />
         <Compile Include="GraphsTests.fs" />
         <Compile Include="Main.fs" />

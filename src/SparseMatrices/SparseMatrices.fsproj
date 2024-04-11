@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
     <PropertyGroup>
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-        <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net8.0</TargetFramework>
         <OutputType>Exe</OutputType>
         <RootNamespace>SparseMatrices</RootNamespace>
     </PropertyGroup>
@@ -18,7 +18,7 @@
         <Compile Include="AssemblyInfo.fs" />
         <None Include="App.config" />
         <Compile Include="Trees.fs" />
-        <Compile Include="Helper.fs" />
+        <Compile Include="Helpers.fs" />
         <Compile Include="SparseVector.fs" />
         <Compile Include="SparseMatrix.fs" />
         <Compile Include="MatrixAlgebra.fs" />
@@ -30,6 +30,7 @@
         <Compile Remove="BasicSyntax.fs" />
         <Compile Remove="OOPLists.fs" />
         <Compile Remove="NTreeData.fs" />
+        <Compile Remove="CLists.fs" />
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />

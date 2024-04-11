@@ -1,14 +1,15 @@
-module BreadthFirstSearchTests
+module SparseMatrices.BFS.Tests
 
 open System
 open System.Collections.Generic
-open SparseMatrix.MatrixData
-open SparseVector.VectorData
-open BreadthFirstSearch
+open SparseMatrices.SparseMatrix
+open SparseMatrices.SparseVector
+open SparseMatrices.BFS
+open SparseMatrices.Helpers
 open Microsoft.FSharp.Collections
 open Expecto
 open Microsoft.FSharp.Core
-open Trees.BinTrees
+open SparseMatrices.Trees.BinTrees
 
 let config =
     { FsCheckConfig.defaultConfig with
@@ -16,8 +17,8 @@ let config =
 
 module GeneralFunctions =
 
-    open SparseMatrix.SparseMatrix
-    open Graphs
+    open SparseMatrices.SparseMatrix
+    open SparseMatrices.Graphs
 
     let r = Random()
 
@@ -47,28 +48,26 @@ module GeneralFunctions =
 
     /// Returns an Array2D from a given list of triplets (i, j, weight).
     let cooTriplesToTable (tripletsList: List<uint * uint * Option<'A>>) size =
-        let s = Helpers.Numbers.toIntConv size
+        let s = toIntConv size
         let arr = Array2D.create s s Option.None
 
         for i = 0 to tripletsList.Length - 1 do
-            let indexI =
-                Helpers.GeneralFunction.takeFirst tripletsList[i] |> Helpers.Numbers.toIntConv
+            let indexI = takeFirst tripletsList[i] |> toIntConv
 
-            let indexJ =
-                Helpers.GeneralFunction.takeSecond tripletsList[i] |> Helpers.Numbers.toIntConv
+            let indexJ = takeSecond tripletsList[i] |> toIntConv
 
-            arr[indexI, indexJ] <- Helpers.GeneralFunction.takeThird tripletsList[i] |> Some
+            arr[indexI, indexJ] <- takeThird tripletsList[i] |> Some
 
         arr
 
 
     /// Returns an array from a given list of tuples (i, weight).
     let cooTuplesToTable (tuplesList: List<uint * Option<'A>>) size =
-        let s = Helpers.Numbers.toIntConv size
+        let s = toIntConv size
         let arr = Array.create s Option.None
 
         for i = 0 to tuplesList.Length - 1 do
-            let index = Helpers.Numbers.toIntConv (fst tuplesList[i])
+            let index = toIntConv (fst tuplesList[i])
             arr[index] <- snd tuplesList[i] |> Some
 
         arr
@@ -87,7 +86,7 @@ module GeneralFunctions =
         /// Function adds successors of a given vertex to the queue.
         let addToQueue vertexIndex iter =
             for j = 0 to length - 1 do
-                let i = Helpers.Numbers.toIntConv vertexIndex
+                let i = toIntConv vertexIndex
                 let value = mtx[i, j]
 
                 if value <> Option.None then
@@ -167,7 +166,7 @@ module GeneralFunctions =
 
                   let inputTable = cooTriplesToTable inputList size
 
-                  let actualResult = (BFS.BFS 0u startV graph).Data
+                  let actualResult = (BFS 0u startV graph).Data
 
                   let expectedResult = COOVector(naiveBFS startV inputTable, size) |> cooVecToTree
 
@@ -187,7 +186,7 @@ module GeneralFunctions =
 
                   let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV graph).Data
+                  let actualResult = (BFS 0u startV graph).Data
 
                   Expect.equal actualResult BinTree.None ""
 
@@ -205,7 +204,7 @@ module GeneralFunctions =
 
                   let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV graph).Data
+                  let actualResult = (BFS 0u startV graph).Data
 
                   let expectedResult =
                       COOVector([ (0u, 0u); (1u, 0u); (2u, 0u); (3u, 0u) ], size) |> cooVecToTree
@@ -226,7 +225,7 @@ module GeneralFunctions =
 
                   let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV graph).Data
+                  let actualResult = (BFS 0u startV graph).Data
 
                   let expectedResult = COOVector([], size) |> cooVecToTree
 
@@ -246,7 +245,7 @@ module GeneralFunctions =
 
                   let graph = COOMatrix(inputList, size, size) |> SparseMatrix |> Graph
 
-                  let actualResult = (BFS.BFS 0u startV graph).Data
+                  let actualResult = (BFS 0u startV graph).Data
 
                   let expectedResult = COOVector([], size) |> cooVecToTree
 

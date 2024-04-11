@@ -1,16 +1,14 @@
-module MatrixVectorTests
+module SparseMatrices.MatrixVector.Tests
 
 open System
-open Helpers.Numbers
-open SparseVector.SparseVector
-open SparseMatrix.MatrixData
-open SparseVector.VectorData
-open SparseMatrix.SparseMatrix
-open MatrixAlgebra.MatrixAlgebra
+open SparseMatrices.Helpers
+open SparseMatrices.SparseVector
+open SparseMatrices.SparseMatrix
+open SparseMatrices.SparseVector
+open SparseMatrices.MatrixAlgebra
 open Microsoft.FSharp.Collections
-open Trees.BinTrees
-open Trees.QuadTrees
-open Trees
+open SparseMatrices.Trees.BinTrees
+open SparseMatrices.Trees.QuadTrees
 open Expecto
 open Microsoft.FSharp.Core
 
@@ -98,20 +96,20 @@ module SparseVector =
               testCase "vecToTree: empty array should produce an empty tree"
               <| fun _ ->
                   let actualResult = arrVecToTree [||]
-                  let expectedResult = BinTrees.None
+                  let expectedResult = BinTree.None
                   Expect.equal actualResult expectedResult ""
 
               testCase "vecToTree: 1-element array"
               <| fun _ ->
                   let actualResult = arrVecToTree [| Some 1 |]
-                  let expectedResult = BinTrees.Leaf 1
+                  let expectedResult = BinTree.Leaf 1
                   Expect.equal actualResult expectedResult ""
 
               testCase "vecToTree: 2-elements array (different values)"
               <| fun _ ->
                   let actualResult = arrVecToTree [| Some 1; Some 2 |]
 
-                  let expectedResult = BinTrees.Node(BinTrees.Leaf 1, BinTrees.Leaf 2)
+                  let expectedResult = BinTree.Node(BinTree.Leaf 1, BinTree.Leaf 2)
 
                   Expect.equal actualResult expectedResult ""
 
@@ -119,7 +117,7 @@ module SparseVector =
               <| fun _ ->
                   let actualResult = arrVecToTree [| Some 1; Some 1 |]
 
-                  let expectedResult = BinTrees.Leaf(1)
+                  let expectedResult = BinTree.Leaf(1)
                   Expect.equal actualResult expectedResult ""
 
               testCase "vecToTree: 3-elements array (different values)"
@@ -127,9 +125,9 @@ module SparseVector =
                   let actualResult = arrVecToTree [| Some 1; Option.None; Some 2 |]
 
                   let expectedResult =
-                      BinTrees.Node(
-                          BinTrees.Node(BinTrees.Leaf 1, BinTrees.None),
-                          BinTrees.Node(BinTrees.Leaf 2, BinTrees.None)
+                      BinTree.Node(
+                          BinTree.Node(BinTree.Leaf 1, BinTree.None),
+                          BinTree.Node(BinTree.Leaf 2, BinTree.None)
                       )
 
                   Expect.equal actualResult expectedResult ""
@@ -488,7 +486,7 @@ module Algebra =
 
                   let vec = SparseVector arr
                   let result = SparseVector.Map2 0u fMinus vec vec
-                  Expect.equal result.Data BinTrees.None ""
+                  Expect.equal result.Data BinTree.None ""
 
               testCase "Vector 1x1 * 1x1 Matrix = Vector 1x1"
               <| fun _ ->
@@ -522,7 +520,7 @@ module Algebra =
 
                   let actualResult = vecByMtx 0u fPlus fMult vec mtx
 
-                  let expectedResult = BinTrees.Leaf(table[0, 0] + table[1, 0]) |> reduce
+                  let expectedResult = BinTree.Leaf(table[0, 0] + table[1, 0]) |> reduce
 
                   Expect.equal
                       actualResult.Data

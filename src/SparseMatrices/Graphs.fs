@@ -1,7 +1,7 @@
-module Graphs
+module SparseMatrices.Graphs
 
-open SparseMatrix.SparseMatrix
-open Helpers.Numbers
+open SparseMatrices.SparseMatrix
+open SparseMatrices.Helpers
 
 type Graph<'A when 'A: equality and 'A: comparison>(adjMtx: SparseMatrix<'A>) =
 
