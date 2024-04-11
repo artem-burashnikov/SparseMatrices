@@ -31,8 +31,8 @@ let environVarAsBoolOrDefault varName defaultValue =
 // Metadata and Configuration
 //-----------------------------------------------------------------------------
 
-let productName = "spbu-fsharp"
-let sln = __SOURCE_DIRECTORY__ </> ".." </> "spbu-fsharp.sln"
+let productName = "SparseMatrices"
+let sln = __SOURCE_DIRECTORY__ </> ".." </> "SparseMatrices.sln"
 
 let src = __SOURCE_DIRECTORY__ </> ".." </> "src"
 
@@ -65,7 +65,7 @@ let coverageThresholdPercent = 1
 let coverageReportDir =  __SOURCE_DIRECTORY__ </> ".." </> "docs" @@ "coverage"
 
 let gitOwner = "artem-burashnikov"
-let gitRepoName = "spbu-fsharp"
+let gitRepoName = "SparseMatrices"
 
 let gitHubRepoUrl = sprintf "https://github.com/%s/%s" gitOwner gitRepoName
 

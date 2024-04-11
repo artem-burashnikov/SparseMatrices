@@ -18,7 +18,7 @@
         <Compile Include="Main.fs" />
     </ItemGroup>
     <ItemGroup>
-        <ProjectReference Include="../../src/spbu-fsharp/spbu-fsharp.fsproj" />
+        <ProjectReference Include="..\..\src\SparseMatrices\SparseMatrices.fsproj" />
     </ItemGroup>
     <ItemGroup>
       <PackageReference Include="Expecto.FsCheck" Version="9.0.4" />

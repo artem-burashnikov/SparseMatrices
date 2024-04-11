@@ -3,8 +3,8 @@ namespace System
 
 open System.Reflection
 
-[<assembly: AssemblyTitleAttribute("spbu-fsharp")>]
-[<assembly: AssemblyProductAttribute("spbu-fsharp")>]
+[<assembly: AssemblyTitleAttribute("SparseMatrices")>]
+[<assembly: AssemblyProductAttribute("SparseMatrices")>]
 [<assembly: AssemblyVersionAttribute("0.1.0")>]
 [<assembly: AssemblyMetadataAttribute("ReleaseDate", "2017-03-17T00:00:00.0000000")>]
 [<assembly: AssemblyFileVersionAttribute("0.1.0")>]
@@ -15,10 +15,10 @@ do ()
 
 module internal AssemblyVersionInformation =
     [<Literal>]
-    let AssemblyTitle = "spbu-fsharp"
+    let AssemblyTitle = "SparseMatrices"
 
     [<Literal>]
-    let AssemblyProduct = "spbu-fsharp"
+    let AssemblyProduct = "SparseMatrices"
 
     [<Literal>]
     let AssemblyVersion = "0.1.0"

@@ -1,4 +1,4 @@
-namespace BreadthFirstSearch
+namespace BFS
 
 open Microsoft.FSharp.Core
 
